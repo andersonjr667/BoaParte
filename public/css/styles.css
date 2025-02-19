@@ -29,6 +29,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* Estilos base */
@@ -68,6 +69,9 @@ a {
     color: var(--color-primary);
     text-decoration: none;
     transition: all 0.3s ease;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
 }
 
 a:hover {
@@ -83,6 +87,8 @@ a:hover {
     width: 100%;
     max-width: 500px;
     margin: 0 auto;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
 }
 
 /* Campos de entrada */
@@ -110,7 +116,8 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus {
-    outline: none;
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
 }
@@ -129,6 +136,7 @@ textarea:focus {
     transition: all 0.3s ease;
     text-align: center;
     gap: var(--spacing-sm);
+    min-height: 44px; /* Mínimo para touch targets */
 }
 
 .button-primary {
@@ -200,6 +208,7 @@ textarea:focus {
 
     .form-container {
         padding: var(--spacing-lg);
+        margin: var(--spacing-sm);
     }
 
     h1 { font-size: 2rem; }
@@ -208,6 +217,66 @@ textarea:focus {
 
     .top-left-image img {
         max-width: 120px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    input[type="tel"] {
+        font-size: 16px; /* Evita zoom em iOS */
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    .notification {
+        width: 90%;
+        left: 5%;
+        right: 5%;
+        font-size: 0.9rem;
+    }
+}
+
+/* Melhorias de acessibilidade */
+:focus {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* Melhorias de performance */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Melhorias de usabilidade */
+button, 
+input[type="submit"] {
+    min-height: 44px; /* Mínimo para touch targets */
+}
+
+/* Melhorias visuais */
+.form-container {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-text: #ffffff;
+        --color-text-light: #cccccc;
+        --color-background: #1a1a1a;
+        --color-white: #2d2d2d;
+    }
+
+    .form-container {
+        background: rgba(45, 45, 45, 0.95);
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    input[type="tel"] {
+        background: rgba(60, 60, 60, 0.8);
+        color: var(--color-text);
     }
 }
 

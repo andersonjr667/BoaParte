@@ -1,142 +1,204 @@
+// Função para adicionar loading state aos botões
+function setButtonLoading(button, isLoading) {
+    if (isLoading) {
+        button.classList.add('loading');
+        button.disabled = true;
+        button.dataset.originalText = button.innerHTML;
+        button.innerHTML = '';
+    } else {
+        button.classList.remove('loading');
+        button.disabled = false;
+        if (button.dataset.originalText) {
+            button.innerHTML = button.dataset.originalText;
+        }
+    }
+}
+
 // Função para login
 async function login(event) {
     event.preventDefault();
+    
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
-    const loginButton = document.querySelector('button[type="submit"]');
+    const submitButton = event.target.querySelector('button[type="submit"]');
 
     if (!username || !password) {
-        errorHandling.showErrorNotification('Por favor, preencha todos os campos.');
+        showNotification("Por favor, preencha todos os campos.", "error");
         return;
     }
 
     try {
-        loginButton.disabled = true;
-        loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+        setButtonLoading(submitButton, true);
 
         const response = await fetch("/login", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({ username, password })
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.error || 'auth/invalid-credentials');
+            throw new Error(data.error || 'Erro ao fazer login');
         }
 
         localStorage.setItem("token", data.token);
-        localStorage.setItem("username", data.username);
-        window.location.href = "dashboard.html";
-
+        localStorage.setItem("username", username);
+        
+        showNotification("Login realizado com sucesso!", "success");
+        
+        // Redireciona após um breve delay para mostrar a mensagem de sucesso
+        setTimeout(() => {
+            window.location.href = "dashboard.html";
+        }, 500);
     } catch (error) {
-        const errorCode = error.message || 'error/unknown';
-        errorHandling.showErrorNotification(errorHandling.getErrorMessage(errorCode), 5000);
+        console.error("Erro:", error);
+        showNotification(error.message || "Erro ao fazer login. Tente novamente.", "error");
     } finally {
-        loginButton.disabled = false;
-        loginButton.innerHTML = 'Entrar';
+        setButtonLoading(submitButton, false);
     }
 }
 
 // Função para registro
 async function register(event) {
     event.preventDefault();
+    
     const username = document.getElementById("newUsername").value.trim();
     const password = document.getElementById("newPassword").value;
     const confirmPassword = document.getElementById("confirmPassword").value;
     const inviteCode = document.getElementById("inviteCode").value.trim();
-    const registerButton = document.querySelector('#registerForm button[type="submit"]');
+    const submitButton = event.target.querySelector('button[type="submit"]');
 
-    // Validações
     if (!username || !password || !confirmPassword || !inviteCode) {
-        errorHandling.showErrorNotification(errorHandling.getErrorMessage('auth/missing-fields'));
+        showNotification("Por favor, preencha todos os campos.", "error");
         return;
     }
 
     if (password !== confirmPassword) {
-        errorHandling.showErrorNotification(errorHandling.getErrorMessage('password/mismatch'));
+        showNotification("As senhas não coincidem.", "error");
         return;
     }
 
     if (password.length < 6) {
-        errorHandling.showErrorNotification(errorHandling.getErrorMessage('auth/weak-password'));
+        showNotification("A senha deve ter pelo menos 6 caracteres.", "error");
         return;
     }
 
     try {
-        registerButton.disabled = true;
-        registerButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
+        setButtonLoading(submitButton, true);
 
         const response = await fetch("/register", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({ username, password, inviteCode })
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-            let errorCode = 'error/unknown';
-            if (response.status === 409) errorCode = 'auth/username-exists';
-            if (response.status === 403) errorCode = 'auth/invalid-invite';
-            if (response.status === 400) errorCode = 'auth/validation';
-            throw new Error(errorCode);
+            throw new Error(data.error || 'Erro ao registrar');
         }
 
-        errorHandling.showSuccessNotification('Conta criada com sucesso! Você já pode fazer login.');
+        showNotification("Registro realizado com sucesso! Faça login para continuar.", "success");
         
-        // Limpar campos e mostrar formulário de login
-        document.getElementById("newUsername").value = '';
-        document.getElementById("newPassword").value = '';
-        document.getElementById("confirmPassword").value = '';
-        document.getElementById("inviteCode").value = '';
-        showLoginForm();
-
+        // Limpa os campos
+        document.getElementById("newUsername").value = "";
+        document.getElementById("newPassword").value = "";
+        document.getElementById("confirmPassword").value = "";
+        document.getElementById("inviteCode").value = "";
+        
+        // Volta para o formulário de login
+        setTimeout(() => {
+            showLoginForm();
+        }, 1000);
     } catch (error) {
-        const errorCode = error.message || 'error/unknown';
-        errorHandling.showErrorNotification(errorHandling.getErrorMessage(errorCode), 5000);
+        console.error("Erro:", error);
+        showNotification(error.message || "Erro ao registrar. Tente novamente.", "error");
     } finally {
-        registerButton.disabled = false;
-        registerButton.innerHTML = 'Registrar';
+        setButtonLoading(submitButton, false);
     }
 }
 
 // Função para mostrar formulário de login
 function showLoginForm() {
-    document.getElementById("loginForm").style.display = "block";
     document.getElementById("registerForm").style.display = "none";
+    document.getElementById("loginForm").style.display = "block";
+    
+    // Limpa os campos do registro
+    document.getElementById("newUsername").value = "";
+    document.getElementById("newPassword").value = "";
+    document.getElementById("confirmPassword").value = "";
+    document.getElementById("inviteCode").value = "";
 }
 
 // Função para mostrar formulário de registro
 function showRegisterForm() {
     document.getElementById("loginForm").style.display = "none";
     document.getElementById("registerForm").style.display = "block";
+    
+    // Limpa os campos do login
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
 }
 
 // Função para verificar token expirado
-function checkTokenExpiration() {
+async function checkTokenExpiration() {
     const token = localStorage.getItem("token");
-    if (token) {
-        try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
-            if (payload.exp * 1000 < Date.now()) {
-                // Token expirado
-                localStorage.removeItem("token");
-                localStorage.removeItem("username");
-                window.location.href = "index.html";
+    if (!token) return;
+
+    try {
+        const response = await fetch("/verify-auth", {
+            headers: {
+                "Authorization": `Bearer ${token}`
             }
-        } catch (error) {
-            console.error("Erro ao verificar token:", error);
+        });
+
+        if (!response.ok) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("username");
+            window.location.href = "index.html";
         }
+    } catch (error) {
+        console.error("Erro ao verificar token:", error);
     }
+}
+
+// Função para mostrar notificações
+function showNotification(message, type = "info") {
+    const notification = document.createElement("div");
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Adiciona a classe show após um pequeno delay para ativar a animação
+    setTimeout(() => {
+        notification.classList.add("show");
+    }, 10);
+
+    // Remove a notificação após 3 segundos
+    setTimeout(() => {
+        notification.classList.remove("show");
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
 }
 
 // Verifica o token a cada minuto
 setInterval(checkTokenExpiration, 60000);
 
 // Verifica o token quando a página carrega
-document.addEventListener("DOMContentLoaded", checkTokenExpiration);
+document.addEventListener('DOMContentLoaded', checkTokenExpiration);
 
 // Função para logout
 async function logout() {
@@ -169,14 +231,14 @@ async function logout() {
     }
 }
 
-// Função para verificar autenticação
+// Verifica autenticação
 async function checkAuth() {
     const token = localStorage.getItem("token");
     const protectedPages = ['/dashboard.html', '/users.html'];
     const currentPath = window.location.pathname;
 
     if (!token && protectedPages.includes(currentPath)) {
-        window.location.href = "/";
+        window.location.href = "index.html";
         return;
     }
 
@@ -194,21 +256,18 @@ async function checkAuth() {
 
             // Se estiver na página inicial e estiver autenticado, redireciona para o dashboard
             if (currentPath === "/" || currentPath === "/index.html") {
-                window.location.href = "/dashboard.html";
+                window.location.href = "dashboard.html";
             }
         } catch (error) {
             console.error("Erro na verificação de auth:", error);
             localStorage.removeItem("token");
             localStorage.removeItem("username");
             if (protectedPages.includes(currentPath)) {
-                window.location.href = "/";
+                window.location.href = "index.html";
             }
         }
     }
 }
-
-// Verificar autenticação quando a página carrega
-document.addEventListener('DOMContentLoaded', checkAuth);
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
