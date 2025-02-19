@@ -1,7 +1,7 @@
 {
     "name": "boa-parte-contatos",
     "version": "1.0.0",
-    "description": "Projeto para gerenciamento de contatos",
+    "description": "Sistema de gerenciamento de contatos da Boa Parte",
     "main": "server.js",
     "scripts": {
         "start": "node server.js",
@@ -28,5 +28,11 @@
     },
     "engines": {
         "node": ">=16"
+    },
+    "license": "MIT",
+    "author": "Anderson Jr",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/andersonjr667/BoaParte"
     }
 }

@@ -1,4 +1,10 @@
-require("dotenv").config();
+// Carrega variáveis de ambiente
+if (process.env.NODE_ENV === 'production') {
+    require('dotenv').config({ path: '.env.production' });
+} else {
+    require('dotenv').config();
+}
+
 const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
@@ -86,10 +92,33 @@ setInterval(() => {
 }, 3600000);
 
 // ================== CONEXÃO COM MONGODB ==================
+if (!process.env.MONGO_URI) {
+    console.error(`
+❌ Erro: MONGO_URI não está definida!
+💡 Soluções:
+   1. Em desenvolvimento: Crie um arquivo .env com MONGO_URI=sua_url_mongodb
+   2. No Render: Configure MONGO_URI nas variáveis de ambiente
+   
+   Exemplo de MONGO_URI: mongodb+srv://usuario:senha@cluster.mongodb.net/database
+    `);
+    process.exit(1);
+}
+
 mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log("✅ MongoDB conectado com sucesso"))
+.then(() => console.log(`
+✅ MongoDB conectado com sucesso
+📦 Database: ${process.env.MONGO_URI.split('/').pop()}
+`))
 .catch(err => {
-    console.error("❌ Falha na conexão com MongoDB:", err);
+    console.error(`
+❌ Falha na conexão com MongoDB:
+🔍 Erro: ${err.message}
+💡 Soluções possíveis:
+   1. Verifique se a MONGO_URI está correta
+   2. Verifique se o IP está na whitelist do MongoDB Atlas
+   3. Verifique se usuário e senha estão corretos
+   4. Verifique se o cluster MongoDB está online
+    `);
     process.exit(1);
 });
 
