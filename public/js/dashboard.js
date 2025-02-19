@@ -101,7 +101,7 @@ async function logout() {
         window.location.href = "index.html";
     } catch (error) {
         console.error("Erro no logout:", error);
-        showNotification("Erro ao fazer logout. Tente novamente.", "error");
+        alert("Erro ao fazer logout. Tente novamente.");
     }
 }
 
