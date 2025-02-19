@@ -3,52 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Dashboard - BoaParte</title>
     <link rel="icon" type="image/png" href="images/image.png">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-        <!-- Imagem no canto superior esquerdo -->
-        <div class="top-left-image">
-            <img src="images/image2.png" alt="Logo">
-        </div>
-    
+    <!-- Imagem no canto superior esquerdo -->
+    <div class="top-left-image">
+        <img src="images/image2.png" alt="Logo BoaParte">
+    </div>
+
     <div class="dashboard-container">
-        <h2>Adicione os contatos Aqui!</h2>
+        <h2>Gerenciamento de Contatos</h2>
         
         <!-- Formulário para adicionar contatos -->
         <div class="form-container">
-            <h3>Adicionar Contato</h3>
-            <input type="text" id="contactName" placeholder="Nome">
-            <input type="text" id="contactPhone" placeholder="Telefone">
-            <button onclick="addContact()">Adicionar</button>
+            <h3>Adicionar Novo Contato</h3>
+            <div class="input-group">
+                <div class="input-field">
+                    <input type="text" id="contactName" placeholder="Nome do Contato" aria-label="Nome do Contato">
+                </div>
+                <div class="input-field">
+                    <input type="text" id="contactPhone" placeholder="Telefone" aria-label="Telefone">
+                </div>
+            </div>
+            <button class="add-button" onclick="addContact()">
+                <i class="fas fa-plus"></i> Adicionar
+            </button>
         </div>
 
         <!-- Lista de contatos -->
         <div class="contacts-container">
-            <h3></h3>
-            <ul id="contactsList"></ul>
+            <h3>Contatos Recentes</h3>
+            <ul id="contactsList" class="contacts-list"></ul>
         </div>
 
         <!-- Botões de ação -->
         <div class="dashboard-actions">
-            <button class="view-contacts-btn" onclick="window.location.href='/users'">
-                Ver Todos os Contatos
+            <a href="/users" class="action-button view-contacts-btn">
+                <i class="fas fa-address-book"></i> Ver Todos os Contatos
+            </a>
+            <button class="action-button logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Sair
             </button>
-            <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
 
         <!-- Link para redefinir senha -->
-        <div style="margin-top: 20px;">
-            <a href="#" onclick="showChangePasswordForm()" style="text-decoration: underline; color: #1b5e20;">Redefinir Senha</a>
+        <div class="password-reset">
+            <a href="#" onclick="showChangePasswordForm()" class="password-link">
+                <i class="fas fa-key"></i> Redefinir Senha
+            </a>
         </div>
 
         <!-- Formulário para redefinir senha (inicialmente oculto) -->
-        <div id="changePasswordForm" style="display: none; margin-top: 20px;">
+        <div id="changePasswordForm" class="password-form" style="display: none;">
             <h3>Redefinir Senha</h3>
-            <input type="password" id="currentPassword" placeholder="Senha Atual">
-            <input type="password" id="newPassword" placeholder="Nova Senha">
-            <button onclick="changePassword()">Alterar Senha</button>
+            <div class="input-field">
+                <input type="password" id="currentPassword" placeholder="Senha Atual">
+            </div>
+            <div class="input-field">
+                <input type="password" id="newPassword" placeholder="Nova Senha">
+            </div>
+            <button class="action-button view-contacts-btn" onclick="changePassword()">
+                <i class="fas fa-save"></i> Alterar Senha
+            </button>
         </div>
     </div>
 

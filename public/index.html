@@ -3,11 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login e Registro</title>
+    <title>BoaParte - Login</title>
     <link rel="icon" type="image/png" href="images/image.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
-    <script defer src="js/script.js"></script>
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+    <!-- Logo -->
+    <div class="top-left-image">
+        <img src="images/image2.png" alt="Logo BoaParte">
+    </div>
+
+    <div class="auth-container">
+        <!-- Login Form -->
+        <div class="form-container" id="loginForm">
+            <div class="form-header">
+                <h2>Bem-vindo de volta!</h2>
+                <p>Entre na sua conta para continuar</p>
+            </div>
+
+            <form onsubmit="login(event)">
+                <div class="input-field">
+                    <div class="input-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" placeholder="Nome de usuário" autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="input-field">
+                    <div class="input-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" placeholder="Senha" autocomplete="current-password">
+                    </div>
+                </div>
+
+                <button type="submit" class="button button-primary">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
+
+                <p class="form-footer">
+                    Não tem uma conta? 
+                    <a href="#" onclick="showRegisterForm()">Registre-se</a>
+                </p>
+            </form>
+        </div>
+
+        <!-- Register Form -->
+        <div class="form-container" id="registerForm" style="display: none;">
+            <div class="form-header">
+                <h2>Criar Conta</h2>
+                <p>Preencha os dados para se registrar</p>
+            </div>
+
+            <form onsubmit="register(event)">
+                <div class="input-field">
+                    <div class="input-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="newUsername" placeholder="Nome de usuário" autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="input-field">
+                    <div class="input-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="newPassword" placeholder="Senha" autocomplete="new-password">
+                    </div>
+                </div>
+
+                <div class="input-field">
+                    <div class="input-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="confirmPassword" placeholder="Confirme a senha" autocomplete="new-password">
+                    </div>
+                </div>
+
+                <div class="input-field">
+                    <div class="input-icon">
+                        <i class="fas fa-key"></i>
+                        <input type="text" id="inviteCode" placeholder="Código de convite">
+                    </div>
+                </div>
+
+                <button type="submit" class="button button-primary">
+                    <i class="fas fa-user-plus"></i> Registrar
+                </button>
+
+                <p class="form-footer">
+                    Já tem uma conta? 
+                    <a href="#" onclick="showLoginForm()">Faça login</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/errorMessages.js"></script>
+    <script src="js/script.js"></script>
     <script>
         function checkLogin() {
             const token = localStorage.getItem("token");
@@ -18,43 +109,5 @@
 
         window.onload = checkLogin;
     </script>
-</head>
-<body>
-    <!-- Imagem no canto superior esquerdo -->
-    <div class="top-left-image">
-        <img src="images/image2.png" alt="Logo">
-    </div>
-
-    <div class="container">
-        <div class="form-container login-container">
-            <h2>Login</h2>
-            <form>
-                <div class="form-group">
-                    <i class="fas fa-user"></i>
-                    <input type="text" id="loginUser" placeholder="Usuário">
-                </div>
-                <div class="form-group">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="loginPass" placeholder="Senha">
-                </div>
-                <button type="button" onclick="login()">Entrar</button>
-            </form>
-        </div>
-
-        <div class="form-container register-container">
-            <h2>Registrar</h2>
-            <form>
-                <div class="form-group">
-                    <i class="fas fa-user"></i>
-                    <input type="text" id="registerUser" placeholder="Usuário">
-                </div>
-                <div class="form-group">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="registerPass" placeholder="Senha">
-                </div>
-                <button type="button" onclick="register()">Criar Conta</button>
-            </form>
-        </div>
-    </div>
 </body>
 </html>
