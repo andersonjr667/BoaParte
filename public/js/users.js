@@ -188,14 +188,18 @@ async function logout() {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${localStorage.getItem("token")}`
-            }
+            },
+            credentials: 'include' // Importante para enviar e receber cookies
         });
 
         if (!response.ok) {
             throw new Error('Erro ao fazer logout');
         }
 
+        // Limpa o token do localStorage
         localStorage.removeItem("token");
+        
+        // Redireciona para a página inicial
         window.location.href = "index.html";
     } catch (error) {
         console.error("Erro no logout:", error);

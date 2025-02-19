@@ -251,12 +251,22 @@ app.post("/login", async (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-    const token = req.cookies?.token || req.headers.authorization?.split(" ")[1];
-    if (token) {
-        invalidTokens.add(token);
-        res.clearCookie('token');
+    try {
+        const token = req.cookies?.token || req.headers.authorization?.split(" ")[1];
+        if (token) {
+            invalidTokens.add(token);
+            res.clearCookie('token', { 
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                path: '/'
+            });
+        }
+        res.json({ message: "Logout realizado com sucesso" });
+    } catch (error) {
+        console.error("Erro no logout:", error);
+        res.status(500).json({ error: "Erro ao fazer logout" });
     }
-    res.json({ message: "Logout realizado com sucesso" });
 });
 
 // ---------- Contatos ----------
