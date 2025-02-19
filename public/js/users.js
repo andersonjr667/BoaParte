@@ -131,31 +131,23 @@ function filterContacts(event) {
 // Função para logout
 async function logout() {
     try {
-        const response = await fetch("/logout", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("token")}`
-            },
-            credentials: 'include'
-        });
-
-        if (!response.ok) {
-            throw new Error('Erro ao fazer logout');
-        }
-
         // Limpa dados do usuário
         localStorage.removeItem("token");
         localStorage.removeItem("username");
         
         // Redireciona para a página inicial
-        window.location.href = "index.html";
+        window.location.href = "/index.html";
+        
+        // Faz a requisição de logout após redirecionar
+        await fetch("/logout", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: 'include'
+        });
     } catch (error) {
         console.error("Erro no logout:", error);
-        // Mesmo com erro, limpa o localStorage e redireciona
-        localStorage.removeItem("token");
-        localStorage.removeItem("username");
-        window.location.href = "index.html";
     }
 }
 

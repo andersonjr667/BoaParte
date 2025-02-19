@@ -1,53 +1,47 @@
-// Função para adicionar um contato
-async function addContact() {
-    const name = document.getElementById("contactName").value.trim();
-    const phone = document.getElementById("contactPhone").value.trim();
-    const addButton = document.querySelector('.add-button');
+// Variáveis globais
+let contacts = [];
+let isLoading = false;
 
-    if (!name || !phone) {
-        showNotification("Por favor, preencha todos os campos.", "error");
-        return;
+// Função para formatar número de telefone
+function formatPhoneNumber(phone) {
+    const cleaned = phone.replace(/\D/g, '');
+    const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/);
+    if (match) {
+        return `(${match[1]}) ${match[2]}-${match[3]}`;
     }
+    return phone;
+}
 
-    try {
-        setButtonLoading(addButton, true);
-
-        const response = await fetch("/addContact", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("token")}`
-            },
-            body: JSON.stringify({ name, phone })
-        });
-
-        if (!response.ok) {
-            throw new Error('Erro ao adicionar contato');
-        }
-
-        const result = await response.json();
-        showNotification("Contato adicionado com sucesso!", "success");
-        
-        // Limpa os campos
-        document.getElementById("contactName").value = "";
-        document.getElementById("contactPhone").value = "";
-        
-        // Recarrega a lista de contatos
-        loadContacts();
-    } catch (error) {
-        console.error("Erro:", error);
-        showNotification("Erro ao adicionar contato. Tente novamente.", "error");
-    } finally {
-        setButtonLoading(addButton, false);
-    }
+// Função para formatar data
+function formatDate(date) {
+    return new Date(date).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 }
 
 // Função para carregar contatos
 async function loadContacts() {
+    if (isLoading) return;
+    
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const errorMessage = document.getElementById('error-message');
+    const contactsList = document.getElementById('contacts-list');
+    const loadButton = document.getElementById('load-contacts');
+    
     try {
-        const response = await fetch("/getContacts", {
+        isLoading = true;
+        loadButton.disabled = true;
+        loadButton.innerHTML = '<span class="spinner"></span> Carregando...';
+        loadingIndicator.classList.remove('hidden');
+        errorMessage.classList.add('hidden');
+
+        const response = await fetch('/getContacts', {
             headers: {
-                "Authorization": `Bearer ${localStorage.getItem("token")}`
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
 
@@ -55,75 +49,207 @@ async function loadContacts() {
             throw new Error('Erro ao carregar contatos');
         }
 
-        const contacts = await response.json();
-        const contactsList = document.getElementById("contactsList");
-        contactsList.innerHTML = "";
+        contacts = await response.json();
+        displayContacts(contacts);
+        
+        // Atualiza contagem de contatos
+        updateContactCount();
 
-        // Mostra apenas os 5 contatos mais recentes
-        const recentContacts = contacts.slice(0, 5);
+    } catch (error) {
+        console.error('Erro:', error);
+        errorMessage.textContent = 'Erro ao carregar contatos. Por favor, tente novamente.';
+        errorMessage.classList.remove('hidden');
+        contactsList.innerHTML = '';
+    } finally {
+        isLoading = false;
+        loadButton.disabled = false;
+        loadButton.textContent = 'Atualizar Contatos';
+        loadingIndicator.classList.add('hidden');
+    }
+}
 
-        recentContacts.forEach(contact => {
-            const li = document.createElement("li");
-            li.className = "contact-card";
-            li.innerHTML = `
-                <div class="contact-info">
-                    <strong>${contact.name}</strong>
-                    <span>${contact.phone}</span>
-                </div>
-                <div class="contact-date">
-                    <small>Adicionado em: ${new Date(contact.createdAt).toLocaleDateString()}</small>
-                </div>
-            `;
-            contactsList.appendChild(li);
+// Função para exibir contatos
+function displayContacts(contactsToShow) {
+    const contactsList = document.getElementById('contacts-list');
+    contactsList.innerHTML = '';
+
+    if (contactsToShow.length === 0) {
+        contactsList.innerHTML = '<p class="empty-message">Nenhum contato encontrado.</p>';
+        return;
+    }
+
+    contactsToShow.forEach(contact => {
+        const li = document.createElement('li');
+        li.className = 'contact-card';
+        
+        li.innerHTML = `
+            <div class="contact-info">
+                <span class="contact-name">${contact.name}</span>
+                <span class="contact-phone">${formatPhoneNumber(contact.phone)}</span>
+                <span class="contact-date">Adicionado em ${formatDate(contact.createdAt)}</span>
+            </div>
+        `;
+
+        contactsList.appendChild(li);
+    });
+}
+
+// Função para atualizar contagem de contatos
+function updateContactCount() {
+    const countElement = document.getElementById('contact-count');
+    if (countElement) {
+        countElement.textContent = contacts.length;
+    }
+}
+
+// Função para adicionar contato
+async function addContact(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const submitButton = form.querySelector('button[type="submit"]');
+    const errorMessage = document.getElementById('error-message');
+    const successMessage = document.getElementById('success-message');
+
+    try {
+        // Desabilita o botão e mostra loading
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner"></span> Salvando...';
+        errorMessage.classList.add('hidden');
+        successMessage.classList.add('hidden');
+
+        const formData = new FormData(form);
+        const contactData = {
+            name: formData.get('name'),
+            phone: formData.get('phone')
+        };
+
+        const response = await fetch('/addContact', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(contactData)
         });
 
-        if (contacts.length > 5) {
-            const viewAllButton = document.createElement("li");
-            viewAllButton.className = "view-all-card";
-            viewAllButton.innerHTML = `
-                <a href="users.html" class="view-all-link">
-                    <i class="fas fa-eye"></i>
-                    Ver todos os ${contacts.length} contatos
-                </a>
-            `;
-            contactsList.appendChild(viewAllButton);
+        if (!response.ok) {
+            throw new Error('Erro ao adicionar contato');
         }
+
+        // Limpa o formulário
+        form.reset();
+        
+        // Mostra mensagem de sucesso
+        successMessage.textContent = 'Contato adicionado com sucesso!';
+        successMessage.classList.remove('hidden');
+        
+        // Recarrega a lista de contatos
+        await loadContacts();
+
     } catch (error) {
-        console.error("Erro:", error);
-        showNotification("Erro ao carregar contatos. Tente novamente.", "error");
+        console.error('Erro:', error);
+        errorMessage.textContent = 'Erro ao adicionar contato. Por favor, tente novamente.';
+        errorMessage.classList.remove('hidden');
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Adicionar Contato';
     }
+}
+
+// Função para pesquisar contatos
+function searchContacts(event) {
+    const searchTerm = event.target.value.toLowerCase();
+    
+    if (!searchTerm) {
+        displayContacts(contacts);
+        return;
+    }
+
+    const filteredContacts = contacts.filter(contact => 
+        contact.name.toLowerCase().includes(searchTerm) ||
+        contact.phone.includes(searchTerm)
+    );
+
+    displayContacts(filteredContacts);
 }
 
 // Função para logout
 async function logout() {
     try {
-        const response = await fetch("/logout", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("token")}`
-            },
-            credentials: 'include'
-        });
-
-        if (!response.ok) {
-            throw new Error('Erro ao fazer logout');
-        }
-
         // Limpa dados do usuário
         localStorage.removeItem("token");
         localStorage.removeItem("username");
         
         // Redireciona para a página inicial
-        window.location.href = "index.html";
+        window.location.href = "/index.html";
+        
+        // Faz a requisição de logout após redirecionar
+        await fetch("/logout", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: 'include'
+        });
     } catch (error) {
         console.error("Erro no logout:", error);
-        // Mesmo com erro, limpa o localStorage e redireciona
-        localStorage.removeItem("token");
-        localStorage.removeItem("username");
-        window.location.href = "index.html";
     }
 }
+
+// Função para verificar autenticação
+async function checkAuth() {
+    const token = localStorage.getItem("token");
+    
+    if (!token) {
+        window.location.href = "/index.html";
+        return;
+    }
+
+    try {
+        const response = await fetch("/verify-auth", {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Token inválido');
+        }
+
+        // Atualiza o nome do usuário na interface
+        const username = localStorage.getItem("username");
+        const userElement = document.getElementById("username");
+        if (userElement && username) {
+            userElement.textContent = username;
+        }
+
+    } catch (error) {
+        console.error("Erro na verificação de auth:", error);
+        localStorage.removeItem("token");
+        localStorage.removeItem("username");
+        window.location.href = "/index.html";
+    }
+}
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', async () => {
+    await checkAuth();
+    
+    // Adiciona listeners
+    const contactForm = document.getElementById('contact-form');
+    if (contactForm) {
+        contactForm.addEventListener('submit', addContact);
+    }
+
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', searchContacts);
+    }
+
+    // Carrega contatos iniciais
+    loadContacts();
+});
 
 // Função para adicionar loading state aos botões
 function setButtonLoading(button, isLoading) {
@@ -155,57 +281,6 @@ function showNotification(message, type) {
         }, 300);
     }, 3000);
 }
-
-// Função para verificar autenticação
-async function checkAuth() {
-    const token = localStorage.getItem("token");
-    
-    if (!token) {
-        window.location.href = "index.html";
-        return;
-    }
-
-    try {
-        const response = await fetch("/verify-auth", {
-            headers: {
-                "Authorization": `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Token inválido');
-        }
-    } catch (error) {
-        console.error("Erro na verificação de auth:", error);
-        localStorage.removeItem("token");
-        localStorage.removeItem("username");
-        window.location.href = "index.html";
-    }
-}
-
-// Inicialização
-window.onload = async () => {
-    await checkAuth(); // Verifica autenticação primeiro
-    loadContacts(); // Só carrega os contatos se estiver autenticado
-    
-    // Adicionar máscara para o telefone
-    const phoneInput = document.getElementById("contactPhone");
-    phoneInput.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length > 0) {
-            if (value.length <= 2) {
-                value = `(${value}`;
-            } else if (value.length <= 6) {
-                value = `(${value.slice(0,2)}) ${value.slice(2)}`;
-            } else if (value.length <= 10) {
-                value = `(${value.slice(0,2)}) ${value.slice(2,6)}-${value.slice(6)}`;
-            } else {
-                value = `(${value.slice(0,2)}) ${value.slice(2,7)}-${value.slice(7,11)}`;
-            }
-        }
-        e.target.value = value;
-    });
-};
 
 // Função para mostrar o formulário de redefinição de senha
 function showChangePasswordForm() {

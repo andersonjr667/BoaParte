@@ -258,28 +258,6 @@ input[type="submit"] {
     background: rgba(255, 255, 255, 0.95);
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --color-text: #ffffff;
-        --color-text-light: #cccccc;
-        --color-background: #1a1a1a;
-        --color-white: #2d2d2d;
-    }
-
-    .form-container {
-        background: rgba(45, 45, 45, 0.95);
-    }
-
-    input[type="text"],
-    input[type="password"],
-    input[type="email"],
-    input[type="tel"] {
-        background: rgba(60, 60, 60, 0.8);
-        color: var(--color-text);
-    }
-}
-
 /* Estados */
 .hidden {
     display: none;
