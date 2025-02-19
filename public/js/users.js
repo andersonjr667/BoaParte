@@ -211,8 +211,36 @@ async function logout() {
     }
 }
 
+// Função para verificar autenticação
+async function checkAuth() {
+    const token = localStorage.getItem("token");
+    
+    if (!token) {
+        window.location.href = "index.html";
+        return;
+    }
+
+    try {
+        const response = await fetch("/verify-auth", {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Token inválido');
+        }
+    } catch (error) {
+        console.error("Erro na verificação de auth:", error);
+        localStorage.removeItem("token");
+        localStorage.removeItem("username");
+        window.location.href = "index.html";
+    }
+}
+
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    initializeElements();
+document.addEventListener('DOMContentLoaded', async () => {
+    await checkAuth(); // Verifica autenticação primeiro
+    initializeElements(); // Só inicializa se estiver autenticado
     carregarContatos();
 });

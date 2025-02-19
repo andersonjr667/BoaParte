@@ -317,12 +317,16 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get("/dashboard.html", authenticateToken, (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+app.get("/verify-auth", authenticateToken, (req, res) => {
+    res.json({ message: "Token válido", username: req.user.username });
 });
 
-app.get("/users", authenticateToken, (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "users.html"));
+app.get("/dashboard.html", authenticateToken, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+app.get("/users.html", authenticateToken, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'users.html'));
 });
 
 // Rota para listar todos os contatos (agora com autenticação)
@@ -339,11 +343,6 @@ app.get("/contatos", authenticateToken, async (req, res) => {
 // Rota para verificar token
 app.get('/verify-token', authenticateToken, (req, res) => {
     res.json({ valid: true });
-});
-
-// Rota para verificar autenticação
-app.get("/verify-auth", authenticateToken, (req, res) => {
-    res.json({ valid: true, username: req.user.username });
 });
 
 // Rota para verificar status do servidor
