@@ -83,9 +83,26 @@ async function loadContacts() {
 }
 
 // Função para logout
-function logout() {
-    localStorage.removeItem("token");
-    window.location.href = "index.html";
+async function logout() {
+    try {
+        const response = await fetch("/logout", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao fazer logout');
+        }
+
+        localStorage.removeItem("token");
+        window.location.href = "index.html";
+    } catch (error) {
+        console.error("Erro no logout:", error);
+        showNotification("Erro ao fazer logout. Tente novamente.", "error");
+    }
 }
 
 // Função para mostrar o formulário de redefinição de senha
