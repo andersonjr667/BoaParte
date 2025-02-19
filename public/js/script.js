@@ -144,23 +144,28 @@ async function logout() {
         const response = await fetch("/logout", {
             method: "POST",
             headers: {
+                "Content-Type": "application/json",
                 "Authorization": `Bearer ${localStorage.getItem("token")}`
-            }
+            },
+            credentials: 'include'
         });
 
         if (!response.ok) {
             throw new Error('Erro ao fazer logout');
         }
 
+        // Limpa dados do usuário
         localStorage.removeItem("token");
         localStorage.removeItem("username");
-        window.location.href = "/";
+        
+        // Redireciona para a página inicial
+        window.location.href = "index.html";
     } catch (error) {
         console.error("Erro no logout:", error);
         // Mesmo com erro, limpa o localStorage e redireciona
         localStorage.removeItem("token");
         localStorage.removeItem("username");
-        window.location.href = "/";
+        window.location.href = "index.html";
     }
 }
 

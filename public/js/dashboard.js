@@ -91,21 +91,25 @@ async function logout() {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${localStorage.getItem("token")}`
             },
-            credentials: 'include' // Importante para enviar e receber cookies
+            credentials: 'include'
         });
 
         if (!response.ok) {
             throw new Error('Erro ao fazer logout');
         }
 
-        // Limpa o token do localStorage
+        // Limpa dados do usuário
         localStorage.removeItem("token");
+        localStorage.removeItem("username");
         
         // Redireciona para a página inicial
         window.location.href = "index.html";
     } catch (error) {
         console.error("Erro no logout:", error);
-        alert("Erro ao fazer logout. Tente novamente.");
+        // Mesmo com erro, limpa o localStorage e redireciona
+        localStorage.removeItem("token");
+        localStorage.removeItem("username");
+        window.location.href = "index.html";
     }
 }
 
