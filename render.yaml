@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: Boa Parte
+    env: node
+    plan: free
+    buildCommand: 'yarn install' # ou 'npm install'
+    startCommand: 'node server.js'
+    envVars:
+      - key: MONGODB_URI
+        value: 'mongodb+srv://anderson:152070@database.o6gmd.mongodb.net/test?retryWrites=true&w=majority'
+      - key: JWT_SECRET
+        value: 'WPYvz*z_ZC5L:?mW.:,MPJ$_U?RD8X'
+      - key: REGISTRATION_CODE
+        value: 'BOAPARTE2024'
