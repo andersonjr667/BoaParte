@@ -1,0 +1,523 @@
+{
+  "noiseKey": {
+    "private": {
+      "type": "Buffer",
+      "data": [
+        208,
+        228,
+        133,
+        14,
+        156,
+        18,
+        122,
+        32,
+        227,
+        129,
+        56,
+        4,
+        173,
+        215,
+        122,
+        184,
+        30,
+        16,
+        205,
+        250,
+        53,
+        199,
+        177,
+        172,
+        153,
+        2,
+        105,
+        76,
+        11,
+        198,
+        198,
+        72
+      ]
+    },
+    "public": {
+      "type": "Buffer",
+      "data": [
+        8,
+        94,
+        60,
+        23,
+        73,
+        124,
+        77,
+        122,
+        112,
+        206,
+        206,
+        137,
+        246,
+        209,
+        253,
+        175,
+        214,
+        133,
+        146,
+        169,
+        255,
+        189,
+        225,
+        74,
+        207,
+        163,
+        214,
+        201,
+        49,
+        68,
+        64,
+        79
+      ]
+    }
+  },
+  "pairingEphemeralKeyPair": {
+    "private": {
+      "type": "Buffer",
+      "data": [
+        240,
+        128,
+        101,
+        204,
+        239,
+        1,
+        39,
+        16,
+        146,
+        151,
+        192,
+        58,
+        96,
+        125,
+        53,
+        207,
+        229,
+        50,
+        252,
+        165,
+        171,
+        96,
+        255,
+        23,
+        47,
+        233,
+        254,
+        189,
+        63,
+        161,
+        204,
+        79
+      ]
+    },
+    "public": {
+      "type": "Buffer",
+      "data": [
+        240,
+        15,
+        160,
+        22,
+        58,
+        249,
+        28,
+        134,
+        128,
+        44,
+        107,
+        222,
+        191,
+        95,
+        31,
+        224,
+        86,
+        190,
+        236,
+        20,
+        31,
+        2,
+        240,
+        156,
+        59,
+        64,
+        21,
+        193,
+        28,
+        100,
+        114,
+        92
+      ]
+    }
+  },
+  "signedIdentityKey": {
+    "private": {
+      "type": "Buffer",
+      "data": [
+        192,
+        48,
+        12,
+        107,
+        43,
+        233,
+        118,
+        38,
+        96,
+        39,
+        219,
+        50,
+        166,
+        210,
+        181,
+        250,
+        20,
+        4,
+        89,
+        78,
+        141,
+        0,
+        242,
+        236,
+        162,
+        98,
+        130,
+        121,
+        61,
+        40,
+        185,
+        118
+      ]
+    },
+    "public": {
+      "type": "Buffer",
+      "data": [
+        70,
+        156,
+        127,
+        173,
+        11,
+        16,
+        220,
+        56,
+        44,
+        83,
+        146,
+        161,
+        146,
+        135,
+        29,
+        94,
+        50,
+        63,
+        52,
+        94,
+        219,
+        25,
+        184,
+        82,
+        151,
+        19,
+        24,
+        125,
+        82,
+        193,
+        239,
+        33
+      ]
+    }
+  },
+  "signedPreKey": {
+    "keyPair": {
+      "private": {
+        "type": "Buffer",
+        "data": [
+          168,
+          166,
+          189,
+          27,
+          16,
+          57,
+          235,
+          69,
+          58,
+          52,
+          228,
+          15,
+          154,
+          139,
+          79,
+          25,
+          203,
+          66,
+          72,
+          86,
+          145,
+          118,
+          200,
+          45,
+          244,
+          191,
+          82,
+          0,
+          116,
+          240,
+          249,
+          100
+        ]
+      },
+      "public": {
+        "type": "Buffer",
+        "data": [
+          137,
+          20,
+          226,
+          213,
+          55,
+          231,
+          33,
+          56,
+          73,
+          196,
+          101,
+          35,
+          47,
+          216,
+          149,
+          214,
+          60,
+          67,
+          246,
+          44,
+          136,
+          58,
+          144,
+          186,
+          63,
+          124,
+          213,
+          200,
+          111,
+          221,
+          192,
+          104
+        ]
+      }
+    },
+    "signature": {
+      "type": "Buffer",
+      "data": [
+        134,
+        250,
+        181,
+        204,
+        102,
+        69,
+        48,
+        76,
+        11,
+        213,
+        178,
+        214,
+        112,
+        86,
+        220,
+        131,
+        54,
+        25,
+        111,
+        53,
+        231,
+        116,
+        13,
+        3,
+        214,
+        209,
+        8,
+        210,
+        180,
+        74,
+        230,
+        230,
+        235,
+        247,
+        207,
+        124,
+        18,
+        15,
+        160,
+        241,
+        145,
+        48,
+        104,
+        246,
+        38,
+        253,
+        20,
+        156,
+        99,
+        242,
+        17,
+        162,
+        130,
+        2,
+        187,
+        222,
+        92,
+        101,
+        226,
+        194,
+        250,
+        59,
+        64,
+        11
+      ]
+    },
+    "keyId": 1
+  },
+  "registrationId": 144,
+  "advSecretKey": "CwXfgWTwB2xs05zBvYqrl871A8qULSjfu3m9PGArAcw=",
+  "processedHistoryMessages": [
+    {
+      "key": {
+        "remoteJid": "553171533882@s.whatsapp.net",
+        "fromMe": true,
+        "id": "B06E18824071D630F2D09B244BEB85CC"
+      },
+      "messageTimestamp": 1741175361
+    },
+    {
+      "key": {
+        "remoteJid": "553171533882@s.whatsapp.net",
+        "fromMe": true,
+        "id": "3938D8BE6B2766C809AC206FE2EEFCD2"
+      },
+      "messageTimestamp": 1741175362
+    },
+    {
+      "key": {
+        "remoteJid": "553171533882@s.whatsapp.net",
+        "fromMe": true,
+        "id": "EA9A3ABD12B540E0F549C5968A47C577"
+      },
+      "messageTimestamp": 1741175494
+    },
+    {
+      "key": {
+        "remoteJid": "553171533882@s.whatsapp.net",
+        "fromMe": true,
+        "id": "E0A7A97A8FB90CB9852928CDF7BB0D82"
+      },
+      "messageTimestamp": 1741180670
+    },
+    {
+      "key": {
+        "remoteJid": "553171533882@s.whatsapp.net",
+        "fromMe": true,
+        "id": "1BD599F279B5C8B7A3461D018D18539E"
+      },
+      "messageTimestamp": 1741180678
+    },
+    {
+      "key": {
+        "remoteJid": "553171533882@s.whatsapp.net",
+        "fromMe": true,
+        "id": "55CBCC057DBD576A0950EE00A0BA6EF2"
+      },
+      "messageTimestamp": 1741180686
+    },
+    {
+      "key": {
+        "remoteJid": "553171533882@s.whatsapp.net",
+        "fromMe": true,
+        "id": "5293C58EB8FADA0A05A2000A4A1AB94D"
+      },
+      "messageTimestamp": 1741180693
+    },
+    {
+      "key": {
+        "remoteJid": "553171533882@s.whatsapp.net",
+        "fromMe": true,
+        "id": "581090282ACD480C7FF53F68D5E54F76"
+      },
+      "messageTimestamp": 1741180696
+    }
+  ],
+  "nextPreKeyId": 207,
+  "firstUnuploadedPreKeyId": 207,
+  "accountSyncCounter": 1,
+  "accountSettings": {
+    "unarchiveChats": false
+  },
+  "registered": false,
+  "account": {
+    "details": "CPLot9AFEKP0oL4GGCcgACgA",
+    "accountSignatureKey": "sPzkQK+fMWYzq3kZFNUGM3WZ2gXT3KXh0CjbJZ3bWnE=",
+    "accountSignature": "PzyUPW7n1AAsbqnldMbuLjaOaGQlCZBt0JZPpJFudBJA9Ib/wOiSbwPbdFakLm7DsMHXv9PwzNtqIUYkVaXbCw==",
+    "deviceSignature": "FzTDTs3fnNn+vBmFzd1XU7NEekJHPxG5fcd3+sU0zut5XB9C7fYkQYPTR5d0Mb76eyq46oYeSWYR0d1qnMYFAA=="
+  },
+  "me": {
+    "id": "553171533882:45@s.whatsapp.net",
+    "lid": "138036323025043:45@lid",
+    "name": "Anderson Jr"
+  },
+  "signalIdentities": [
+    {
+      "identifier": {
+        "name": "553171533882:45@s.whatsapp.net",
+        "deviceId": 0
+      },
+      "identifierKey": {
+        "type": "Buffer",
+        "data": [
+          5,
+          176,
+          252,
+          228,
+          64,
+          175,
+          159,
+          49,
+          102,
+          51,
+          171,
+          121,
+          25,
+          20,
+          213,
+          6,
+          51,
+          117,
+          153,
+          218,
+          5,
+          211,
+          220,
+          165,
+          225,
+          208,
+          40,
+          219,
+          37,
+          157,
+          219,
+          90,
+          113
+        ]
+      }
+    }
+  ],
+  "platform": "android",
+  "routingInfo": {
+    "type": "Buffer",
+    "data": [
+      8,
+      13,
+      8,
+      8
+    ]
+  },
+  "lastAccountSyncTimestamp": 1741175336,
+  "lastPropHash": "PWk5B",
+  "myAppStateKeyId": "AAAAABdG"
+}

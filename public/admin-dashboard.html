@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BoaParte - Dashboard Administrativo</title>
+    <link rel="icon" type="image/png" href="images/image.png">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/shared.css">
+    <!-- Adiciona Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #4CAF50;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #2E7D32;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .admin-functions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .function-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .function-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .function-icon {
+            font-size: 24px;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+
+        .function-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .function-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .back-btn {
+            background: #388E3C;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-right: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #2E7D32;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .contacts-table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .contacts-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        .contacts-table th,
+        .contacts-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .contacts-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .contacts-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .contacts-table td {
+            color: #666;
+        }
+
+        .timestamp {
+            white-space: nowrap;
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .chart-title {
+            color: #333;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #contacts-chart {
+            max-height: 400px;
+            margin: 0 auto;
+        }
+
+        .notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            font-size: 1.1em;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .notification.success {
+            border-left: 5px solid #4CAF50;
+        }
+
+        .notification.error {
+            border-left: 5px solid #f44336;
+        }
+
+        .notification.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .notification i {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                margin: 15px 0;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-value {
+                font-size: 24px;
+            }
+
+            .chart-container {
+                margin: 15px 0;
+                padding: 15px;
+                overflow-x: auto;
+            }
+
+            #contacts-chart {
+                height: 300px !important;
+                width: 100% !important;
+            }
+
+            .admin-functions {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .function-card {
+                padding: 15px;
+                min-height: auto;
+            }
+
+            .function-icon {
+                font-size: 22px;
+            }
+
+            .function-title {
+                font-size: 16px;
+                margin-bottom: 8px;
+            }
+
+            .function-description {
+                font-size: 13px;
+            }
+
+            .chart-title {
+                font-size: 16px;
+                margin-bottom: 15px;
+            }
+
+            .contacts-table-container {
+                margin: 15px 0;
+                padding: 10px;
+            }
+
+            .contacts-table th,
+            .contacts-table td {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .stat-value {
+                font-size: 22px;
+            }
+
+            .stat-label {
+                font-size: 12px;
+            }
+
+            .logout-btn,
+            .back-btn {
+                width: 100%;
+                margin: 5px 0;
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .function-card {
+                padding: 12px;
+            }
+
+            .function-icon {
+                font-size: 20px;
+            }
+
+            .function-title {
+                font-size: 15px;
+            }
+
+            .function-description {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+
+            .function-title {
+                font-size: 14px;
+            }
+        }
+
+        @media (hover: none) {
+            .function-card {
+                transition: none;
+            }
+
+            .function-card:active {
+                transform: scale(0.98);
+                background-color: #f8f8f8;
+            }
+
+            .logout-btn:active,
+            .back-btn:active {
+                opacity: 0.8;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="header">
+            <h1>Dashboard Administrativo</h1>
+            <div>
+                <button onclick="window.location.href='dashboard.html'" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <button onclick="logout()" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="total-users">0</div>
+                <div class="stat-label">Total de Usuários</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-contacts">0</div>
+                <div class="stat-label">Total de Contatos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="contacts-today">0</div>
+                <div class="stat-label">Contatos Hoje</div>
+            </div>
+        </div>
+
+        <!-- Container do Gráfico -->
+        <div class="chart-container">
+            <h3 class="chart-title">Distribuição de Contatos por Usuário</h3>
+            <canvas id="contacts-chart"></canvas>
+        </div>
+
+        <div class="contacts-table-container">
+            <h2 style="margin-top: 0; color: #2E7D32; margin-bottom: 20px;">Últimos Contatos</h2>
+            <table class="contacts-table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Telefone</th>
+                        <th>Data/Hora</th>
+                    </tr>
+                </thead>
+                <tbody id="contacts-table-body">
+                    <!-- Dados serão preenchidos via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="admin-functions">
+            <div class="function-card" onclick="window.location.href='users.html'">
+                <div class="function-icon">
+                    <i class="fas fa-users-cog"></i>
+                </div>
+                <div class="function-title">Gerenciar Usuários</div>
+                <div class="function-description">
+                    Adicione, remova ou modifique as permissões dos usuários do sistema.
+                    Controle quem tem acesso administrativo.
+                </div>
+            </div>
+            <div class="function-card" onclick="window.location.href='dashboard.html'">
+                <div class="function-icon">
+                    <i class="fas fa-address-book"></i>
+                </div>
+                <div class="function-title">Gerenciar Contatos</div>
+                <div class="function-description">
+                    Visualize e gerencie todos os contatos do sistema.
+                    Acesso completo a todos os registros.
+                </div>
+            </div>
+            <div class="function-card" id="export-data">
+                <div class="function-icon">
+                    <i class="fas fa-file-export"></i>
+                </div>
+                <div class="function-title">Exportar Dados</div>
+                <div class="function-description">
+                    Exporte dados do sistema para análise.
+                    Relatórios detalhados de usuários e contatos.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification">
+        <span id="notification-message"></span>
+    </div>
+
+    <script>
+        // Função para mostrar notificação
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            const notificationMessage = document.getElementById('notification-message');
+            
+            notification.className = 'notification ' + (isError ? 'error' : 'success');
+            notificationMessage.textContent = message;
+            
+            // Remove show class if it exists
+            notification.classList.remove('show');
+            
+            // Force reflow
+            void notification.offsetWidth;
+            
+            // Add show class and display
+            notification.style.display = 'flex';
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+
+            // Hide notification after delay
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 300);
+            }, 3000);
+        }
+
+        // Carregar estatísticas
+        async function loadStats() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const response = await fetch('/api/admin/stats', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.message || 'Falha ao carregar estatísticas');
+                }
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Falha ao carregar estatísticas');
+                }
+
+                // Atualiza os números
+                document.getElementById('total-users').textContent = data.totalUsers;
+                document.getElementById('total-contacts').textContent = data.totalContacts;
+                document.getElementById('contacts-today').textContent = data.contactsToday;
+
+                // Atualiza o gráfico
+                const ctx = document.getElementById('contacts-chart').getContext('2d');
+                const chartLabels = data.chartData.labels;
+                const chartData = data.chartData.data;
+                const chartColors = Array(data.chartData.data.length).fill('#4CAF50');
+                
+                createChart(ctx, chartLabels, chartData, chartColors);
+
+                // Carrega e exibe os últimos contatos
+                await loadRecentContacts();
+
+                showNotification('✅ Estatísticas carregadas com sucesso!');
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+                showNotification('❌ ' + (error.message || 'Erro ao carregar estatísticas'), true);
+            }
+        }
+
+        // Modifica as opções do gráfico para melhor visualização em mobile
+        function createChart(ctx, labels, data, colors) {
+            const isMobile = window.innerWidth <= 768;
+
+            return new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: 'white',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: isMobile ? 'bottom' : 'right',
+                            labels: {
+                                font: {
+                                    family: 'Poppins',
+                                    size: isMobile ? 11 : 12
+                                },
+                                padding: isMobile ? 10 : 20,
+                                boxWidth: isMobile ? 15 : 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value} contatos (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Atualiza o gráfico quando a orientação do dispositivo muda
+        window.addEventListener('resize', debounce(() => {
+            if (window.contactsChart) {
+                const ctx = document.getElementById('contacts-chart').getContext('2d');
+                window.contactsChart.destroy();
+                createChart(ctx, chartLabels, chartData, chartColors);
+            }
+        }, 250));
+
+        // Função para debounce do resize
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Carrega e exibe os últimos contatos
+        async function loadRecentContacts() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/admin/recent-contacts', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Falha ao carregar contatos recentes');
+                }
+
+                const contacts = await response.json();
+                const tableBody = document.getElementById('contacts-table-body');
+                tableBody.innerHTML = '';
+
+                contacts.forEach(contact => {
+                    const row = document.createElement('tr');
+                    const timestamp = new Date(contact.timestamp);
+                    const formattedDate = timestamp.toLocaleDateString('pt-BR');
+                    const formattedTime = timestamp.toLocaleTimeString('pt-BR');
+
+                    row.innerHTML = `
+                        <td>${contact.name}</td>
+                        <td>${contact.email}</td>
+                        <td>${contact.phone}</td>
+                        <td class="timestamp">${formattedDate} ${formattedTime}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar contatos recentes:', error);
+            }
+        }
+
+        // Função para enviar mensagem WhatsApp
+        async function sendWhatsAppMessage(phone, name, contactId) {
+            try {
+                const cleanPhone = phone.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
+                
+                // Determina a saudação com base na hora
+                const hora = new Date().getHours();
+                let saudacao;
+                if (hora >= 5 && hora < 12) {
+                    saudacao = "Bom dia";
+                } else if (hora >= 12 && hora < 18) {
+                    saudacao = "Boa tarde";
+                } else {
+                    saudacao = "Boa noite";
+                }
+
+                const message = `${saudacao}, ${name}! Graça e Paz do Senhor Jesus!\n\n` +
+                    "Seja muito bem-vindo(a) à Igreja Batista Solidária! A Juventude da Igreja Batista Solidária (JIBS) também celebra a sua chegada e se alegra em recebê-lo(a). " +
+                    "É uma honra tê-lo(a) conosco e agradecemos por compartilhar seu contato.\n\n" +
+                    "Que este momento seja especial em sua vida e que você se sinta acolhido(a) e abençoado(a) por Deus. " +
+                    "Estamos aqui para caminhar ao seu lado e auxiliar no que for preciso.\n\n" +
+                    "Que o Senhor renove sua paz, sua alegria e sua esperança hoje e sempre!\n\n" +
+                    "Com carinho,\nJuventude da Igreja Batista Solidária (JIBS) e Igreja Batista Solidária";
+                
+                const response = await fetch('/api/send-whatsapp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        phone: cleanPhone,
+                        message: message,
+                        contactId: contactId
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('✅ Mensagem enviada com sucesso!');
+                    // Recarrega a lista de contatos para atualizar o status
+                    await loadContacts();
+                } else if (data.message === 'Mensagem já enviada') {
+                    showNotification('⚠️ Mensagem já foi enviada anteriormente. Não é recomendado reenviar.', true);
+                } else {
+                    showNotification('❌ ' + (data.message || 'Erro ao enviar mensagem'), true);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                showNotification('❌ Erro ao enviar mensagem', true);
+            }
+        }
+
+        // Verificar autenticação
+        window.addEventListener('load', async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.replace('login.html');
+                return;
+            }
+
+            // Carregar estatísticas
+            await loadStats();
+        });
+
+        // Função de logout
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.replace('login.html');
+        }
+    </script>
+</body>
+</html>

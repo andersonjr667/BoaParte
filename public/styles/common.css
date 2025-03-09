@@ -1,0 +1,228 @@
+:root {
+    --primary-color: #4CAF50;
+    --primary-color-light: #E8F5E9;
+    --danger-color: #f44336;
+    --danger-color-light: #ffebee;
+    --white: #ffffff;
+    --bg-color: #f5f5f5;
+    --border-color: #e0e0e0;
+    --box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    --box-shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --border-radius: 10px;
+    --border-radius-sm: 5px;
+}
+
+/* Estilos comuns para todas as páginas */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    display: inline-block;
+    text-align: center;
+    width: auto;
+}
+
+.btn-primary {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #45a049;
+}
+
+.btn-danger {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #da190b;
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 5px;
+    color: white;
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.notification.success {
+    background-color: #4CAF50;
+}
+
+.notification.error {
+    background-color: #f44336;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Estilos para tabelas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* Formulários */
+.form-group {
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #4CAF50;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+/* Header */
+.header {
+    background: white;
+    padding: 15px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+    }
+
+    .form-control {
+        font-size: 16px;
+        padding: 12px;
+    }
+
+    .header-content {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .notification {
+        width: 90%;
+        left: 5%;
+        right: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .card {
+        margin: 10px 0;
+    }
+
+    .notification {
+        width: 100%;
+        left: 0;
+        right: 0;
+        border-radius: 0;
+    }
+}

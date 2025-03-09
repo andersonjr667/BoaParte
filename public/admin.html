@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoaParte - Painel Administrativo</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="styles/shared.css">
+</head>
+<body>
+    <div class="admin-dashboard">
+        <header class="admin-header">
+            <h1>Painel Administrativo BoaParte</h1>
+            <div class="admin-user-info">
+                <span id="admin-username"></span>
+                <button onclick="logout()" class="logout-btn">Sair</button>
+            </div>
+        </header>
+
+        <nav class="admin-nav">
+            <button class="nav-btn active" onclick="showSection('users')">Usuários</button>
+            <button class="nav-btn" onclick="showSection('stats')">Estatísticas</button>
+            <button class="nav-btn" onclick="showSection('logs')">Logs do Sistema</button>
+            <button class="nav-btn" onclick="window.location.href='dashboard.html'">Voltar ao Dashboard</button>
+        </nav>
+
+        <main class="admin-content">
+            <!-- Seção de Usuários -->
+            <section id="users-section" class="admin-section">
+                <h2>Gerenciamento de Usuários</h2>
+                <div class="users-list" id="users-list"></div>
+            </section>
+
+            <!-- Seção de Estatísticas -->
+            <section id="stats-section" class="admin-section" style="display: none;">
+                <h2>Estatísticas do Sistema</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total de Usuários</h3>
+                        <p id="total-users">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total de Contatos</h3>
+                        <p id="total-contacts">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Contatos Hoje</h3>
+                        <p id="today-contacts">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Usuários Ativos</h3>
+                        <p id="active-users">0</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção de Logs -->
+            <section id="logs-section" class="admin-section" style="display: none;">
+                <h2>Logs do Sistema</h2>
+                <div class="logs-container" id="system-logs">
+                    <div class="log-filters">
+                        <select id="log-type">
+                            <option value="all">Todos os Logs</option>
+                            <option value="user">Logs de Usuário</option>
+                            <option value="system">Logs do Sistema</option>
+                            <option value="error">Logs de Erro</option>
+                        </select>
+                        <input type="date" id="log-date" />
+                    </div>
+                    <div class="logs-list" id="logs-list"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Verificação de Admin
+        document.addEventListener('DOMContentLoaded', async () => {
+            const username = localStorage.getItem('username');
+            const token = localStorage.getItem('token');
+
+            if (!username || !token || username !== 'Anderson') {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            document.getElementById('admin-username').textContent = `Administrador: ${username}`;
+            loadInitialData();
+        });
+
+        // Funções de navegação
+        function showSection(sectionName) {
+            document.querySelectorAll('.admin-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(`${sectionName}-section`).style.display = 'block';
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            loadSectionData(sectionName);
+        }
+
+        // Carregar dados iniciais
+        async function loadInitialData() {
+            await loadUsers();
+            await loadStats();
+            await loadLogs();
+        }
+
+        // Gerenciamento de Usuários
+        async function loadUsers() {
+            try {
+                const response = await fetch('/admin/users', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message);
+
+                const usersList = document.getElementById('users-list');
+                usersList.innerHTML = data.users.map(user => `
+                    <div class="user-card">
+                        <div class="user-info">
+                            <h3>${user.username}</h3>
+                            <p>Criado em: ${new Date(user.createdAt).toLocaleDateString()}</p>
+                        </div>
+                        ${user.username !== 'Anderson' ? `
+                            <div class="user-actions">
+                                <button onclick="deleteUser('${user.username}')" class="delete-btn">
+                                    <i class="fas fa-trash"></i> Deletar
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        }
+
+        // Estatísticas
+        async function loadStats() {
+            try {
+                const response = await fetch('/admin/stats', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message);
+
+                document.getElementById('total-users').textContent = data.totalUsers;
+                document.getElementById('total-contacts').textContent = data.totalContacts;
+                document.getElementById('today-contacts').textContent = data.todayContacts;
+                document.getElementById('active-users').textContent = data.activeUsers;
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        }
+
+        // Logs do Sistema
+        async function loadLogs() {
+            try {
+                const type = document.getElementById('log-type').value;
+                const date = document.getElementById('log-date').value;
+
+                const response = await fetch(`/admin/logs?type=${type}&date=${date}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message);
+
+                const logsList = document.getElementById('logs-list');
+                logsList.innerHTML = data.logs.map(log => `
+                    <div class="log-entry ${log.type}">
+                        <span class="log-time">${new Date(log.timestamp).toLocaleString()}</span>
+                        <span class="log-type">${log.type}</span>
+                        <span class="log-message">${log.message}</span>
+                    </div>
+                `).join('');
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        }
+
+        // Função de logout
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            window.location.href = 'index.html';
+        }
+
+        // Notificações
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Event Listeners
+        document.getElementById('log-type').addEventListener('change', loadLogs);
+        document.getElementById('log-date').addEventListener('change', loadLogs);
+    </script>
+</body>
+</html>
