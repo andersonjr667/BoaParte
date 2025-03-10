@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles/shared.css">
-    <title>BoaParte - Redirecionando...</title>
+    <meta name="description" content="BoaParte - Página de redirecionamento para login">
+    <title>BoaParte - Página de Redirecionamento</title>
     <style>
         body {
             margin: 0;
@@ -60,19 +61,21 @@
     </div>
 
     <script>
-        function authenticateUser() {
-            const token = localStorage.getItem('token');
-            if (!token || token === '') {
-                console.log('Token não encontrado, redirecionando para login.');
+        function redirectToLogin() {
+            console.log('Redirecionando para login...');
+            setTimeout(() => {
+                console.log('Redirecionando agora...');
                 window.location.href = 'login.html';
-                return;
-            }
-            // Aqui você pode adicionar lógica para validar o token, se necessário
-            console.log('Token encontrado:', token);
+            }, 2000); // Adiciona um atraso de 2 segundos antes de redirecionar
         }
 
-        // Chamar a função de autenticação ao carregar a página
-        window.addEventListener('load', authenticateUser);
+        // Chamar a função de redirecionamento ao carregar a página
+        window.addEventListener('load', redirectToLogin);
+
+        // Adicionar um listener para capturar erros de JavaScript
+        window.addEventListener('error', function(event) {
+            console.error('Erro capturado:', event.message);
+        });
     </script>
 </body>
 </html>

@@ -60,6 +60,15 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+// Ensure the uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir);
+}
+
+// Serve static files from the uploads directory
+app.use('/uploads', express.static(uploadsDir));
+
 // Lista de tokens inválidos
 let invalidTokens = new Set();
 
@@ -526,7 +535,7 @@ app.put("/api/contacts/:id", async (req, res) => {
 });
 
 // Rota para deletar contato
-app.delete("/api/contacts/:id", async (req, res) => {
+app.delete("/api/contacts/:id", authenticateToken, async (req, res) => {
     try {
         const contactId = req.params.id;
         const contact = await Contact.findById(contactId);
@@ -1013,6 +1022,11 @@ app.post('/api/members', upload.single('photo'), async (req, res) => {
             memberData.birthday = new Date(req.body.birthday);
         }
 
+        // Add photo if it's provided
+        if (req.file) {
+            memberData.photo = `/uploads/${req.file.filename}`;
+        }
+
         const member = new Member(memberData);
         await member.save();
 
@@ -1051,11 +1065,11 @@ app.put('/api/members/:id', upload.single('photo'), async (req, res) => {
     try {
         const memberId = req.params.id;
         const { name, phone, birthday } = req.body;
-        const photo = req.file ? req.file.filename : null;
+        const photo = req.file ? `/uploads/${req.file.filename}` : null;
 
         if (!name || !phone) {
             return res.status(400).json({ success: false, message: 'Nome e telefone são obrigatórios' });
-        }
+        }   
 
         const member = await Member.findById(memberId);
         if (!member) {
@@ -1219,10 +1233,20 @@ let sock;
 const MAX_RETRIES = 5;
 let retries = 0;
 
+// Load state from auth_info.json if it exists
+if (fs.existsSync(authPath)) {
+    state = JSON.parse(fs.readFileSync(authPath, 'utf-8'));
+}
+
 async function connectToWhatsApp() {
     const { makeWASocket } = require('@whiskeysockets/baileys');
 
     try {
+        // Ensure state is not null
+        if (!state) {
+            state = {};
+        }
+
         sock = makeWASocket({
             logger: P({ level: 'info' }),
             printQRInTerminal: true,

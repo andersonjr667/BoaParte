@@ -886,7 +886,7 @@
         // Função para verificar se o token é válido
         function checkAndRedirect(response) {
             if (response.status === 401 || response.status === 403) {
-                localStorage.removeItem('');
+                localStorage.removeItem('token');
                 window.location.href = 'login.html';
                 return false;
             }
