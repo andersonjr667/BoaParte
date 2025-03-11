@@ -11,23 +11,91 @@ const P = require('pino');
 const fs = require('fs');
 const multer = require('multer');
 
-// Adicione no início do server.js, após as importações
+// WhatsApp initialization constants and state
 const authPath = './auth_info.json';
+const AUTH_FOLDER = path.join(__dirname, 'auth');
+const AUTH_FILE = path.join(AUTH_FOLDER, 'auth_info.json');
+const MAX_RETRIES = 5;
 
-// Verifica se o arquivo de autenticação existe
-if (!fs.existsSync(authPath)) {
-    fs.writeFileSync(authPath, JSON.stringify({}));
-    console.log('Arquivo de autenticação criado');
-}
+let sock;
+let retries = 0;
+let state = {
+    creds: {
+        me: {},
+        registered: false
+    },
+    keys: {}
+};
 
-// Função para salvar o estado
-const saveState = async (state) => {
+// Save state function
+const saveState = async () => {
     try {
-        fs.writeFileSync(authPath, JSON.stringify(state, null, 2));
-    } catch (error) {
-        console.error('Erro ao salvar estado:', error);
+        fs.writeFileSync(AUTH_FILE, JSON.stringify(state, null, 2));
+    } catch (err) {
+        console.error('Error saving auth:', err);
     }
 };
+
+// Initialize auth
+async function initAuth() {
+    try {
+        if (!fs.existsSync(AUTH_FOLDER)) {
+            await mkdir(AUTH_FOLDER);
+        }
+        
+        if (fs.existsSync(AUTH_FILE)) {
+            state = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8'));
+        }
+    } catch (err) {
+        console.error('Error initializing auth:', err);
+    }
+}
+
+// WhatsApp connection function
+async function connectToWhatsApp() {
+    const { makeWASocket, DisconnectReason } = require('@whiskeysockets/baileys');
+    
+    try {
+        await initAuth();
+
+        sock = makeWASocket({
+            printQRInTerminal: true,
+            auth: state,
+            browser: ['Boa Parte', 'Chrome', '1.0.0']
+        });
+
+        sock.ev.on('connection.update', async (update) => {
+            const { connection, lastDisconnect } = update;
+            
+            if (connection === 'close') {
+                const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
+                
+                if (shouldReconnect && retries < MAX_RETRIES) {
+                    retries++;
+                    console.log(`INFO: Tentando reconectar... Tentativa ${retries}`);
+                    await connectToWhatsApp();
+                } else {
+                    console.log('INFO: Não foi possível reconectar. Verifique as credenciais e tente novamente.');
+                }
+            } else if (connection === 'open') {
+                retries = 0;
+                console.log('INFO: Conexão estabelecida com sucesso!');
+            }
+        });
+
+        sock.ev.on('creds.update', saveState);
+        
+        return sock;
+    } catch (err) {
+        console.error('Error in WhatsApp connection:', err);
+        throw err;
+    }
+}
+
+// Initialize WhatsApp connection
+connectToWhatsApp().catch(err => {
+    console.error('Failed to start WhatsApp client:', err);
+});
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -38,7 +106,6 @@ const TOKEN_EXPIRATION = '7d'; // Aumentado para 7 dias
 
 let whatsappClient = null;
 let isInitializing = false;
-let state = null;
 
 // Add this at the top of your script
 const API_BASE_URL = '/api'; // Change this to match your API URL
@@ -1228,125 +1295,6 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });
-
-let sock;
-const MAX_RETRIES = 5;
-let retries = 0;
-
-// Load state from auth_info.json if it exists
-if (fs.existsSync(authPath)) {
-    state = JSON.parse(fs.readFileSync(authPath, 'utf-8'));
-}
-
-async function connectToWhatsApp() {
-    const { makeWASocket } = require('@whiskeysockets/baileys');
-
-    try {
-        // Ensure state is not null
-        if (!state) {
-            state = {};
-        }
-
-        sock = makeWASocket({
-            logger: P({ level: 'info' }),
-            printQRInTerminal: true,
-            auth: state
-        });
-
-        sock.ev.on('connection.update', async (update) => {
-            const { connection, lastDisconnect } = update;
-            if (connection === 'close') {
-                const shouldReconnect = (lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut;
-                if (shouldReconnect && retries < MAX_RETRIES) {
-                    retries++;
-                    console.log(`INFO: Tentando reconectar... Tentativa ${retries}`);
-                    await connectToWhatsApp();
-                } else {
-                    console.log('INFO: Não foi possível reconectar. Verifique as credenciais e tente novamente.');
-                }
-            } else if (connection === 'open') {
-                retries = 0;
-                console.log('INFO: Conexão estabelecida com sucesso!');
-            }
-        });
-
-        sock.ev.on('creds.update', saveState);
-    } catch (error) {
-        console.error('Erro ao conectar:', error);
-    }
-}
-
-// Rota para buscar todos os contatos (mantenha esta parte)
-app.get('/api/contacts/', async (req, res) => {
-    try {
-        let contacts;
-
-        // Se for admin, busca todos os contatos
-        if (req.user.role === 'admin') {
-            contacts = await Contact.find().sort({ createdAt: -1 });
-        } else {
-            // Se não for admin, busca apenas os contatos do usuário
-            contacts = await Contact.find({
-                username: req.user.username
-            }).sort({ createdAt: -1 });
-        }
-
-        res.json({
-            success: true,
-            contacts: contacts.map(contact => ({
-                _id: contact._id,
-                name: contact.name,
-                phone: contact.phone,
-                birthday: contact.birthday,
-                createdAt: contact.createdAt,
-                owner: contact.owner || contact.username,
-                username: contact.username,
-                messageResent: contact.receivedMessage || false
-            }))
-        });
-    } catch (error) {
-        console.error('Erro ao buscar contatos:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Erro ao buscar contatos',
-            error: error.message
-        });
-    }
-});
-
-// Rota para obter todos os contatos
-app.get('/api/contacts/', async (req, res) => {
-    try {
-        const contacts = await Contact.find();
-        res.json({ success: true, contacts });
-    } catch (error) {
-        console.error('Erro ao obter contatos:', error);
-        res.status(500).json({ success: false, message: 'Erro ao obter contatos' });
-    }
-});
-
-// Rota para enviar mensagem WhatsApp
-app.post('/api/send-whatsapp', async (req, res) => {
-    try {
-        const { phone, message, contactId } = req.body;
-        if (!whatsappClient) {
-            return res.status(500).json({ success: false, message: 'WhatsApp client not initialized' });
-        }
-
-        await whatsappClient.sendMessage(phone, message);
-
-        // Update contact to mark message as sent
-        await Contact.findByIdAndUpdate(contactId, { messageResent: true });
-
-        res.json({ success: true });
-    } catch (error) {
-        console.error('Erro ao enviar mensagem WhatsApp:', error);
-        res.status(500).json({ success: false, message: 'Erro ao enviar mensagem WhatsApp' });
-    }
-});
-
-// Mantenha apenas a conexão do WhatsApp no final do arquivo
-connectToWhatsApp().catch(err => console.error('Erro ao conectar:', err));
 
 // Modifique a rota de validação de token
 app.get('/api/auth/validate-token', (req, res) => {
