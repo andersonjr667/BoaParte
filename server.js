@@ -11,6 +11,8 @@ const P = require('pino');
 const fs = require('fs');
 const multer = require('multer');
 
+const whatsapp = require('./whatsapp');
+
 // WhatsApp initialization constants and state
 const authPath = './auth_info.json';
 const AUTH_FOLDER = path.join(__dirname, 'auth');
@@ -1035,24 +1037,37 @@ app.post('/api/send-whatsapp', async (req, res) => {
         const { phone, message, contactId } = req.body;
 
         if (!phone || !message || !contactId) {
-            return res.status(400).json({ success: false, message: 'Parâmetros inválidos' });
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Parâmetros inválidos' 
+            });
         }
 
-        // Ensure WhatsApp client is initialized and connected
-        if (!whatsappClient || !whatsappClient.isConnected) {
-            return res.status(500).json({ success: false, message: 'Cliente WhatsApp não está conectado' });
+        if (!whatsapp.isConnected) {
+            return res.status(503).json({ 
+                success: false, 
+                message: 'WhatsApp não está conectado',
+                shouldReconnect: true
+            });
         }
 
-        // Send message via WhatsApp
-        await whatsappClient.sendMessage(phone, { text: message });
+        // Log do número antes do envio
+        console.log('Número original:', phone);
 
-        // Update contact to mark message as sent
+        await whatsapp.sendMessage(phone, message);
         await Contact.findByIdAndUpdate(contactId, { receivedMessage: true });
 
-        res.json({ success: true });
+        res.json({ 
+            success: true,
+            message: 'Mensagem enviada com sucesso'
+        });
     } catch (error) {
-        console.error('Erro ao enviar mensagem WhatsApp:', error);
-        res.status(500).json({ success: false, message: 'Erro ao enviar mensagem WhatsApp' });
+        console.error('Erro ao enviar mensagem:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Erro ao enviar mensagem',
+            error: error.message
+        });
     }
 });
 
@@ -1265,6 +1280,12 @@ app.delete('/api/members/:id', async (req, res) => {
         console.error('Error deleting member:', error);
         res.status(500).json({ message: 'Erro ao excluir membro', error: error.message });
     }
+});
+
+// Add WhatsApp status endpoint
+app.get('/api/whatsapp/status', (req, res) => {
+    const status = whatsapp.getConnectionStatus();
+    res.json(status);
 });
 
 // Servir arquivos estáticos depois das rotas da API
