@@ -7,27 +7,811 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="styles/shared.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4CAF50;
+            --primary-dark: #2E7D32;
+            --primary-light: #E8F5E9;
+            --secondary-color: #2196F3;
+            --danger-color: #f44336;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --border-radius: 15px;
+            --transition: all 0.3s ease;
+        }
+
+        .admin-dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            padding: 2rem;
+            color: white;
+        }
+
+        .header-content {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            width: 90px;
+            height: 90px;
+            border: 4px solid white;
+            border-radius: 50%;
+            padding: 4px;
+            background: white;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .header-content h1 {
+            color: white;
+            font-size: 2rem;
+            margin: 0;
+            flex: 1;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: #E8F5E9;
+            color: #2E7D32;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #4CAF50;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .admin-nav {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .admin-nav button {
+            white-space: nowrap;
+        }
+
+        .nav-btn.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .admin-content {
+            padding: 2rem;
+        }
+
+        .admin-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .admin-section h2 {
+            color: #2E7D32;
+            margin-top: 0;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #E8F5E9;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .overview-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 2px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover .stat-icon {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .stat-info h3 {
+            margin: 0;
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .stat-info p {
+            margin: 0.5rem 0 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2E7D32;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chart-title {
+            color: var(--primary-dark);
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-light);
+        }
+
+        .logs-container {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .log-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .log-filters select,
+        .log-filters input {
+            padding: 0.8rem;
+            border: 1px solid #E8F5E9;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .log-entry {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            background: #4CAF50;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .notification.error {
+            background: #f44336;
+        }
+
+        @media (max-width: 1200px) {
+            .header-content {
+                grid-template-columns: auto 1fr;
+            }
+            
+            .header-buttons {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .admin-dashboard {
+                margin: 0.5rem;
+                border-radius: calc(var(--border-radius) / 2);
+            }
+
+            .header-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .logo {
+                margin: 0 auto;
+                width: 70px;
+                height: 70px;
+            }
+
+            .header-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .nav-btn {
+                width: 100%;
+            }
+
+            .admin-nav {
+                padding: 0.5rem;
+                gap: 0.5rem;
+            }
+
+            .admin-content {
+                padding: 1rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .stat-card i {
+                font-size: 2rem;
+                padding: 0.8rem;
+            }
+
+            .stat-info p {
+                font-size: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .chart-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .admin-header {
+                padding: 1rem;
+            }
+
+            .header-content h1 {
+                font-size: 1.5rem;
+            }
+
+            .admin-nav {
+                flex-wrap: wrap;
+            }
+
+            .nav-btn {
+                width: calc(50% - 0.5rem);
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+
+            .stat-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card {
+            animation: fadeIn 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-light: rgba(76, 175, 80, 0.2);
+                --gray-100: #2a2a2a;
+                --gray-200: #3a3a3a;
+                --gray-300: #4a4a4a;
+            }
+
+            body {
+                background: #1a1a1a;
+                color: #ffffff;
+            }
+
+            .admin-dashboard {
+                background: rgba(30, 30, 30, 0.98);
+            }
+
+            .stat-card {
+                background: #2a2a2a;
+                border-color: #3a3a3a;
+            }
+
+            .chart-container {
+                background: #2a2a2a;
+            }
+        }
+    </style>
+    <style>
+        :root {
+            /* Cores principais mais suaves e legíveis */
+            --primary-dark: #1b5e20;
+            --primary-main: #2e7d32;
+            --primary-light: #4caf50;
+            --primary-bg: #e8f5e9;
+            
+            /* Cores de texto mais legíveis */
+            --text-primary: #1a1a1a;
+            --text-secondary: #424242;
+            --text-light: #757575;
+            
+            /* Cores de status */
+            --success: #2e7d32;
+            --warning: #f57c00;
+            --error: #d32f2f;
+            --info: #1976d2;
+            
+            /* Cores de fundo */
+            --bg-main: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-hover: #fafafa;
+            
+            /* Cores de borda */
+            --border-light: #e0e0e0;
+            --border-dark: #bdbdbd;
+        }
+
+        body {
+            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+        }
+
+        .admin-dashboard {
+            background: var(--bg-main);
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary-main) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .nav-btn {
+            background: var(--primary-bg);
+            color: var(--primary-dark);
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-main);
+            color: white;
+        }
+
+        .nav-btn.active {
+            background: var(--primary-main);
+            color: white;
+        }
+
+        .stat-card {
+            background: var(--bg-main);
+            border: 1px solid var(--border-light);
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary-main);
+        }
+
+        .stat-icon {
+            background: var(--primary-bg);
+            color: var(--primary-main);
+        }
+
+        .stat-info h3 {
+            color: var(--text-secondary);
+        }
+
+        .stat-info p {
+            color: var(--primary-dark);
+        }
+
+        .log-entry {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        .log-entry.error {
+            border-left: 4px solid var(--error);
+        }
+
+        .log-entry.warning {
+            border-left: 4px solid var(--warning);
+        }
+
+        .log-entry.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .notification {
+            background: var(--primary-main);
+        }
+
+        .notification.error {
+            background: var(--error);
+        }
+
+        /* Dark mode adjustments */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --text-primary: #ffffff;
+                --text-secondary: #e0e0e0;
+                --text-light: #bdbdbd;
+                --bg-main: #1a1a1a;
+                --bg-secondary: #2d2d2d;
+                --bg-hover: #333333;
+                --border-light: #424242;
+                --border-dark: #616161;
+                --primary-bg: rgba(76, 175, 80, 0.15);
+            }
+
+            .stat-card {
+                background: var(--bg-secondary);
+            }
+
+            .admin-dashboard {
+                background: var(--bg-main);
+            }
+
+            .log-entry {
+                background: var(--bg-secondary);
+                color: var(--text-secondary);
+            }
+        }
+    </style>
+    <!-- Adicione este CSS na seção de estilos -->
+    <style>
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
+        }
+
+        .user-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--border-light);
+        }
+
+        .user-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary-dark);
+        }
+
+        .user-info h3 {
+            margin: 0;
+            color: var(--primary-dark);
+            font-size: 1.2rem;
+        }
+
+        .user-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: var(--primary-light);
+            border-radius: var(--border-radius);
+        }
+
+        .stat-item .value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-dark);
+        }
+
+        .stat-item .label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .role-btn {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        .role-btn:hover {
+            background: var(--primary-main);
+            color: white;
+        }
+
+        .delete-btn {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .delete-btn:hover {
+            background: #d32f2f;
+            color: white;
+        }
+
+        .user-status {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-inactive {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+    </style>
+    <style>
+    :root {
+        --primary-color: #4CAF50;
+        --primary-dark: #2E7D32;
+        --primary-light: #E8F5E9;
+        --bg-main: #ffffff;
+        --text-primary: #333333;
+        --text-secondary: #666666;
+        --border-color: #e0e0e0;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+        background: linear-gradient(135deg, var(--primary-light) 0%, #ffffff 100%);
+    }
+
+    .admin-dashboard {
+        background: var(--bg-main);
+    }
+
+    .admin-section {
+        background: var(--bg-main);
+        border: 1px solid var(--border-color);
+    }
+
+    .stat-card {
+        background: var(--bg-main);
+        border: 1px solid var(--border-color);
+    }
+
+    /* Remove dark mode styles */
+    @media (prefers-color-scheme: dark) {
+        /* Remove or comment out dark mode overrides */
+    }
+</style>
 </head>
 <body>
     <div class="admin-dashboard">
         <header class="admin-header">
-            <h1>Painel Administrativo BoaParte</h1>
+            <div class="header-content">
+                <img src="images/image2.png" alt="Logo JIBS" class="logo">
+                <h1>Painel Administrativo JIBS</h1>
+            </div>
             <div class="admin-user-info">
                 <span id="admin-username"></span>
-                <button onclick="logout()" class="logout-btn">Sair</button>
+                <div class="header-buttons">
+                    <button onclick="window.location.href='dashboard.html'" class="nav-btn">
+                        <i class="fas fa-home"></i> Dashboard
+                    </button>
+                    <button onclick="logout()" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                </div>
             </div>
         </header>
 
         <nav class="admin-nav">
-            <button class="nav-btn active" onclick="showSection('users')">Usuários</button>
-            <button class="nav-btn" onclick="showSection('stats')">Estatísticas</button>
-            <button class="nav-btn" onclick="showSection('logs')">Logs do Sistema</button>
-            <button class="nav-btn" onclick="window.location.href='dashboard.html'">Voltar ao Dashboard</button>
+            <button class="nav-btn active" onclick="showSection('overview')">
+                <i class="fas fa-chart-bar"></i> Visão Geral
+            </button>
+            <button class="nav-btn" onclick="showSection('users')">
+                <i class="fas fa-users"></i> Usuários
+            </button>
+            <button class="nav-btn" onclick="showSection('stats')">
+                <i class="fas fa-chart-line"></i> Estatísticas
+            </button>
+            <button class="nav-btn" onclick="showSection('logs')">
+                <i class="fas fa-history"></i> Logs
+            </button>
+            <button class="nav-btn" onclick="showSection('members')">
+                <i class="fas fa-users"></i> Membros
+            </button>
+            <button class="nav-btn" onclick="showSection('messages')">
+                <i class="fas fa-envelope"></i> Mensagens
+            </button>
+            <button class="nav-btn" onclick="showSection('notifications')">
+                <i class="fas fa-bell"></i> Notificações
+            </button>
         </nav>
 
         <main class="admin-content">
+            <!-- Seção de Visão Geral -->
+            <section id="overview-section" class="admin-section">
+                <h2>Visão Geral do Sistema</h2>
+                <div class="overview-cards">
+                    <div class="stat-card total-users">
+                        <i class="fas fa-users stat-icon"></i>
+                        <div class="stat-info">
+                            <h3>Total de Usuários</h3>
+                            <p id="total-users">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card total-contacts">
+                        <i class="fas fa-address-book stat-icon"></i>
+                        <div class="stat-info">
+                            <h3>Total de Contatos</h3>
+                            <p id="total-contacts">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card today-contacts">
+                        <i class="fas fa-calendar-day stat-icon"></i>
+                        <div class="stat-info">
+                            <h3>Contatos Hoje</h3>
+                            <p id="today-contacts">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card active-users">
+                        <i class="fas fa-user-check stat-icon"></i>
+                        <div class="stat-info">
+                            <h3>Usuários Ativos</h3>
+                            <p id="active-users">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="activity-chart"></canvas>
+                </div>
+            </section>
+
             <!-- Seção de Usuários -->
-            <section id="users-section" class="admin-section">
+            <section id="users-section" class="admin-section" style="display: none;">
                 <h2>Gerenciamento de Usuários</h2>
                 <div class="users-list" id="users-list"></div>
             </section>
@@ -71,6 +855,80 @@
                     <div class="logs-list" id="logs-list"></div>
                 </div>
             </section>
+
+            <!-- Seção de Membros -->
+            <section id="members-section" class="admin-section" style="display: none;">
+                <h2>Gerenciamento de Membros</h2>
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="showAddMemberModal()">
+                        <i class="fas fa-plus"></i> Adicionar Membro
+                    </button>
+                </div>
+                <div id="members-list" class="members-grid">
+                    <!-- Membros serão carregados aqui -->
+                </div>
+            </section>
+
+            <!-- Seção de Mensagens -->
+            <section id="messages-section" class="admin-section" style="display: none;">
+                <h2>Controle de Mensagens</h2>
+                <div class="controls">
+                    <div class="filter-group">
+                        <select id="week-filter">
+                            <option value="all">Todas as Semanas</option>
+                            <option value="1">Semana 1</option>
+                            <option value="2">Semana 2</option>
+                            <option value="3">Semana 3</option>
+                            <option value="4">Semana 4</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="filterMessages()">
+                            <i class="fas fa-filter"></i> Filtrar
+                        </button>
+                    </div>
+                    <button class="btn btn-primary" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i> Exportar Excel
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Telefone</th>
+                                <th>Data de Cadastro</th>
+                                <th>Status Mensagens</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="messages-table">
+                            <!-- Mensagens serão carregadas aqui -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Adicione estas novas seções -->
+            <section id="notifications-section" class="admin-section" style="display: none;">
+                <h2>Central de Notificações</h2>
+                <div class="notifications-list" id="notifications-list">
+                    <!-- Notificações serão carregadas aqui -->
+                </div>
+            </section>
+
+            <div id="loading-overlay" class="loading-overlay">
+                <div class="spinner"></div>
+                <p>Carregando...</p>
+            </div>
+
+            <div id="success-toast" class="toast success">
+                <i class="fas fa-check-circle"></i>
+                <span id="success-message"></span>
+            </div>
+
+            <div id="error-toast" class="toast error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="error-message"></span>
+            </div>
         </main>
     </div>
 
@@ -113,85 +971,165 @@
             await loadLogs();
         }
 
-        // Gerenciamento de Usuários
-        async function loadUsers() {
+        // Função para carregar dados de uma seção específica
+        async function loadSectionData(sectionName) {
+            showLoading();
             try {
-                const response = await fetch('/admin/users', {
+                switch(sectionName) {
+                    case 'overview':
+                        await loadStats();
+                        break;
+                    case 'users':
+                        await loadUsers();
+                        break;
+                    case 'logs':
+                        await loadLogs();
+                        break;
+                    case 'members':
+                        loadMembers();
+                        break;
+                    case 'messages':
+                        loadMessages();
+                        break;
+                    case 'notifications':
+                        await loadNotifications();
+                        break;
+                }
+                showToast(`Dados de ${sectionName} carregados com sucesso`);
+            } catch (error) {
+                console.error(`Erro ao carregar ${sectionName}:`, error);
+                showToast(`Erro ao carregar ${sectionName}: ${error.message}`, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Função para carregar estatísticas
+        async function loadStats() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/admin/stats', {
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message);
+                if (!response.ok) throw new Error('Falha ao carregar estatísticas');
 
+                const data = await response.json();
+                
+                // Atualiza os números nas cards
+                document.getElementById('total-users').textContent = data.totalUsers;
+                document.getElementById('total-contacts').textContent = data.totalContacts;
+                document.getElementById('today-contacts').textContent = data.contactsToday;
+                document.getElementById('active-users').textContent = data.activeUsers;
+
+                // Cria o gráfico
+                createActivityChart(data.chartData);
+
+            } catch (error) {
+                showNotification('Erro ao carregar estatísticas: ' + error.message, 'error');
+            }
+        }
+
+        // Função para carregar usuários
+        async function loadUsers() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/admin/users', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Falha ao carregar usuários');
+
+                const data = await response.json();
                 const usersList = document.getElementById('users-list');
-                usersList.innerHTML = data.users.map(user => `
-                    <div class="user-card">
-                        <div class="user-info">
-                            <h3>${user.username}</h3>
-                            <p>Criado em: ${new Date(user.createdAt).toLocaleDateString()}</p>
+                usersList.innerHTML = '<div class="users-grid"></div>';
+                const usersGrid = usersList.querySelector('.users-grid');
+
+                data.users.forEach(user => {
+                    const userCard = document.createElement('div');
+                    userCard.className = 'user-card';
+                    userCard.innerHTML = `
+                        <div class="user-header">
+                            <div class="user-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="user-info">
+                                <h3>${user.username}</h3>
+                                <span class="user-status ${user.lastActive ? 'status-active' : 'status-inactive'}">
+                                    ${user.lastActive ? 'Ativo' : 'Inativo'}
+                                </span>
+                            </div>
                         </div>
-                        ${user.username !== 'Anderson' ? `
+                        <div class="user-stats">
+                            <div class="stat-item">
+                                <div class="value">${user.contactCount}</div>
+                                <div class="label">Contatos</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="value">${user.messageCount || 0}</div>
+                                <div class="label">Mensagens</div>
+                            </div>
+                        </div>
+                        <div class="user-meta">
+                            <p><i class="fas fa-calendar"></i> Criado em: ${new Date(user.createdAt).toLocaleDateString('pt-BR')}</p>
+                            ${user.lastActive ? 
+                                `<p><i class="fas fa-clock"></i> Última atividade: ${new Date(user.lastActive).toLocaleDateString('pt-BR')}</p>` : 
+                                '<p><i class="fas fa-exclamation-circle"></i> Sem atividade recente</p>'
+                            }
+                        </div>
+                        ${user.username !== 'anderson' ? `
                             <div class="user-actions">
-                                <button onclick="deleteUser('${user.username}')" class="delete-btn">
-                                    <i class="fas fa-trash"></i> Deletar
+                                <button onclick="changeRole('${user.username}')" class="action-btn role-btn">
+                                    <i class="fas fa-user-shield"></i> Alterar Papel
+                                </button>
+                                <button onclick="deleteUser('${user.username}')" class="action-btn delete-btn">
+                                    <i class="fas fa-trash"></i> Excluir
                                 </button>
                             </div>
                         ` : ''}
-                    </div>
-                `).join('');
-            } catch (error) {
-                showNotification(error.message, 'error');
-            }
-        }
-
-        // Estatísticas
-        async function loadStats() {
-            try {
-                const response = await fetch('/admin/stats', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
+                    `;
+                    usersGrid.appendChild(userCard);
                 });
-
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message);
-
-                document.getElementById('total-users').textContent = data.totalUsers;
-                document.getElementById('total-contacts').textContent = data.totalContacts;
-                document.getElementById('today-contacts').textContent = data.todayContacts;
-                document.getElementById('active-users').textContent = data.activeUsers;
             } catch (error) {
-                showNotification(error.message, 'error');
+                showNotification('Erro ao carregar usuários: ' + error.message, 'error');
             }
         }
 
-        // Logs do Sistema
+        // Função para carregar logs
         async function loadLogs() {
             try {
+                const token = localStorage.getItem('token');
                 const type = document.getElementById('log-type').value;
                 const date = document.getElementById('log-date').value;
 
                 const response = await fetch(`/admin/logs?type=${type}&date=${date}`, {
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message);
+                if (!response.ok) throw new Error('Falha ao carregar logs');
 
+                const data = await response.json();
                 const logsList = document.getElementById('logs-list');
-                logsList.innerHTML = data.logs.map(log => `
-                    <div class="log-entry ${log.type}">
-                        <span class="log-time">${new Date(log.timestamp).toLocaleString()}</span>
+                logsList.innerHTML = '';
+
+                data.logs.forEach(log => {
+                    const logEntry = document.createElement('div');
+                    logEntry.className = `log-entry ${log.type}`;
+                    logEntry.innerHTML = `
+                        <span class="log-time">${new Date(log.timestamp).toLocaleString('pt-BR')}</span>
                         <span class="log-type">${log.type}</span>
                         <span class="log-message">${log.message}</span>
-                    </div>
-                `).join('');
+                    `;
+                    logsList.appendChild(logEntry);
+                });
             } catch (error) {
-                showNotification(error.message, 'error');
+                showNotification('Erro ao carregar logs: ' + error.message, 'error');
             }
         }
 
@@ -217,6 +1155,282 @@
         // Event Listeners
         document.getElementById('log-type').addEventListener('change', loadLogs);
         document.getElementById('log-date').addEventListener('change', loadLogs);
+
+        // Adicione essa função para criar o gráfico de atividades
+        function createActivityChart(data) {
+            const ctx = document.getElementById('activity-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Atividades do Sistema',
+                        data: data.values,
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Adicione esta função para melhorar a interação com os cards
+        function initializeStatCards() {
+            const cards = document.querySelectorAll('.stat-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    const icon = card.querySelector('.stat-icon');
+                    icon.style.transform = 'scale(1.1) rotate(5deg)';
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    const icon = card.querySelector('.stat-icon');
+                    icon.style.transform = 'scale(1) rotate(0)';
+                });
+            });
+        }
+
+        // Chame a função quando a página carregar
+        document.addEventListener('DOMContentLoaded', initializeStatCards);
+
+        // Adicione suporte a gestos touch
+        let touchStartY = 0;
+        document.addEventListener('touchstart', e => {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchmove', e => {
+            const touchY = e.touches[0].clientY;
+            const diff = touchStartY - touchY;
+
+            if (diff > 50) {
+                // Scroll para baixo
+                window.scrollBy({ top: 100, behavior: 'smooth' });
+            } else if (diff < -50) {
+                // Scroll para cima
+                window.scrollBy({ top: -100, behavior: 'smooth' });
+            }
+        });
+
+        async function loadMembers() {
+            try {
+                const response = await fetch('/api/members', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Erro ao carregar membros');
+
+                const members = await response.json();
+                displayMembers(members);
+            } catch (error) {
+                showNotification('Erro ao carregar membros: ' + error.message, 'error');
+            }
+        }
+
+        async function loadMessages() {
+            try {
+                const response = await fetch('/api/contacts/table', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Erro ao carregar mensagens');
+
+                const data = await response.json();
+                displayMessages(data.contacts);
+            } catch (error) {
+                showNotification('Erro ao carregar mensagens: ' + error.message, 'error');
+            }
+        }
+
+        function displayMembers(members) {
+            const membersList = document.getElementById('members-list');
+            membersList.innerHTML = '';
+
+            members.forEach(member => {
+                const memberCard = document.createElement('div');
+                memberCard.className = 'member-card';
+                memberCard.innerHTML = `
+                    <h3>${member.name}</h3>
+                    <p><i class="fas fa-phone"></i> ${member.phone}</p>
+                    ${member.birthday ? `<p><i class="fas fa-birthday-cake"></i> ${new Date(member.birthday).toLocaleDateString()}</p>` : ''}
+                    <div class="member-actions">
+                        <button onclick="editMember('${member._id}')" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button onclick="deleteMember('${member._id}')" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Excluir
+                        </button>
+                    </div>
+                `;
+                membersList.appendChild(memberCard);
+            });
+        }
+
+        function displayMessages(messages) {
+            const messagesTable = document.getElementById('messages-table');
+            messagesTable.innerHTML = '';
+
+            if (!messages || messages.length === 0) {
+                messagesTable.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center">Nenhuma mensagem encontrada</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            messages.forEach(message => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${message.name}</td>
+                    <td>${message.phone}</td>
+                    <td>${new Date(message.createdAt).toLocaleDateString()}</td>
+                    <td>
+                        <div class="week-status">
+                            ${generateWeekBadges(message)}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            ${generateMessageButtons(message)}
+                        </div>
+                    </td>
+                `;
+                messagesTable.appendChild(row);
+            });
+        }
+
+        function generateWeekBadges(message) {
+            let badges = '';
+            for (let week = 1; week <= 4; week++) {
+                const status = message[`week${week}Sent`] ? 'sent' : 'pending';
+                badges += `
+                    <span class="week-badge week-${status}">
+                        S${week}: ${status === 'sent' ? 'Enviado' : 'Pendente'}
+                    </span>
+                `;
+            }
+            return badges;
+        }
+
+        function generateMessageButtons(message) {
+            let buttons = '';
+            for (let week = 1; week <= 4; week++) {
+                if (!message[`week${week}Sent`]) {
+                    buttons += `
+                        <button onclick="sendMessage('${message.id}', ${week})" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Semana ${week}
+                        </button>
+                    `;
+                }
+            }
+            return buttons || '<span class="status-sent">Todas mensagens enviadas</span>';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const weekFilter = document.getElementById('week-filter');
+            if (weekFilter) {
+                weekFilter.addEventListener('change', () => {
+                    filterMessages();
+                });
+            }
+        });
+
+        // Adicione estas funções de utilidade
+        function showLoading() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById(`${type}-toast`);
+            const messageEl = document.getElementById(`${type}-message`);
+            
+            messageEl.textContent = message;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Adicione esta nova função
+        async function loadNotifications() {
+            try {
+                const response = await fetch('/api/admin/notifications', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Erro ao carregar notificações');
+
+                const data = await response.json();
+                const notificationsList = document.getElementById('notifications-list');
+                notificationsList.innerHTML = '';
+
+                data.notifications.forEach(notification => {
+                    const notificationElement = document.createElement('div');
+                    notificationElement.className = `notification-item ${notification.type}`;
+                    notificationElement.innerHTML = `
+                        <div class="notification-header">
+                            <i class="fas ${getNotificationIcon(notification.type)}"></i>
+                            <span class="notification-time">${formatDate(notification.createdAt)}</span>
+                        </div>
+                        <div class="notification-content">
+                            <h4>${notification.title}</h4>
+                            <p>${notification.message}</p>
+                        </div>
+                    `;
+                    notificationsList.appendChild(notificationElement);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar notificações:', error);
+                throw error;
+            }
+        }
+
+        function getNotificationIcon(type) {
+            switch(type) {
+                case 'success': return 'fa-check-circle';
+                case 'warning': return 'fa-exclamation-triangle';
+                case 'error': return 'fa-exclamation-circle';
+                default: return 'fa-info-circle';
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
     </script>
 </body>
 </html>

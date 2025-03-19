@@ -428,6 +428,9 @@
         <!-- Container do Gráfico -->
         <div class="chart-container">
             <h3 class="chart-title">Distribuição de Contatos por Usuário</h3>
+            <select id="year-select" onchange="loadStats()">
+                <!-- Options will be populated dynamically -->
+            </select>
             <canvas id="contacts-chart"></canvas>
         </div>
 
@@ -437,9 +440,10 @@
                 <thead>
                     <tr>
                         <th>Nome</th>
-                        <th>Email</th>
                         <th>Telefone</th>
-                        <th>Data/Hora</th>
+                        <th>Data de Nascimento</th>
+                        <th>Adicionado por</th>
+                        <th>Data de Criação</th>
                     </tr>
                 </thead>
                 <tbody id="contacts-table-body">
@@ -469,7 +473,7 @@
                     Acesso completo a todos os registros.
                 </div>
             </div>
-            <div class="function-card" id="export-data">
+            <div class="function-card" id="export-data" onclick="exportData()">
                 <div class="function-icon">
                     <i class="fas fa-file-export"></i>
                 </div>
@@ -477,6 +481,35 @@
                 <div class="function-description">
                     Exporte dados do sistema para análise.
                     Relatórios detalhados de usuários e contatos.
+                </div>
+            </div>
+            <div class="function-card" onclick="exportToExcel('users')">
+                <div class="function-icon">
+                    <i class="fas fa-file-export"></i>
+                </div>
+                <div class="function-title">Exportar Usuários</div>
+                <div class="function-description">
+                    Baixar lista de usuários em formato Excel
+                </div>
+            </div>
+            
+            <div class="function-card" onclick="exportToExcel('members')">
+                <div class="function-icon">
+                    <i class="fas fa-file-export"></i>
+                </div>
+                <div class="function-title">Exportar Membros</div>
+                <div class="function-description">
+                    Baixar lista de membros em formato Excel
+                </div>
+            </div>
+            
+            <div class="function-card" onclick="exportToExcel('contacts')">
+                <div class="function-icon">
+                    <i class="fas fa-file-export"></i>
+                </div>
+                <div class="function-title">Exportar Visitantes</div>
+                <div class="function-description">
+                    Baixar lista de visitantes em formato Excel
                 </div>
             </div>
         </div>
@@ -516,6 +549,49 @@
             }, 3000);
         }
 
+        // Função para exportar dados
+        async function exportData() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/export-data', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao exportar dados');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'dados_exportados.csv';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+
+                showNotification('✅ Dados exportados com sucesso!');
+            } catch (error) {
+                console.error('Erro ao exportar dados:', error);
+                showNotification('❌ ' + (error.message || 'Erro ao exportar dados'), true);
+            }
+        }
+
+        // Função para carregar anos no dropdown
+        function populateYearSelect() {
+            const yearSelect = document.getElementById('year-select');
+            const currentYear = new Date().getFullYear();
+            for (let year = currentYear; year >= currentYear - 5; year--) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            }
+        }
+
         // Carregar estatísticas
         async function loadStats() {
             try {
@@ -525,7 +601,8 @@
                     return;
                 }
 
-                const response = await fetch('/api/admin/stats', {
+                const year = document.getElementById('year-select').value;
+                const response = await fetch(`/api/admin/stats?year=${year}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -570,40 +647,30 @@
             const isMobile = window.innerWidth <= 768;
 
             return new Chart(ctx, {
-                type: 'pie',
+                type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
+                        label: 'Contatos por Mês',
                         data: data,
-                        backgroundColor: colors,
-                        borderColor: 'white',
-                        borderWidth: 2
+                        backgroundColor: colors
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: isMobile ? 'bottom' : 'right',
-                            labels: {
-                                font: {
-                                    family: 'Poppins',
-                                    size: isMobile ? 11 : 12
-                                },
-                                padding: isMobile ? 10 : 20,
-                                boxWidth: isMobile ? 15 : 20
+                    maintainAspectRatio: !isMobile,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Número de Contatos'
                             }
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.raw;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = ((value / total) * 100).toFixed(1);
-                                    return `${label}: ${value} contatos (${percentage}%)`;
-                                }
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Meses'
                             }
                         }
                     }
@@ -637,31 +704,29 @@
         async function loadRecentContacts() {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('/api/admin/recent-contacts', {
+                const response = await fetch('/api/contacts', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
 
                 if (!response.ok) {
-                    throw new Error('Falha ao carregar contatos recentes');
+                    throw new Error('Erro ao carregar contatos recentes');
                 }
 
-                const contacts = await response.json();
+                const data = await response.json();
+                const contacts = data.contacts;
                 const tableBody = document.getElementById('contacts-table-body');
                 tableBody.innerHTML = '';
 
                 contacts.forEach(contact => {
                     const row = document.createElement('tr');
-                    const timestamp = new Date(contact.timestamp);
-                    const formattedDate = timestamp.toLocaleDateString('pt-BR');
-                    const formattedTime = timestamp.toLocaleTimeString('pt-BR');
-
                     row.innerHTML = `
                         <td>${contact.name}</td>
-                        <td>${contact.email}</td>
                         <td>${contact.phone}</td>
-                        <td class="timestamp">${formattedDate} ${formattedTime}</td>
+                        <td>${contact.birthday ? new Date(contact.birthday).toLocaleDateString('pt-BR') : 'N/A'}</td>
+                        <td>${contact.owner || 'N/A'}</td>
+                        <td>${new Date(contact.createdAt).toLocaleDateString('pt-BR')} ${new Date(contact.createdAt).toLocaleTimeString('pt-BR')}</td>
                     `;
                     tableBody.appendChild(row);
                 });
@@ -732,6 +797,9 @@
                 return;
             }
 
+            // Populate year select dropdown
+            populateYearSelect();
+
             // Carregar estatísticas
             await loadStats();
         });
@@ -740,6 +808,36 @@
         function logout() {
             localStorage.removeItem('token');
             window.location.replace('login.html');
+        }
+
+        async function exportToExcel(type) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/admin/export/${type}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao exportar dados');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${type}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+
+                showNotification('✅ Dados exportados com sucesso!');
+            } catch (error) {
+                console.error('Erro ao exportar dados:', error);
+                showNotification('❌ Erro ao exportar dados', true);
+            }
         }
     </script>
 </body>

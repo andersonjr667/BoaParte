@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device=width, initial-scale=1.0">
     <title>Login - Boa Parte</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -261,6 +261,77 @@
     </div>
 
     <script>
+        // Remove the storage clear on load
+        /*
+        window.addEventListener('load', () => {
+            localStorage.clear();
+            sessionStorage.clear();
+        });
+        */
+
+        async function login(event) {
+            event.preventDefault();
+            console.log('Login attempt started');
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginButton = document.getElementById('loginButton');
+
+            try {
+                loginButton.disabled = true;
+                loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+
+                console.log('Sending login request...');
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                console.log('Login response:', data);
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Erro ao fazer login');
+                }
+
+                // Store auth data
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('username', data.username);
+                localStorage.setItem('role', data.role || 'user');
+                
+                console.log('Auth data stored successfully');
+                showNotification('Login realizado com sucesso!');
+                
+                // Redirect with small delay
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 500);
+
+            } catch (error) {
+                console.error('Login error:', error);
+                showNotification(error.message || 'Falha no login. Tente novamente.', true);
+            } finally {
+                loginButton.disabled = false;
+                loginButton.innerHTML = '<i class="fas fa-sign-in-alt"></i> Entrar';
+            }
+        }
+
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            const notificationMessage = document.getElementById('notification-message');
+            
+            notification.className = 'notification ' + (isError ? 'error' : 'success');
+            notificationMessage.textContent = message;
+            notification.style.display = 'flex';
+
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const toggleButton = document.querySelector('.password-toggle i');
@@ -275,123 +346,6 @@
                 toggleButton.classList.add('fa-eye');
             }
         }
-    
-        function showNotification(message, isError = false) {
-            const notification = document.getElementById('notification');
-            const notificationMessage = document.getElementById('notification-message');
-            
-            notification.className = 'notification ' + (isError ? 'error' : 'success');
-            notificationMessage.textContent = message;
-            notification.style.display = 'flex';
-    
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
-    
-        async function login(event) {
-            event.preventDefault();
-            
-            const loginButton = document.getElementById('loginButton');
-            const buttonText = loginButton.querySelector('span');
-            const buttonIcon = loginButton.querySelector('i');
-            
-            // Desabilita o botão e mostra loading
-            loginButton.classList.add('loading');
-            buttonIcon.className = 'fas fa-spinner';
-            buttonText.textContent = 'Entrando...';
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-    
-            try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password })
-                });
-                console.log('Resposta do servidor:', response);
-                const data = await response.json();
-                console.log('Dados retornados:', data);
-    
-                if (response.ok && data.success) {
-                    handleLoginSuccess(data);
-                } else {
-                    throw new Error(data.message || 'Usuário ou senha incorretos');
-                }
-            } catch (error) {
-                console.error('Erro no login:', error);
-                showNotification(error.message || 'Erro ao fazer login. Tente novamente.', true);
-                
-                // Restaura o botão
-                loginButton.classList.remove('loading');
-                buttonIcon.className = 'fas fa-sign-in-alt';
-                buttonText.textContent = 'Entrar';
-            }
-        }
-    
-        async function handleLoginSuccess(data) {
-            try {
-                if (!data.success) {
-                    throw new Error('Login falhou');
-                }
-        
-                // Limpa qualquer sessão anterior
-                sessionStorage.clear();
-                
-                // Armazena nova sessão
-                sessionStorage.setItem('isAuthenticated', 'true');
-                sessionStorage.setItem('username', data.username);
-                sessionStorage.setItem('role', data.role);
-                sessionStorage.setItem('loginTime', new Date().getTime());
-
-                // Armazenar o token no localStorage
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('username', data.username); // Ensure username is stored
-                console.log('Token armazenado:', data.token); // Log para verificar o token
-
-                showNotification('Login realizado com sucesso!');
-                
-                // Pequeno delay antes do redirecionamento
-                setTimeout(() => {
-                    window.location.replace('dashboard.html');
-                }, 500);
-        
-            } catch (error) {
-                console.error('Erro no login:', error);
-                showNotification('Erro ao processar login', true);
-            }
-        }
-    
-        // Verificar se já está logado
-        window.addEventListener('load', () => {
-            const isAuthenticated = sessionStorage.getItem('isAuthenticated');
-            if (isAuthenticated === 'true') {
-                window.location.replace('dashboard.html');
-            }
-        });
-        
-        function authenticateUser() {
-            const token = localStorage.getItem('token');
-            const currentPage = window.location.pathname;
-            console.log('Página atual:', currentPage);
-            console.log('Token encontrado:', token);
-            if (!token || token === '') {
-                console.log('Token não encontrado, permanecendo na página de login.');
-                return;
-            }
-            // Se o token estiver presente e a página for a de login, redirecionar
-            if (currentPage === '/login.html' && !sessionStorage.getItem('isAuthenticated')) {
-                console.log('Token encontrado, redirecionando para dashboard.');
-                window.location.href = 'dashboard.html';
-            }
-        }
-        
-        // Chamar a função de autenticação ao carregar a página
-        window.addEventListener('load', authenticateUser);
     </script>
 </body>
 </html>

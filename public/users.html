@@ -571,7 +571,12 @@
             if (!checkAuth()) return;
 
             try {
-                const response = await fetch('/api/users');
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/users', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
 
                 if (!response.ok) {
                     throw new Error('Falha ao carregar usuários');
@@ -586,13 +591,6 @@
                 usersList.innerHTML = '';
 
                 data.users.forEach(user => {
-                    // Add null checks and default values
-                    const username = user.username || 'Usuário sem nome';
-                    const role = username.toLowerCase() === 'anderson' ? 'Administrador' : 'Usuário';
-                    const createdAt = user.createdAt ? 
-                        new Date(user.createdAt).toLocaleDateString('pt-BR') : 
-                        'Data não disponível';
-                    
                     const userCard = document.createElement('div');
                     userCard.className = 'user-card';
                     userCard.innerHTML = `
@@ -600,28 +598,30 @@
                             <i class="fas fa-user"></i>
                         </div>
                         <div class="user-info">
-                            <h3 class="user-name">${username}</h3>
+                            <h3 class="user-name">${user.username}</h3>
                             <p class="user-details">
-                                Criado em: ${createdAt}
-                                <span class="user-role">${role}</span>
+                                Criado em: ${new Date(user.createdAt).toLocaleDateString('pt-BR')}
+                                <span class="user-role">${user.role === 'admin' ? 'Administrador' : 'Usuário'}</span>
                             </p>
                         </div>
-                        <div class="user-actions">
-                            ${username.toLowerCase() !== 'anderson' ? `
-                                <button onclick="changeRole('${username}')" class="action-btn role-btn">
+                        ${user.username.toLowerCase() !== 'anderson' ? `
+                            <div class="user-actions">
+                                <button onclick="changeRole('${user.username}')" class="action-btn role-btn">
                                     <i class="fas fa-user-shield"></i> Alterar Papel
                                 </button>
-                                <button onclick="deleteUser('${username}')" class="action-btn delete-btn">
+                                <button onclick="deleteUser('${user.username}')" class="action-btn delete-btn">
                                     <i class="fas fa-trash"></i> Excluir
                                 </button>
-                            ` : ''}
-                        </div>
+                            </div>
+                        ` : ''}
                     `;
                     usersList.appendChild(userCard);
                 });
+                
+                showNotification('✅ Usuários carregados com sucesso!');
             } catch (error) {
-                console.error('Erro:', error);
-                alert(error.message || 'Erro ao carregar usuários');
+                console.error('Erro ao carregar usuários:', error);
+                showNotification('❌ ' + (error.message || 'Erro ao carregar usuários'), true);
             }
         }
 

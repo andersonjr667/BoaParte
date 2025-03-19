@@ -1,5 +1,36 @@
 // ...existing code...
 
+async function deleteContact(contactId) {
+    try {
+        const response = await fetch(`/api/contacts/${contactId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`, // Ensure the token is included
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                alert('Unauthorized: Please log in again.');
+                // Redirect to login page or handle re-authentication
+                window.location.href = '/login.html';
+            } else {
+                throw new Error('Error deleting contact');
+            }
+        }
+
+        const result = await response.json();
+        console.log('Contact deleted:', result);
+        // Refresh the contact list or update the UI accordingly
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error deleting contact');
+    }
+}
+
+// ...existing code...
+
 // Function to load contacts and sort them in reverse order
 async function loadContacts() {
     try {
@@ -73,6 +104,7 @@ async function sendWhatsAppMessage(phone, name, contactId) {
 function createContactElement(contact) {
     const contactElement = document.createElement('div');
     contactElement.className = 'contact-card';
+    contactElement.setAttribute('data-id', contact._id); // Adiciona o ID como atributo data
 
     // Handle MongoDB date format
     const createdAt = new Date(contact.createdAt.$date ? contact.createdAt.$date.$numberLong : contact.createdAt);

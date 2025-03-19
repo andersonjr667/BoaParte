@@ -10,10 +10,11 @@
     <link rel="stylesheet" href="styles/shared.css">
     <link rel="stylesheet" href="styles/dashboard.css">
     <script src="js/messages.js"></script>
+    <script src="js/auth.js"></script>
     <style>
         /* Adicione esta seção para a imagem do dashboard */
         .logo {
-            position: fixed; /* Altere para fixed */
+            position: absolute; /* Altere para absolute */
             top: 1rem;
             left: 1rem;
             width: 120px; /* Ajuste o tamanho conforme necessário */
@@ -32,6 +33,7 @@
             max-width: 1200px;
             margin: 2rem auto;
             transition: all 0.3s ease-in-out;
+            top: -50px; /* Move the container higher */
         }
 
         /* Estilos específicos do dashboard */
@@ -47,7 +49,7 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             animation: fadeIn 0.5s ease;
             position: relative;
-            top: 20px;
+            top: -50px; /* Move the container higher */
             max-height: 90vh; /* Reduce from 100vh to allow scrolling */
             overflow-y: auto;
             padding-bottom: 2rem; /* Add padding at bottom */
@@ -249,7 +251,7 @@
                 width: 95%;
                 padding: 1rem;
                 margin: 1rem;
-                top: 10px;
+                top: -50px; /* Move the container higher */
             }
 
             .dashboard-header h2 {
@@ -536,6 +538,23 @@
                 <i class="fas fa-user-friends"></i>
                 Gerenciar Membros
             </a>
+            <a href="TabelaExcel.html" class="users-button">
+                <i class="fas fa-table"></i>
+                Tabela de Mensagens
+            </a>
+            <a href="users.html" class="users-button" id="users-button">
+                <i class="fas fa-users"></i>
+                Gerenciar Usuários
+            </a>
+            <a href="admin.html" class="users-button" id="admin-button">
+                <i class="fas fa-user-shield"></i>
+                Painel Admin
+            </a>
+            <!-- Adicione um ID ao botão de configurar WhatsApp -->
+            <button class="users-button" id="whatsapp-config-button" style="display: none;">
+                <i class="fab fa-whatsapp"></i>
+                Configurar WhatsApp
+            </button>
         </div>
         <div class="content">
             <div class="header">
@@ -714,28 +733,58 @@
         </div>
     </div>
 
+    <script src="js/messages.js"></script>
+    <script src="js/dashboard.js"></script>
     <script>
-        // Verificar se o usuário está autenticado
-        function checkAuthentication() {
+        // Simplify authentication check
+        async function checkAuthentication() {
             const token = localStorage.getItem('token');
-            console.log('Verificando autenticação...');
-            console.log('Token encontrado:', token);
-            if (!token || token === '') {
-                console.log('Token não encontrado, redirecionando para login.');
+            console.log('Checking authentication, token:', token);
+            
+            if (!token) {
+                console.log('No token found, redirecting to login');
                 window.location.href = 'login.html';
-            } else {
-                console.log('Token encontrado, usuário autenticado.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/verify-token', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Token verification failed');
+                }
+
+                const data = await response.json();
+                if (!data.valid) {
+                    throw new Error('Invalid token');
+                }
+
+                // If we get here, token is valid
+                console.log('Token is valid');
+                return true;
+            } catch (error) {
+                console.error('Authentication error:', error);
+                localStorage.clear();
+                window.location.href = 'login.html';
+                return false;
             }
         }
 
-        // Executar a verificação ao carregar a página
+        // Initialize page
         window.addEventListener('load', async () => {
-            checkAuthentication();
-            const username = localStorage.getItem('username');
-            const role = localStorage.getItem('role');
-
             try {
-                // Update username display first
+                // Check authentication first
+                await checkAuthentication();
+
+                const username = localStorage.getItem('username');
+                const role = localStorage.getItem('role');
+
+                // Update username display
                 const usernameDisplay = document.getElementById('username-display');
                 if (usernameDisplay) {
                     usernameDisplay.innerHTML = `
@@ -745,17 +794,22 @@
                     `;
                 }
 
-                // Load contacts with error handling
-                console.log('Iniciando carregamento de contatos...');
-                await loadContacts();
-                console.log('Contatos carregados com sucesso');
+                // Show WhatsApp config button only for Anderson
+                if (username === 'Anderson') {
+                    document.getElementById('whatsapp-config-button').style.display = 'block';
+                }
 
-                // Check admin access last
+                // Load contacts
+                console.log('Loading contacts...');
+                await loadContacts();
+                console.log('Contacts loaded successfully');
+
+                // Check admin access
                 await checkAdminAccess();
 
             } catch (error) {
-                console.error('Erro ao inicializar dashboard:', error);
-                showNotification('❌ Erro ao carregar informações', true);
+                console.error('Error initializing dashboard:', error);
+                showNotification('❌ Error loading information', true);
             }
         });
 
@@ -886,7 +940,7 @@
         // Função para verificar se o token é válido
         function checkAndRedirect(response) {
             if (response.status === 401 || response.status === 403) {
-                localStorage.removeItem('token');
+                localStorage.clear(); // Clear all tokens and local storage items
                 window.location.href = 'login.html';
                 return false;
             }
@@ -896,9 +950,11 @@
         // Função para editar contato
         async function editContact(id) {
             try {
-                const response = await fetch(`/api/contacts/${id}`);
-
-                if (!checkAndRedirect(response)) return;
+                const response = await fetch(`/api/contacts/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
 
                 if (!response.ok) {
                     throw new Error('Erro ao carregar contato');
@@ -910,7 +966,7 @@
                 document.getElementById('edit-id').value = contact._id;
                 document.getElementById('edit-name').value = contact.name;
                 document.getElementById('edit-phone').value = contact.phone;
-                document.getElementById('edit-birthday').value = new Date(contact.birthday).toISOString().split('T')[0];
+                document.getElementById('edit-birthday').value = contact.birthday ? new Date(contact.birthday).toISOString().split('T')[0] : '';
 
                 // Mostra o modal
                 document.getElementById('edit-modal').style.display = 'block';
@@ -934,12 +990,11 @@
                 const response = await fetch(`/api/contacts/${id}`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
                     },
                     body: JSON.stringify({ name, phone, birthday })
                 });
-
-                if (!checkAndRedirect(response)) return;
 
                 if (!response.ok) {
                     throw new Error('Erro ao atualizar contato');
@@ -960,7 +1015,7 @@
             document.getElementById('edit-modal').style.display = 'none';
         }
 
-        // Deletar contato
+        // Função para deletar contato
         async function deleteContact(id) {
             try {
                 if (!confirm('Tem certeza que deseja excluir este contato?')) {
@@ -968,7 +1023,10 @@
                 }
 
                 const response = await fetch(`/api/contacts/${id}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
                 });
 
                 if (!response.ok) {
@@ -1026,7 +1084,11 @@
         // Update the loadContacts function
         async function loadContacts() {
             try {
-                const response = await fetch('/api/contacts/');
+                const response = await fetch('/api/contacts/', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
 
                 if (!response.ok) {
                     if (response.status === 401) {
@@ -1040,6 +1102,9 @@
                 if (!data.success) {
                     throw new Error('Erro ao carregar dados dos contatos');
                 }
+
+                // Ordena os contatos pela data de criação em ordem decrescente
+                data.contacts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
                 displayContacts(data);
                 console.log('Contatos carregados:', data.contacts.length);
@@ -1156,7 +1221,10 @@
                         <button onclick="editContact('${contact._id.$oid || contact._id}')" class="action-button edit-button">
                             <i class="fas fa-edit"></i> Editar
                         </button>
-                        <button onclick="deleteContact('${contact._id.$oid || contact._id}')" class="action-button delete-button">
+                        <button 
+                            onclick="deleteContact('${contact._id}')"
+                            class="action-button delete-button"
+                            data-contact-id="${contact._id}">
                             <i class="fas fa-trash"></i> Excluir
                         </button>
                     </div>
@@ -1169,34 +1237,16 @@
         async function sendWhatsAppMessage(phone, name, contactId) {
             try {
                 const cleanPhone = phone.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
-                
-                // Determina a saudação com base na hora
-                const hora = new Date().getHours();
-                let saudacao;
-                if (hora >= 5 && hora < 12) {
-                    saudacao = "Bom dia";
-                } else if (hora >= 12 && hora < 18) {
-                    saudacao = "Boa tarde";
-                } else {
-                    saudacao = "Boa noite";
-                }
+                const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+                console.log(`Enviando mensagem para ${formattedPhone} (ID do contato: ${contactId})`); // Log para depuração
 
-                const message = `${saudacao}, ${name}! Graça e Paz do Senhor Jesus!\n\n` +
-                    "Seja muito bem-vindo(a) à Igreja Batista Solidária! A Juventude da Igreja Batista Solidária (JIBS) também celebra a sua chegada e se alegra em recebê-lo(a). " +
-                    "É uma honra tê-lo(a) conosco e agradecemos por compartilhar seu contato.\n\n" +
-                    "Que este momento seja especial em sua vida e que você se sinta acolhido(a) e abençoado(a) por Deus. " +
-                    "Estamos aqui para caminhar ao seu lado e auxiliar no que for preciso.\n\n" +
-                    "Que o Senhor renove sua paz, sua alegria e sua esperança hoje e sempre!\n\n" +
-                    "Com carinho,\nJuventude da Igreja Batista Solidária (JIBS) e Igreja Batista Solidária";
-                
                 const response = await fetch('/api/send-whatsapp', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        phone: cleanPhone,
-                        message: message,
+                        phone: formattedPhone, // Adiciona o código do país +55 se necessário
                         contactId: contactId
                     })
                 });
@@ -1297,7 +1347,7 @@
         function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('username');
-            localStorage.removeItem('role');
+localStorage.removeItem('role');
             sessionStorage.clear();
             window.location.href = 'login.html';
         }
@@ -1361,24 +1411,16 @@
                 const role = localStorage.getItem('role');
                 const isAdmin = role === 'admin';
                 
-                // Completely hide admin buttons if not admin
-                const adminButtons = document.getElementById('admin-buttons');
-                if (adminButtons) {
-                    if (isAdmin) {
-                        adminButtons.style.display = 'flex';
-                        adminButtons.innerHTML = `
-                            <button class="users-button" onclick="window.location.href='users.html'">
-                                <i class="fas fa-users"></i>
-                                Gerenciar Usuários
-                            </button>
-                            <button class="users-button" onclick="window.location.href='admin-dashboard.html'">
-                                <i class="fas fa-user-shield"></i>
-                                Dashboard Admin
-                            </button>
-                        `;
-                    } else {
-                        adminButtons.style.display = 'none'; // Hide the admin buttons
-                    }
+                // Controla visibilidade dos botões admin
+                const adminButton = document.getElementById('admin-button');
+                const usersButton = document.getElementById('users-button');
+                
+                if (adminButton) {
+                    adminButton.style.display = isAdmin ? 'flex' : 'none';
+                }
+                
+                if (usersButton) {
+                    usersButton.style.display = isAdmin ? 'flex' : 'none';
                 }
 
                 return isAdmin;
@@ -1757,6 +1799,7 @@
     
     // Chamar a função de autenticação ao carregar a página
     window.addEventListener('load', authenticateUser);
+    
     </script>
 </body>
 </html>

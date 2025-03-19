@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Mensagens</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-dark: #2E7D32;
+            --primary-light: #E8F5E9;
+            --error-color: #f44336;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            background: var(--bg-color);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        select {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            background: white;
+            min-width: 200px;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 600;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        tr:hover td {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-pending {
+            background: #fff3e0;
+            color: var(--warning-color);
+        }
+
+        .status-sent {
+            background: #e8f5e9;
+            color: var(--success-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .week-status {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .week-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .week-pending {
+            background: #fff3e0;
+            color: var(--warning-color);
+        }
+
+        .week-sent {
+            background: #e8f5e9;
+            color: var (--success-color);
+        }
+
+        @media (max-width: 1024px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                flex-wrap: wrap;
+            }
+
+            select {
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .search-filter {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            th, td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Adicione um botão de voltar -->
+        <div class="header-buttons" style="margin-bottom: 1rem;">
+            <button class="btn btn-primary" onclick="window.location.href='dashboard.html'">
+                <i class="fas fa-arrow-left"></i>
+                Voltar ao Dashboard
+            </button>
+        </div>
+
+        <div class="controls">
+            <div class="filter-group">
+                <select id="week-filter">
+                    <option value="all">Todas as Semanas</option>
+                    <option value="1">Semana 1</option>
+                    <option value="2">Semana 2</option>
+                    <option value="3">Semana 3</option>
+                    <option value="4">Semana 4</option>
+                </select>
+                <button class="btn btn-primary" onclick="filterContacts()">
+                    <i class="fas fa-filter"></i>
+                    Filtrar
+                </button>
+            </div>
+            <button class="btn btn-primary" onclick="exportToExcel()">
+                <i class="fas fa-file-excel"></i>
+                Exportar Excel
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Telefone</th>
+                        <th>Data de Cadastro</th>
+                        <th>Status Mensagens</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="contacts-table">
+                    <!-- Dados serão inseridos via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Função para carregar dados
+        async function loadContacts(weekFilter = 'all') {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const response = await fetch('/api/contacts/table', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar dados');
+                }
+
+                const data = await response.json();
+                
+                if (!data.success || !data.contacts) {
+                    throw new Error('Formato de dados inválido');
+                }
+
+                const tableBody = document.getElementById('contacts-table');
+                tableBody.innerHTML = '';
+
+                if (!data.contacts || data.contacts.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center;">
+                                Nenhum contato encontrado
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                // Ordena os contatos pela data de criação em ordem decrescente
+                data.contacts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                data.contacts.forEach(contact => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${contact.name}</td>
+                        <td>${contact.phone}</td>
+                        <td>${new Date(contact.createdAt).toLocaleDateString('pt-BR')}</td>
+                        <td>
+                            <div class="week-status">
+                                ${generateWeekBadges(contact)}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                ${generateWeekButtons(contact)}
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                const tableBody = document.getElementById('contacts-table');
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--error-color);">
+                            <i class="fas fa-exclamation-circle"></i> 
+                            Erro ao carregar dados: ${error.message}
+                        </td>
+                    </tr>`;
+            }
+        }
+
+        function generateWeekBadges(contact) {
+            let badges = '';
+            for (let week = 1; week <= 4; week++) {
+                const status = contact[`week${week}Sent`] ? 'sent' : 'pending';
+                badges += `
+                    <span class="week-badge week-${status}" title="Semana ${week}">
+                        S${week}: ${status === 'sent' ? 'Enviado' : 'Pendente'}
+                    </span>
+                `;
+            }
+            return badges;
+        }
+
+        function generateWeekButtons(contact) {
+            let buttons = '';
+            for (let week = 1; week <= 4; week++) {
+                if (!contact[`week${week}Sent`]) {
+                    buttons += `
+                        <button class="btn btn-primary" 
+                                onclick="sendMessage('${contact.id}', ${week})"
+                                title="Enviar mensagem da semana ${week}">
+                            <i class="fas fa-paper-plane"></i> Semana ${week}
+                        </button>
+                    `;
+                }
+            }
+            return buttons || '<span class="status-badge status-sent">Todas mensagens enviadas</span>';
+        }
+
+        // Função para exportar para Excel
+        function exportToExcel() {
+            const table = document.querySelector('table');
+            const html = table.outerHTML;
+            const url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'contatos.xls';
+            link.click();
+        }
+
+        // Função para enviar mensagem
+        async function sendMessage(contactId, week) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/send-message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        contactId,
+                        week
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao enviar mensagem');
+                }
+
+                // Recarrega os dados após enviar a mensagem
+                await loadContacts(document.getElementById('week-filter').value);
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao enviar mensagem: ' + error.message);
+            }
+        }
+
+        function filterContacts() {
+            const weekFilter = document.getElementById('week-filter').value;
+            loadContacts(weekFilter);
+        }
+
+        // Inicializa a página verificando autenticação
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            await loadContacts();
+        });
+
+        // Implementa busca na tabela
+        document.querySelector('.search-box').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#contacts-table tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

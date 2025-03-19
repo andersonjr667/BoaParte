@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuração WhatsApp</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .qr-container {
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .qr-image {
+            max-width: 300px;
+            margin: 20px auto;
+        }
+
+        .status {
+            text-align: center;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .status.connected {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status.disconnected {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Configuração do WhatsApp</h1>
+        <div class="status" id="status">Verificando status...</div>
+        <div class="qr-container" id="qr-container">
+            <p>Aguardando QR Code...</p>
+        </div>
+        <button class="btn" onclick="connectWhatsApp()">
+            <i class="fab fa-whatsapp"></i> Conectar WhatsApp
+        </button>
+        <button class="btn" onclick="window.location.href='dashboard.html'">
+            <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+        </button>
+    </div>
+
+    <script>
+        async function checkStatus() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/whatsapp/status', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao verificar status');
+                }
+
+                const data = await response.json();
+                console.log('Status recebido:', data); // Debug
+                updateStatus(data);
+            } catch (error) {
+                console.error('Erro ao verificar status:', error);
+                document.getElementById('status').innerHTML = 
+                    '<i class="fas fa-exclamation-circle"></i> Erro ao verificar status';
+            }
+        }
+
+        function updateStatus(data) {
+            const statusDiv = document.getElementById('status');
+            const qrContainer = document.getElementById('qr-container');
+
+            console.log('Atualizando status:', data); // Debug
+
+            if (data.status === 'connected') {
+                statusDiv.className = 'status connected';
+                statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> WhatsApp Conectado';
+                qrContainer.innerHTML = '<p>WhatsApp conectado com sucesso!</p>';
+            } else if (data.qr) {
+                statusDiv.className = 'status disconnected';
+                statusDiv.innerHTML = '<i class="fas fa-qrcode"></i> Aguardando leitura do QR Code';
+                qrContainer.innerHTML = `
+                    <p>Escaneie o QR Code com seu WhatsApp:</p>
+                    <img src="${data.qr}" alt="QR Code" class="qr-image">
+                `;
+                console.log('QR Code atualizado'); // Debug
+            } else {
+                statusDiv.className = 'status disconnected';
+                statusDiv.innerHTML = '<i class="fas fa-times-circle"></i> WhatsApp Desconectado';
+                qrContainer.innerHTML = '<p>Clique em "Conectar WhatsApp" para começar.</p>';
+            }
+        }
+
+        async function connectWhatsApp() {
+            try {
+                const token = localStorage.getItem('token');
+                await fetch('/api/whatsapp/connect', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                // Inicia verificação de status
+                checkStatus();
+            } catch (error) {
+                console.error('Erro ao conectar WhatsApp:', error);
+            }
+        }
+
+        // Verifica status a cada 3 segundos (reduzido de 5 para 3)
+        setInterval(checkStatus, 3000);
+
+        // Verifica status inicial e inicia conexão
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkStatus();
+            // Tenta conectar automaticamente
+            await connectWhatsApp();
+        });
+    </script>
+</body>
+</html>
