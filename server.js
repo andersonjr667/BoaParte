@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
@@ -5,12 +7,11 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const path = require('path');
 const bodyParser = require('body-parser');
-const { default: makeWASocket, DisconnectReason } = require('@whiskeysockets/baileys');
-const { Boom } = require('@hapi/boom');
-const P = require('pino');
 const fs = require('fs');
 const multer = require('multer');
 const { connectToWhatsApp, getConnectionStatus, sendMessage } = require('./whatsapp');
+const webpush = require('web-push');
+const { welcomeMessage, getMessageByDay, serviceReminderMessage, bulkReminderMessage } = require('./utils/messages');
 
 // Adicione no início do server.js, após as importações
 const authPath = './auth_info.json';
@@ -45,8 +46,45 @@ let state = null;
 const API_BASE_URL = '/api'; // Change this to match your API URL
 console.log('API Base URL:', API_BASE_URL);
 
+// Replace the vapidKeys and webpush configuration with:
+const vapidDetails = {
+    publicKey: process.env.VAPID_PUBLIC_KEY,
+    privateKey: process.env.VAPID_PRIVATE_KEY,
+    subject: `mailto:${process.env.VAPID_EMAIL}`
+};
+
+// Log VAPID details to verify they're loaded
+console.log('VAPID Configuration:', {
+    publicKey: vapidDetails.publicKey ? 'Present' : 'Missing',
+    privateKey: vapidDetails.privateKey ? 'Present' : 'Missing',
+    subject: vapidDetails.subject
+});
+
+if (!vapidDetails.publicKey || !vapidDetails.privateKey) {
+    console.error('VAPID keys are missing! Please check your .env file');
+} else {
+    webpush.setVapidDetails(
+        vapidDetails.subject,
+        vapidDetails.publicKey,
+        vapidDetails.privateKey
+    );
+}
+
+// Exponha a chave pública através de uma rota
+app.get('/api/vapid-public-key', (req, res) => {
+    res.json({ publicKey: vapidDetails.publicKey });
+});
+
+// Armazena as inscrições push (em produção, use um banco de dados)
+let pushSubscriptions = new Set();
+
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -66,29 +104,44 @@ let invalidTokens = new Set();
 
 // Middleware de autenticação
 const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    try {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
 
-    if (!token) {
-        console.log('No token provided');
-        return res.status(401).json({ 
-            success: false,
-            message: 'Token não fornecido' 
-        });
-    }
-
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) {
-            console.log('Token verification failed:', err.message);
+        if (!token) {
+            console.log('Missing token in request:', {
+                headers: req.headers,
+                path: req.path,
+                method: req.method
+            });
             return res.status(401).json({ 
-                success: false,
-                message: 'Token inválido'
+                success: false, 
+                message: 'Token não fornecido',
+                redirect: '/login.html'
             });
         }
 
-        req.user = user;
-        next();
-    });
+        jwt.verify(token, JWT_SECRET, (err, decoded) => {
+            if (err) {
+                console.log('Token verification failed:', err.message);
+                return res.status(401).json({ 
+                    success: false, 
+                    message: 'Token inválido',
+                    redirect: '/login.html'
+                });
+            }
+
+            req.user = decoded;
+            next();
+        });
+    } catch (error) {
+        console.error('Authentication error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Erro interno de autenticação',
+            redirect: '/login.html'
+        });
+    }
 };
 
 // Endpoint /ping
@@ -152,6 +205,19 @@ const userSchema = new mongoose.Schema({
     }
 });
 
+// Add this function after initial configurations
+function getBrazilTimestamp() {
+    return new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+}
+
+// Add these date utility functions after the initial configurations
+function getBrazilDateTime() {
+    const date = new Date();
+    // Convert to Brazil timezone
+    const brazilTime = date.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
+    return new Date(brazilTime);
+}
+
 // Contact Schema
 const contactSchema = new mongoose.Schema({
     name: {
@@ -210,6 +276,25 @@ const Member = mongoose.model('Member', memberSchema, 'members');
 const User = mongoose.model('User', userSchema, 'users');
 const Contact = mongoose.model('Contact', contactSchema, 'contacts');
 
+// Add this after your other mongoose schemas
+const logSchema = new mongoose.Schema({
+    type: {
+        type: String,
+        required: true,
+        enum: ['create', 'update', 'delete', 'system', 'auth', 'message']
+    },
+    action: String,
+    description: String,
+    username: String,
+    timestamp: {
+        type: Date,
+        default: Date.now
+    },
+    details: Object
+});
+
+const Log = mongoose.model('Log', logSchema);
+
 // Rota de login simplificada
 app.post("/api/auth/login", async (req, res) => {
     try {
@@ -253,6 +338,9 @@ app.post("/api/auth/login", async (req, res) => {
         );
 
         console.log('Login successful:', { username, role: user.role });
+        
+        // Set token in the response header
+        res.setHeader('Authorization', `Bearer ${token}`);
         
         res.json({
             success: true,
@@ -461,23 +549,31 @@ app.get('/api/contacts/month/:month', async (req, res) => {
 app.post("/api/contacts", authenticateToken, async (req, res) => {
     try {
         const { name, phone, birthday } = req.body;
-
-        if (!name || !phone) {
-            return res.status(400).json({
-                success: false,
-                message: 'Nome e telefone são obrigatórios'
-            });
-        }
+        const username = req.user.username;
 
         const contact = new Contact({
             name,
             phone,
-            birthday: birthday || null,
-            owner: req.user.username,
-            username: req.user.username
+            birthday: birthday ? new Date(birthday) : null,
+            owner: username,
+            username,
+            createdAt: new Date() // Use current date directly
         });
 
         await contact.save();
+
+        // Add log entry
+        await new Log({
+            type: 'create',
+            action: 'Novo contato criado',
+            description: `Contato "${contact.name}" foi adicionado`,
+            username: req.user.username,
+            details: {
+                contactId: contact._id,
+                name: contact.name,
+                phone: contact.phone
+            }
+        }).save();
 
         res.json({
             success: true,
@@ -527,6 +623,19 @@ app.put("/api/contacts/:id", authenticateToken, async (req, res) => {
         contact.birthday = birthday || contact.birthday;
 
         await contact.save();
+
+        // Add log entry
+        await new Log({
+            type: 'update',
+            action: 'Contato atualizado',
+            description: `Contato "${contact.name}" foi atualizado`,
+            username: req.user.username,
+            details: {
+                contactId: contact._id,
+                name: contact.name,
+                phone: contact.phone
+            }
+        }).save();
 
         res.json({
             success: true,
@@ -578,6 +687,19 @@ app.delete("/api/contacts/:id", authenticateToken, async (req, res) => {
         }
 
         await Contact.findByIdAndDelete(contactId);
+
+        // Add log entry
+        await new Log({
+            type: 'delete',
+            action: 'Contato deletado',
+            description: `Contato "${contact.name}" foi deletado`,
+            username: req.user.username,
+            details: {
+                contactId: contact._id,
+                name: contact.name,
+                phone: contact.phone
+            }
+        }).save();
         
         res.json({
             success: true,
@@ -988,21 +1110,45 @@ app.get('/api/auth/verify', (req, res) => {
 });
 
 // Route to send WhatsApp message
-app.post('/api/send-whatsapp', async (req, res) => {
-    const { phone, message, contactId } = req.body;
+app.post('/api/send-whatsapp', authenticateToken, async (req, res) => {
+    const { phone, name, contactId } = req.body;
+    const timestamp = getBrazilTimestamp();
+    
     try {
-        console.log(`Enviando mensagem para o contato ${contactId} com o número ${phone}`); // Log para depuração
-        await sendMessage(phone, message);
+        if (!req.user) {
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Usuário não autenticado'
+            });
+        }
+
+        console.log(`[${timestamp}] Enviando mensagem para ${name}`);
         
+        if (!whatsappClient) {
+            throw new Error('Cliente WhatsApp não inicializado');
+        }
+
+        await sendMessage(phone, name, contactId);
+
         // Update contact message status if contactId is provided
         if (contactId) {
-            await Contact.findByIdAndUpdate(contactId, { receivedMessage: true });
+            await Contact.findByIdAndUpdate(contactId, { 
+                receivedMessage: true,
+                lastMessageDate: new Date()
+            });
         }
-        
-        res.json({ success: true });
+
+        res.json({ 
+            success: true, 
+            message: 'Mensagem enviada com sucesso' 
+        });
     } catch (error) {
-        console.error('Error sending WhatsApp message:', error);
-        res.status(500).json({ success: false, message: 'Error sending WhatsApp message' });
+        console.error(`[${timestamp}] Erro:`, error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Erro ao enviar mensagem',
+            error: error.message
+        });
     }
 });
 
@@ -1282,7 +1428,7 @@ app.get('/admin/users', authenticateToken, async (req, res) => {
 });
 
 // Rota para estatísticas detalhadas
-app.get('/admin/stats', authenticateToken, async (req, res) => {
+app.get('/api/admin/stats', authenticateToken, async (req, res) => {
     try {
         if (req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Acesso negado' });
@@ -1304,8 +1450,8 @@ app.get('/admin/stats', authenticateToken, async (req, res) => {
             createdAt: { $gte: sevenDaysAgo }
         }).then(users => users.length);
 
-        // Dados para o gráfico
-        const graphData = await Contact.aggregate([
+        // Dados para o gráfico de contatos por mês
+        const contactsByMonth = await Contact.aggregate([
             {
                 $group: {
                     _id: {
@@ -1319,15 +1465,37 @@ app.get('/admin/stats', authenticateToken, async (req, res) => {
         ]);
 
         const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-        const chartData = {
+        const contactsByMonthData = {
             labels: [],
             values: []
         };
 
-        graphData.forEach(data => {
-            chartData.labels.push(monthNames[data._id.month - 1]);
-            chartData.values.push(data.count);
+        contactsByMonth.forEach(data => {
+            contactsByMonthData.labels.push(`${monthNames[data._id.month - 1]} ${data._id.year}`);
+            contactsByMonthData.values.push(data.count);
         });
+
+        // Dados para o gráfico de usuários ativos
+        const activeUsersData = {
+            labels: ['Ativos', 'Inativos'],
+            values: [activeUsers, totalUsers - activeUsers]
+        };
+
+        // Dados para o gráfico de contatos por usuário
+        const contactsByUser = await Contact.aggregate([
+            {
+                $group: {
+                    _id: '$username',
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { count: -1 } }
+        ]);
+
+        const contactsByUserData = {
+            labels: contactsByUser.map(item => item._id),
+            values: contactsByUser.map(item => item.count)
+        };
 
         res.json({
             success: true,
@@ -1335,7 +1503,9 @@ app.get('/admin/stats', authenticateToken, async (req, res) => {
             totalContacts,
             contactsToday,
             activeUsers,
-            chartData
+            contactsByMonth: contactsByMonthData,
+            activeUsersData,
+            contactsByUser: contactsByUserData
         });
     } catch (error) {
         res.status(500).json({ message: 'Erro ao carregar estatísticas' });
@@ -1519,15 +1689,138 @@ app.post('/api/whatsapp/connect', authenticateToken, async (req, res) => {
 
 // Adicione a rota para enviar mensagens
 app.post('/api/send-whatsapp', authenticateToken, async (req, res) => {
-    const { phone, contactId } = req.body;
+    const { phone, name, contactId } = req.body;
 
     try {
-        console.log(`Enviando mensagem para o contato ${contactId} com o número ${phone}`); // Log para depuração
-        await sendMessage(phone);
-        res.json({ success: true, message: 'Mensagem enviada com sucesso' });
+        console.log(`Enviando mensagem para o contato ${contactId} com o número ${phone}`);
+        await sendMessage(phone, name, contactId);
+
+        // Update contact message status if contactId is provided
+        if (contactId) {
+            await Contact.findByIdAndUpdate(contactId, { receivedMessage: true });
+        }
+
+        res.json({ 
+            success: true, 
+            message: 'Mensagem enviada com sucesso' 
+        });
     } catch (error) {
         console.error('Erro ao enviar mensagem:', error);
-        res.status(500).json({ success: false, message: 'Erro ao enviar mensagem' });
+        res.status(500).json({ 
+            success: false, 
+            message: 'Erro ao enviar mensagem',
+            error: error.message
+        });
+    }
+});
+
+// Add new route for sending service reminders
+app.post('/api/send-reminder', authenticateToken, async (req, res) => {
+    const { phone, name, contactId } = req.body;
+    const timestamp = getBrazilDateTime();
+
+    try {
+        let cleanPhone = phone.replace(/\D/g, '');
+        if (cleanPhone.length === 11 && cleanPhone[2] === '9') {
+            cleanPhone = cleanPhone.slice(0, 2) + cleanPhone.slice(3);
+        }
+        const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+
+        // Get the reminder message
+        const reminderMessage = serviceReminderMessage(name);
+        if (!reminderMessage) {
+            throw new Error('Não há culto programado para enviar lembrete agora');
+        }
+
+        // Use the sendMessage function from whatsapp.js
+        await sendMessage(formattedPhone, reminderMessage);
+        
+        // Log the reminder message
+        await Log.create({
+            type: 'message',
+            action: 'Lembrete de Culto',
+            description: `Lembrete enviado para ${name}`,
+            username: req.user.username,
+            timestamp: new Date(),
+            details: { contactId, messageType: 'reminder' }
+        });
+
+        res.json({ 
+            success: true, 
+            message: 'Lembrete enviado com sucesso' 
+        });
+    } catch (error) {
+        console.error(`[${timestamp}] Erro ao enviar lembrete:`, error);
+        res.status(500).json({ 
+            success: false, 
+            message: error.message || 'Erro ao enviar lembrete' 
+        });
+    }
+});
+
+// Add new route for sending bulk messages
+app.post('/api/send-bulk-reminder', authenticateToken, async (req, res) => {
+    try {
+        const contacts = await Contact.find({ receivedMessage: false });
+        const results = {
+            success: [],
+            failed: []
+        };
+
+        for (const contact of contacts) {
+            try {
+                const reminderMessage = bulkReminderMessage(contact.name);
+                let cleanPhone = contact.phone.replace(/\D/g, '');
+                if (cleanPhone.length === 11 && cleanPhone[2] === '9') {
+                    cleanPhone = cleanPhone.slice(0, 2) + cleanPhone.slice(3);
+                }
+                const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+
+                await sendMessage(formattedPhone, reminderMessage);
+                
+                // Update contact status
+                contact.receivedMessage = true;
+                await contact.save();
+                
+                results.success.push(contact.name);
+            } catch (error) {
+                results.failed.push({ name: contact.name, error: error.message });
+            }
+        }
+
+        res.json({
+            success: true,
+            message: `Mensagens enviadas com sucesso para ${results.success.length} contatos`,
+            results
+        });
+    } catch (error) {
+        console.error('Erro ao enviar mensagens em massa:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao enviar mensagens em massa',
+            error: error.message
+        });
+    }
+});
+
+// Add route to mark all contacts as messaged
+app.post('/api/mark-all-messaged', authenticateToken, async (req, res) => {
+    try {
+        await Contact.updateMany(
+            { receivedMessage: false },
+            { $set: { receivedMessage: true } }
+        );
+
+        res.json({
+            success: true,
+            message: 'Todos os contatos foram marcados como mensagem enviada'
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao marcar contatos',
+            error: error.message
+        });
     }
 });
 
@@ -1556,16 +1849,15 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+// Keep only one server start block at the end of the file
+const port = process.env.PORT || 5000;
+app.listen(port, () => {
+    console.log(`Servidor rodando na porta ${port}`);
 }).on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
-        console.error(`Port ${PORT} is already in use, trying another port...`);
-        app.listen(0, () => {
-            console.log(`Server is running on a different port`);
-        });
+        console.log(`Porta ${port} já está em uso`);
     } else {
-        console.error('Server error:', err);
+        console.error('Erro ao iniciar servidor:', err);
     }
 });
 
@@ -1631,10 +1923,6 @@ app.get('/api/auth/validate-token', (req, res) => {
             message: 'Erro ao validar token'
         });
     }
-});
-
-app.listen(3000, () => {
-    console.log('Server is running on port 3000');
 });
 
 // Add the new login and token verification routes
@@ -1811,3 +2099,266 @@ app.post('/api/whatsapp/connect', authenticateToken, async (req, res) => {
         res.status(500).json({ success: false, message: 'Erro ao conectar WhatsApp' });
     }
 });
+
+// Rota para redefinir a senha do usuário (apenas admin)
+app.put('/api/users/:username/reset-password', authenticateToken, async (req, res) => {
+    try {
+        if (!req.user.role || req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Acesso negado'
+            });
+        }
+
+        const { username } = req.params;
+        const defaultPassword = 'senhaPadrao123'; // Defina a senha padrão aqui
+
+        const user = await User.findOneAndUpdate(
+            { username },
+            { password: defaultPassword },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuário não encontrado'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Senha redefinida com sucesso'
+        });
+    } catch (error) {
+        console.error('Erro ao redefinir senha do usuário:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao redefinir senha do usuário'
+        });
+    }
+});
+
+// Rota para fazer upload da imagem de perfil do usuário (apenas admin)
+app.post('/api/users/:username/profile-image', authenticateToken, async (req, res) => {
+    try {
+        if (!req.user.role || req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Acesso negado'
+            });
+        }
+
+        const { username } = req.params;
+        const profileImage = req.files.profileImage;
+
+        if (!profileImage) {
+            return res.status(400).json({
+                success: false,
+                message: 'Nenhuma imagem enviada'
+            });
+        }
+
+        const imagePath = `./public/perfils/${username}-${profileImage.name}`;
+        await profileImage.mv(imagePath);
+
+        const user = await User.findOneAndUpdate(
+            { username },
+            { profileImage: imagePath },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuário não encontrado'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Imagem de perfil atualizada com sucesso',
+            profileImage: imagePath
+        });
+    } catch (error) {
+        console.error('Erro ao fazer upload da imagem de perfil:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao fazer upload da imagem de perfil'
+        });
+    }
+});
+
+// Update the stats route
+app.get('/api/admin/stats', authenticateToken, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Acesso negado' 
+            });
+        }
+
+        // Total users and contacts
+        const totalUsers = await User.countDocuments();
+        const totalContacts = await Contact.countDocuments();
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const contactsToday = await Contact.countDocuments({
+            createdAt: { $gte: today }
+        });
+
+        // Active users (last 7 days)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const activeUsers = await Contact.distinct('owner', {
+            createdAt: { $gte: sevenDaysAgo }
+        }).then(users => users.length);
+
+        // Activity chart data (last 30 days)
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const activityData = await Contact.aggregate([
+            {
+                $match: {
+                    createdAt: { $gte: thirtyDaysAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }
+                    },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { "_id.date": 1 } }
+        ]);
+
+        const chartData = {
+            labels: activityData.map(d => d._id.date),
+            values: activityData.map(d => d.count)
+        };
+
+        // Monthly contacts data
+        const monthlyData = await Contact.aggregate([
+            {
+                $group: {
+                    _id: {
+                        year: { $year: "$createdAt" },
+                        month: { $month: "$createdAt" }
+                    },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ]);
+
+        const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        const contactsByMonth = {
+            labels: monthlyData.map(d => `${monthNames[d._id.month - 1]} ${d._id.year}`),
+            values: monthlyData.map(d => d.count)
+        };
+
+        // User contacts data
+        const userContactsData = await Contact.aggregate([
+            {
+                $group: {
+                    _id: "$username",
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { count: -1 } },
+            { $limit: 10 }
+        ]);
+
+        const contactsByUser = {
+            labels: userContactsData.map(d => d._id || 'Anônimo'),
+            values: userContactsData.map(d => d.count)
+        };
+
+        res.json({
+            success: true,
+            totalUsers,
+            totalContacts,
+            contactsToday,
+            activeUsers,
+            chartData,
+            contactsByMonth,
+            activeUsersData: {
+                labels: ['Ativos', 'Inativos'],
+                values: [activeUsers, totalUsers - activeUsers]
+            },
+            contactsByUser
+        });
+
+    } catch (error) {
+        console.error('Stats Error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Erro ao carregar estatísticas',
+            error: error.message 
+        });
+    }
+});
+
+// Add new route for detailed stats
+app.get('/api/admin/detailed-stats', authenticateToken, async (req, res) => {
+    try {
+        // Set proper headers
+        res.setHeader('Content-Type', 'application/json');
+
+        // Verify admin role
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied: Admin privileges required'
+            });
+        }
+
+        const stats = {
+            totalUsers: await User.countDocuments(),
+            totalContacts: await Contact.countDocuments(),
+            contactsToday: await Contact.countDocuments({
+                createdAt: { $gte: new Date().setHours(0, 0, 0, 0) }
+            }),
+            // ...rest of stats calculation...
+        };
+
+        res.json({
+            success: true,
+            stats: stats
+        });
+
+    } catch (error) {
+        console.error('Error in /api/admin/detailed-stats:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error loading statistics',
+            error: error.message
+        });
+    }
+});
+
+// Admin check endpoint
+app.get('/api/check-admin', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
+        }
+
+        const isAdmin = user.role === 'admin';
+        res.json({ 
+            success: true, 
+            isAdmin,
+            username: user.username,
+            role: user.role
+        });
+    } catch (error) {
+        console.error('Erro ao verificar admin:', error);
+        res.status(500).json({ success: false, message: 'Erro ao verificar permissões de admin' });
+    }
+});
+

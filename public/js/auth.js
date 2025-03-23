@@ -162,3 +162,14 @@ async function createInitialUser() {
 
 // Chama a função quando a página carrega
 document.addEventListener('DOMContentLoaded', createInitialUser);
+
+function isTokenValid() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        return false;
+    }
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const expiry = payload.exp * 1000;
+    return Date.now() < expiry;
+}

@@ -4,7 +4,7 @@ const P = require('pino');
 const fs = require('fs');
 const path = require('path');
 const qrcode = require('qrcode'); // Certifique-se de que esta linha está presente
-const { getRandomMessage } = require('./public/js/messages'); // Adicione esta linha
+const { welcomeMessage, getMessageByDay } = require('./utils/messages'); // Update the import path
 
 let sock = null;
 let qr = null;
@@ -74,19 +74,16 @@ function getConnectionStatus() {
 }
 
 // Função para enviar mensagem
-async function sendMessage(to) {
-    if (!sock || connectionStatus !== 'connected') {
-        throw new Error('WhatsApp não está conectado');
-    }
-
+async function sendMessage(phone, message) {
     try {
-        // Remove todos os caracteres não numéricos e adiciona o código do país +55
-        const cleanNumber = to.replace(/\D/g, '');
-        const formattedNumber = cleanNumber.startsWith('55') ? `${cleanNumber}@s.whatsapp.net` : `55${cleanNumber}@s.whatsapp.net`;
-        const message = getRandomMessage(); // Obtém uma mensagem aleatória
-        console.log(`Enviando mensagem para ${formattedNumber}: ${message}`); // Log para depuração
-        await sock.sendMessage(formattedNumber, { text: message });
-        console.log('Mensagem enviada com sucesso'); // Log para depuração
+        if (!sock || connectionStatus !== 'connected') {
+            throw new Error('WhatsApp não está conectado');
+        }
+
+        const jid = `${phone}@s.whatsapp.net`;
+        await sock.sendMessage(jid, { text: message });
+        console.log(`Mensagem enviada com sucesso para ${phone}`);
+        
         return true;
     } catch (error) {
         console.error('Erro ao enviar mensagem:', error);

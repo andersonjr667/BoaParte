@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="styles/dashboard.css">
     <script src="js/messages.js"></script>
     <script src="js/auth.js"></script>
+    <link rel="icon" type="image/png" href="images/image.png">
     <style>
         /* Adicione esta seção para a imagem do dashboard */
         .logo {
@@ -520,6 +521,49 @@
                 transform: translateY(0);
             }
         }
+
+        .bulk-actions {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .bulk-action-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .bulk-action-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .message-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .message-status.sent {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .message-status.pending {
+            background: #fff3e0;
+            color: #f57c00;
+        }
     </style>
 </head>
 <body class="dashboard">
@@ -554,6 +598,14 @@
             <button class="users-button" id="whatsapp-config-button" style="display: none;">
                 <i class="fab fa-whatsapp"></i>
                 Configurar WhatsApp
+            </button>
+        </div>
+        <div class="bulk-actions">
+            <button onclick="sendBulkMessages()" class="bulk-action-btn">
+                <i class="fas fa-paper-plane"></i> Enviar Msg para Todos
+            </button>
+            <button onclick="markAllMessaged()" class="bulk-action-btn">
+                <i class="fas fa-check-double"></i> Marcar Todos como Enviado
             </button>
         </div>
         <div class="content">
@@ -736,6 +788,46 @@
     <script src="js/messages.js"></script>
     <script src="js/dashboard.js"></script>
     <script>
+        // Add this function at the top
+        function getAuthHeaders() {
+            const token = localStorage.getItem('token');
+            return {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        // Update the authentication check
+        async function checkAuthentication() {
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                console.log('No token found, redirecting to login');
+                window.location.href = 'login.html';
+                return false;
+            }
+
+            try {
+                const response = await fetch('/api/auth/verify', {
+                    method: 'GET',
+                    headers: getAuthHeaders()
+                });
+
+                if (!response.ok) {
+                    throw new Error('Token verification failed');
+                }
+
+                const data = await response.json();
+                return data.success;
+            } catch (error) {
+                console.error('Authentication error:', error);
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                window.location.href = 'login.html';
+                return false;
+            }
+        }
+
         // Simplify authentication check
         async function checkAuthentication() {
             const token = localStorage.getItem('token');
@@ -1085,9 +1177,7 @@
         async function loadContacts() {
             try {
                 const response = await fetch('/api/contacts/', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
+                    headers: getAuthHeaders()
                 });
 
                 if (!response.ok) {
@@ -1227,6 +1317,10 @@
                             data-contact-id="${contact._id}">
                             <i class="fas fa-trash"></i> Excluir
                         </button>
+                        <button onclick="sendServiceReminder('${contact.phone}', '${contact.name}', '${contact._id}')" 
+                                class="action-button reminder-btn">
+                            <i class="fas fa-church"></i> Enviar Msg Lembrete
+                        </button>
                     </div>
                 </div>
             `;
@@ -1236,35 +1330,66 @@
         // Função para enviar mensagem WhatsApp
         async function sendWhatsAppMessage(phone, name, contactId) {
             try {
-                const cleanPhone = phone.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('Token de autenticação não encontrado');
+                }
+
+                let cleanPhone = phone.replace(/\D/g, '');
+                
+                // Remove extra '9' after DDD
+                if (cleanPhone.length === 11) {
+                    // Extract DDD and remaining numbers
+                    const ddd = cleanPhone.slice(0, 2);
+                    const remainder = cleanPhone.slice(3);
+                    // Only keep remaining numbers if the first digit after DDD is 9
+                    if (cleanPhone[2] === '9') {
+                        cleanPhone = ddd + remainder;
+                    }
+                }
+                
                 const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
-                console.log(`Enviando mensagem para ${formattedPhone} (ID do contato: ${contactId})`); // Log para depuração
+                
+                console.log(`Enviando mensagem para ${formattedPhone} (ID do contato: ${contactId})`);
 
                 const response = await fetch('/api/send-whatsapp', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        phone: formattedPhone, // Adiciona o código do país +55 se necessário
+                        phone: formattedPhone,
+                        name: name,
                         contactId: contactId
                     })
                 });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        // Token inválido ou expirado
+                        localStorage.removeItem('token');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    throw new Error('Erro ao enviar mensagem');
+                }
 
                 const data = await response.json();
                 
                 if (data.success) {
                     showNotification('✅ Mensagem enviada com sucesso!');
-                    // Recarrega a lista de contatos para atualizar o status
                     await loadContacts();
-                } else if (data.message === 'Mensagem já enviada') {
-                    showNotification('⚠️ Mensagem já foi enviada anteriormente. Não é recomendado reenviar.', true);
                 } else {
-                    showNotification('❌ ' + (data.message || 'Erro ao enviar mensagem'), true);
+                    throw new Error(data.message || 'Erro ao enviar mensagem');
                 }
             } catch (error) {
-                console.error('Erro:', error);
-                showNotification('❌ Erro ao enviar mensagem', true);
+                console.error('Erro ao enviar mensagem:', error);
+                showNotification('❌ ' + (error.message || 'Erro ao enviar mensagem'), true);
+                
+                if (error.message.includes('Token')) {
+                    window.location.href = 'login.html';
+                }
             }
         }
 
@@ -1800,6 +1925,88 @@ localStorage.removeItem('role');
     // Chamar a função de autenticação ao carregar a página
     window.addEventListener('load', authenticateUser);
     
+    async function sendServiceReminder(phone, name, contactId) {
+        try {
+            const response = await fetch('/api/send-reminder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    phone,
+                    name,
+                    contactId
+                })
+            });
+
+            if (!response.ok) throw new Error('Erro ao enviar lembrete');
+
+            const data = await response.json();
+            if (data.success) {
+                showNotification('✅ Lembrete enviado com sucesso!');
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            showNotification('❌ ' + (error.message || 'Erro ao enviar lembrete'), true);
+        }
+    }
+
+    async function sendBulkMessages() {
+        if (!confirm('Deseja enviar mensagens para todos os contatos que ainda não receberam?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/send-bulk-reminder', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                showNotification('✅ ' + data.message);
+                await loadContacts();
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            showNotification('❌ ' + error.message, true);
+        }
+    }
+
+    async function markAllMessaged() {
+        if (!confirm('Deseja marcar todos os contatos como "mensagem enviada"?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/mark-all-messaged', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                showNotification('✅ ' + data.message);
+                await loadContacts();
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            showNotification('❌ ' + error.message, true);
+        }
+    }
     </script>
 </body>
 </html>

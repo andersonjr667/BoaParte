@@ -7,30 +7,45 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="styles/shared.css">
+    <link rel="icon" type="image/png" href="images/image.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/notifications.js"></script>
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-
         :root {
             --primary-color: #4CAF50;
             --primary-dark: #2E7D32;
             --primary-light: #E8F5E9;
             --secondary-color: #2196F3;
             --danger-color: #f44336;
-            --gray-100: #f8f9fa;
-            --gray-200: #e9ecef;
-            --gray-300: #dee2e6;
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
-            --border-radius: 15px;
-            --transition: all 0.3s ease;
+            --bg-main: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-hover: #fafafa;
+            --text-primary: #2e7d32;
+            --text-secondary: #4CAF50;
+            --text-light: #81C784;
+            --border-light: #E8F5E9;
+            --border-dark: #A5D6A7;
+            --shadow-sm: 0 2px 4px rgba(76, 175, 80, 0.05);
+            --shadow-md: 0 4px 6px rgba(76, 175, 80, 0.1);
+            --shadow-lg: 0 10px 15px rgba(76, 175, 80, 0.1);
+            --text-dark: #1B5E20;
+            --bg-light: #F1F8E9;
+            --border-color: #A5D6A7;
+            --primary-gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            --primary-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+            --gradient-primary: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            --card-shadow: 0 4px 15px rgba(76, 175, 80, 0.15);
+            --hover-transform: translateY(-3px);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-light) 0%, #ffffff 100%);
+            min-height: 100vh;
+            box-sizing: border-box;
+            color: var(--text-dark);
         }
 
         .admin-dashboard {
@@ -41,11 +56,26 @@
             box-shadow: var(--shadow-lg);
             overflow: hidden;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 2px solid var(--border-color);
+            border: none;
+            background: white;
+            box-shadow: var(--primary-shadow);
+            margin: 2rem auto;
+            max-width: 1400px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
         }
 
         .admin-header {
             background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            padding: 2rem;
+            color: white;
+            background: linear-gradient(135deg, var(--primary-main) 0%, var(--primary-dark) 100%);
+            background: var(--primary-gradient);
+            border-bottom: 4px solid var(--primary-dark);
+            background: var(--gradient-primary);
             padding: 2rem;
             color: white;
         }
@@ -83,12 +113,13 @@
         .header-buttons {
             display: flex;
             gap: 1rem;
+            margin-top: 1rem;
         }
 
         .nav-btn {
-            background: #E8F5E9;
-            color: #2E7D32;
-            border: none;
+            background: var(--bg-light);
+            color: var(--primary-dark);
+            border: 1px solid var(--border-color);
             padding: 0.8rem 1.5rem;
             border-radius: 10px;
             cursor: pointer;
@@ -97,30 +128,70 @@
             align-items: center;
             gap: 0.5rem;
             transition: all 0.3s ease;
+            background: var(--bg-light);
+            border: 2px solid var(--border-color);
+            font-weight: 600;
+            background: var(--bg-light);
+            color: var(--primary-dark);
+            border: 2px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
 
-        .nav-btn:hover {
-            background: #4CAF50;
+        .nav-btn:hover, .nav-btn.active {
+            background: var(--primary-color);
             color: white;
+            background: var(--primary-gradient);
+            border-color: var(--primary-dark);
             transform: translateY(-2px);
+            background: var(--gradient-primary);
+            color: white;
+            transform: var(--hover-transform);
         }
 
         .admin-nav {
             display: flex;
-            gap: 1rem;
-            padding: 1rem;
-            background: #f8f9fa;
+            justify-content: space-between !important;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            margin: 1rem;
+            box-shadow: var(--shadow-sm);
             overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
         }
 
-        .admin-nav button {
-            white-space: nowrap;
+        .nav-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
         }
 
-        .nav-btn.active {
-            background: #4CAF50;
-            color: white;
+        .nav-group.left {
+            margin-right: auto;
+        }
+
+        .nav-group.right {
+            margin-left: auto;
+        }
+
+        @media (max-width: 768px) {
+            .admin-nav {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .nav-group {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-group.left,
+            .nav-group.right {
+                margin: 0;
+            }
         }
 
         .admin-content {
@@ -133,13 +204,15 @@
             padding: 2rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             margin-bottom: 2rem;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.1);
         }
 
         .admin-section h2 {
-            color: #2E7D32;
+            color: var(--text-dark);
             margin-top: 0;
-            font-size: 1.8rem;
-            border-bottom: 2px solid #E8F5E9;
+            font-size: 2rem;
+            border-bottom: 3px solid var(--primary-color);
             padding-bottom: 1rem;
             margin-bottom: 2rem;
         }
@@ -152,21 +225,33 @@
         }
 
         .stat-card {
-            background: white;
-            padding: 1.5rem;
+            background: var(--bg-light);
+            padding: 2rem;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-sm);
             transition: var(--transition);
-            border: 2px solid var(--gray-200);
+            border: 2px solid var(--border-color);
             display: flex;
             align-items: center;
             gap: 1.5rem;
+            border: none;
+            background: var(--primary-gradient);
+            color: white;
+            background: var(--gradient-primary);
+            border: none;
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            transition: all 0.3s ease;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
             box-shadow: var(--shadow-lg);
             border-color: var(--primary-color);
+            background: var(--bg-hover);
+            transform: var(--hover-transform);
+            box-shadow: var(--card-shadow);
         }
 
         .stat-icon {
@@ -177,9 +262,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8rem;
+            font-size: 2.5rem;
             color: var(--primary-color);
             transition: var(--transition);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
         }
 
         .stat-card:hover .stat-icon {
@@ -190,22 +277,36 @@
         .stat-info h3 {
             margin: 0;
             font-size: 1rem;
-            color: #666;
+            color: var (--text-dark);
+            font-weight: 600;
+            color: white;
+            color: white;
         }
 
         .stat-info p {
             margin: 0.5rem 0 0;
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: #2E7D32;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            color: white;
+            color: white;
         }
 
         .chart-container {
-            background: white;
+            background: var(--bg-light);
             border-radius: var(--border-radius);
             padding: 2rem;
-            margin: 1.5rem;
+            margin: 2rem 0;
             box-shadow: var(--shadow-sm);
+            height: 400px; /* Add fixed height */
+            position: relative; /* Required for Chart.js */
+            border: 2px solid var(--border-color);
+            min-height: 400px;
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var (--card-shadow);
         }
 
         .chart-title {
@@ -239,7 +340,7 @@
         }
 
         .log-entry {
-            background: #f8f9fa;
+            background: var(--bg-light);
             padding: 1rem;
             border-radius: 10px;
             margin-bottom: 0.5rem;
@@ -247,6 +348,7 @@
             align-items: center;
             gap: 1rem;
             font-size: 0.9rem;
+            border: 1px solid var(--border-color);
         }
 
         .notification {
@@ -400,199 +502,150 @@
         .stat-card:nth-child(3) { animation-delay: 0.3s; }
         .stat-card:nth-child(4) { animation-delay: 0.4s; }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --primary-light: rgba(76, 175, 80, 0.2);
-                --gray-100: #2a2a2a;
-                --gray-200: #3a3a3a;
-                --gray-300: #4a4a4a;
-            }
-
-            body {
-                background: #1a1a1a;
-                color: #ffffff;
-            }
-
-            .admin-dashboard {
-                background: rgba(30, 30, 30, 0.98);
-            }
-
-            .stat-card {
-                background: #2a2a2a;
-                border-color: #3a3a3a;
-            }
-
-            .chart-container {
-                background: #2a2a2a;
-            }
-        }
-    </style>
-    <style>
-        :root {
-            /* Cores principais mais suaves e legíveis */
-            --primary-dark: #1b5e20;
-            --primary-main: #2e7d32;
-            --primary-light: #4caf50;
-            --primary-bg: #e8f5e9;
-            
-            /* Cores de texto mais legíveis */
-            --text-primary: #1a1a1a;
-            --text-secondary: #424242;
-            --text-light: #757575;
-            
-            /* Cores de status */
-            --success: #2e7d32;
-            --warning: #f57c00;
-            --error: #d32f2f;
-            --info: #1976d2;
-            
-            /* Cores de fundo */
-            --bg-main: #ffffff;
-            --bg-secondary: #f5f5f5;
-            --bg-hover: #fafafa;
-            
-            /* Cores de borda */
-            --border-light: #e0e0e0;
-            --border-dark: #bdbdbd;
-        }
-
-        body {
-            color: var(--text-primary);
-            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
-        }
-
-        .admin-dashboard {
-            background: var(--bg-main);
-        }
-
-        .admin-header {
-            background: linear-gradient(135deg, var(--primary-main) 0%, var(--primary-dark) 100%);
-            color: white;
-        }
-
-        .nav-btn {
-            background: var(--primary-bg);
-            color: var(--primary-dark);
-        }
-
-        .nav-btn:hover {
-            background: var(--primary-main);
-            color: white;
-        }
-
-        .nav-btn.active {
-            background: var(--primary-main);
-            color: white;
-        }
-
-        .stat-card {
-            background: var(--bg-main);
+        .detail-item {
+            background: white;
             border: 1px solid var(--border-light);
         }
 
-        .stat-card:hover {
-            border-color: var(--primary-main);
-        }
-
-        .stat-icon {
-            background: var(--primary-bg);
-            color: var(--primary-main);
-        }
-
-        .stat-info h3 {
-            color: var(--text-secondary);
-        }
-
-        .stat-info p {
-            color: var(--primary-dark);
-        }
-
-        .log-entry {
-            background: var(--bg-secondary);
-            color: var(--text-secondary);
-        }
-
-        .log-entry.error {
-            border-left: 4px solid var(--error);
-        }
-
-        .log-entry.warning {
-            border-left: 4px solid var(--warning);
-        }
-
-        .log-entry.success {
-            border-left: 4px solid var(--success);
-        }
-
-        .notification {
-            background: var(--primary-main);
-        }
-
-        .notification.error {
-            background: var(--error);
-        }
-
-        /* Dark mode adjustments */
+        /* Remova o modo escuro completamente */
         @media (prefers-color-scheme: dark) {
             :root {
-                --text-primary: #ffffff;
-                --text-secondary: #e0e0e0;
-                --text-light: #bdbdbd;
-                --bg-main: #1a1a1a;
-                --bg-secondary: #2d2d2d;
-                --bg-hover: #333333;
-                --border-light: #424242;
-                --border-dark: #616161;
-                --primary-bg: rgba(76, 175, 80, 0.15);
+                /* Mantenha as cores claras mesmo no modo escuro */
+                --bg-main: #ffffff;
+                --bg-secondary: #f5f5f5;
+                --text-primary: #2e7d32;
+                --text-secondary: #4CAF50;
+                --border-light: #E8F5E9;
+                --primary-light: rgba(76, 175, 80, 0.2);
             }
 
-            .stat-card {
-                background: var(--bg-secondary);
+            body {
+                background: linear-gradient(135deg, var(--primary-light) 0%, #ffffff 100%);
+                color: var(--text-primary);
             }
 
             .admin-dashboard {
-                background: var(--bg-main);
+                background: rgba(255, 255, 255, 0.98);
+            }
+
+            .stat-card {
+                background: white;
+                border: 1px solid var(--border-light);
+            }
+
+            .chart-container {
+                background: white;
             }
 
             .log-entry {
                 background: var(--bg-secondary);
-                color: var(--text-secondary);
             }
         }
-    </style>
-    <!-- Adicione este CSS na seção de estilos -->
-    <style>
-        .users-grid {
+
+        .filter-select, .filter-date {
+            background: white;
+            border: 2px solid var(--border-color);
+            color: var(--text-dark);
+            font-weight: 500;
+            background: white;
+            border: 2px solid var(--border-color);
+            padding: 0.8rem;
+            border-radius: 8px;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        table th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 600;
+            padding: 1rem;
+        }
+
+        table td {
+            color: var(--text-dark);
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-light);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .export-btn {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Aumenta o contraste dos textos */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        p, span, div {
+            color: var(--text-dark);
+        }
+
+        /* Melhorias na seção de usuários */
+        .users-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem;
             padding: 1rem;
         }
 
         .user-card {
-            background: white;
-            border-radius: var(--border-radius);
+            background: var(--bg-light);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
             padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid var(--border-light);
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .user-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-color);
         }
 
         .user-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+            transform: var(--hover-transform);
         }
 
-        .user-header {
+        .user-info {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 1rem;
             margin-bottom: 1rem;
         }
 
         .user-avatar {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             background: var(--primary-light);
             border-radius: 50%;
             display: flex;
@@ -602,130 +655,507 @@
             color: var(--primary-dark);
         }
 
-        .user-info h3 {
-            margin: 0;
-            color: var(--primary-dark);
+        .user-details {
+            flex: 1;
+        }
+
+        .user-details h3 {
+            color: var (--text-dark);
             font-size: 1.2rem;
+            margin: 0 0 0.5rem 0;
         }
 
-        .user-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin: 1rem 0;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 0.5rem;
-            background: var(--primary-light);
-            border-radius: var(--border-radius);
-        }
-
-        .stat-item .value {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--primary-dark);
-        }
-
-        .stat-item .label {
-            font-size: 0.8rem;
+        .user-details p {
             color: var(--text-secondary);
+            margin: 0.2rem 0;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-role {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--primary-light);
+            color: var(--primary-dark);
         }
 
         .user-actions {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.8rem;
             margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-light);
         }
 
         .action-btn {
             flex: 1;
-            padding: 0.5rem;
+            padding: 0.8rem;
             border: none;
-            border-radius: var(--border-radius);
+            border-radius: 8px;
             cursor: pointer;
             font-size: 0.9rem;
+            font-weight: 500;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
             transition: all 0.3s ease;
-        }
-
-        .role-btn {
             background: var(--primary-light);
             color: var(--primary-dark);
+            background: var(--bg-light);
+            color: var (--primary-dark);
+            border: none;
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
 
-        .role-btn:hover {
-            background: var(--primary-main);
+        .action-btn:hover {
+            background: var(--primary-color);
             color: white;
+            transform: translateY(-2px);
+            background: var(--primary-color);
+            color: white;
+            transform: var(--hover-transform);
         }
 
-        .delete-btn {
+        .action-btn.delete {
             background: #ffebee;
             color: #d32f2f;
         }
 
-        .delete-btn:hover {
+        .action-btn.delete:hover {
             background: #d32f2f;
             color: white;
         }
 
-        .user-status {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 12px;
-            font-size: 0.8rem;
+        .action-btn[disabled] {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Melhorias gerais da página */
+        :root {
+            --primary-gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            --primary-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+        }
+
+        .admin-dashboard {
+            border: none;
+            background: white;
+            box-shadow: var(--primary-shadow);
+        }
+
+        .admin-header {
+            background: var(--primary-gradient);
+            border-bottom: 4px solid var(--primary-dark);
+        }
+
+        .nav-btn {
+            background: var(--bg-light);
+            border: 2px solid var(--border-color);
+            font-weight: 600;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: var(--primary-gradient);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .stat-card {
+            border: none;
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .stat-card .stat-info h3,
+        .stat-card .stat-info p {
+            color: white;
+        }
+
+        .stat-icon {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        /* Melhorias nas tabelas */
+        table th {
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 600;
+            padding: 1rem;
+        }
+
+        table td {
+            background: var(--bg-light);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Melhorias nos filtros */
+        .filter-select {
+            background: white;
+            border: 2px solid var(--border-color);
+            padding: 0.8rem;
+            border-radius: 8px;
+            color: var(--text-dark);
             font-weight: 500;
         }
 
-        .status-active {
-            background: #e8f5e9;
-            color: #2e7d32;
+        .filter-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-light);
         }
 
-        .status-inactive {
-            background: #ffebee;
-            color: #d32f2f;
+        /* Notificações */
+        .notification-badge {
+            background: #f44336;
+            color: white;
+            border-radius: 50%;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.8rem;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .notifications-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem;
+            padding-left: 2.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .notification-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1.2rem;
+            border-radius: 8px;
+            background: var(--bg-light);
+            margin-bottom: 0.8rem;
+            transition: transform 0.2s ease;
+        }
+
+        .notification-item:hover {
+            transform: translateX(5px);
+        }
+
+        .notification-item.unread {
+            border-left: 4px solid var(--primary-color);
+            background: white;
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-content h4 {
+            margin: 0;
+            color: var(--text-dark);
+        }
+
+        .notification-meta {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        /* Melhoria nos botões de ação */
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .filter-bar {
+                flex-direction: column;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .action-btn {
+                width: 100%;
+            }
+        }
+
+        /* Estilos específicos para a seção de Logs */
+        .logs-dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .log-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .logs-filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color); /* Adiciona borda */
+            background: var(--bg-light); /* Light background */
+            border: 1px solid var(--border-color); /* Subtle border */
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: var(--text-dark); /* Cor do texto */
+        }
+
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-input, .filter-select, .filter-date {
+            padding: 0.8rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--text-dark); /* Cor do texto */
+            border: 1px solid var(--border-color); /* Subtle border */
+            background: var(--white); /* White background */
+            transition: border-color 0.3s ease; /* Smooth transition */
+        }
+
+        .filter-input:focus, .filter-select:focus, .filter-date:focus {
+            border-color: var(--primary-color); /* Highlight on focus */
+            outline: none; /* Remove default outline */
+            box-shadow: 0 0 0 2px var(--primary-light); /* Subtle shadow */
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 0.8rem;
+            align-items: flex-end;
+        }
+
+        .logs-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color); /* Adiciona borda */
+            border: 1px solid var(--border-color); /* Subtle border */
+            border-radius: 15px; /* Rounded corners */
+            box-shadow: var(--card-shadow); /* Soft shadow */
+        }
+
+        .logs-header {
+            display: grid;
+            grid-template-columns: 180px 100px 120px 1fr 1fr;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase; /* Uppercase text */
+            letter-spacing: 0.05em; /* Add letter spacing */
+        }
+
+        .logs-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            display: grid;
+            grid-template-columns: 180px 100px 120px 1fr 1fr;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            color: var(--text-dark); /* Cor do texto */
+            border-bottom: 1px solid var(--border-color); /* Subtle divider */
+            transition: background 0.3s ease; /* Smooth transition */
+        }
+
+        .log-entry:hover {
+            background: var(--bg-light);
+        }
+
+        .log-type {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .log-type.auth { background: #E3F2FD; color: #1976D2; }
+        .log-type.create { background: #E8F5E9; color: #2E7D32; }
+        .log-type.update { background: #FFF3E0; color: #F57C00; }
+        .log-type.delete { background: #FFEBEE; color: #D32F2F; }
+        .log-type.error { background: #FCE4EC; color: #C2185B; }
+
+        .logs-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .page-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: var(--bg-light);
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color); /* Subtle border */
+            background: var(--white); /* White background */
+            color: var(--primary-color); /* Primary color text */
+            transition: background 0.3s ease, color 0.3s ease; /* Smooth transition */
+        }
+
+        .page-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Animações */
+        .log-entry {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .logs-header, .log-entry {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .logs-filters {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+            }
+
+            .log-column:not(:first-child) {
+                display: none;
+            }
         }
     </style>
-    <style>
-    :root {
-        --primary-color: #4CAF50;
-        --primary-dark: #2E7D32;
-        --primary-light: #E8F5E9;
-        --bg-main: #ffffff;
-        --text-primary: #333333;
-        --text-secondary: #666666;
-        --border-color: #e0e0e0;
-        --shadow-color: rgba(0, 0, 0, 0.1);
-    }
-
-    body {
-        background: linear-gradient(135deg, var(--primary-light) 0%, #ffffff 100%);
-    }
-
-    .admin-dashboard {
-        background: var(--bg-main);
-    }
-
-    .admin-section {
-        background: var(--bg-main);
-        border: 1px solid var(--border-color);
-    }
-
-    .stat-card {
-        background: var(--bg-main);
-        border: 1px solid var(--border-color);
-    }
-
-    /* Remove dark mode styles */
-    @media (prefers-color-scheme: dark) {
-        /* Remove or comment out dark mode overrides */
-    }
-</style>
 </head>
 <body>
     <div class="admin-dashboard">
@@ -733,43 +1163,85 @@
             <div class="header-content">
                 <img src="images/image2.png" alt="Logo JIBS" class="logo">
                 <h1>Painel Administrativo JIBS</h1>
-            </div>
-            <div class="admin-user-info">
-                <span id="admin-username"></span>
-                <div class="header-buttons">
-                    <button onclick="window.location.href='dashboard.html'" class="nav-btn">
-                        <i class="fas fa-home"></i> Dashboard
-                    </button>
-                    <button onclick="logout()" class="logout-btn">
-                        <i class="fas fa-sign-out-alt"></i> Sair
-                    </button>
+                <div class="admin-user-info">
+                    <span id="admin-username"></span>
+                    <div class="header-buttons">
+                        <button onclick="window.location.href='dashboard.html'" class="nav-btn">
+                            <i class="fas fa-home"></i> Dashboard
+                        </button>
+                        <button onclick="logout()" class="nav-btn logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </button>
+                    </div>
                 </div>
             </div>
         </header>
 
         <nav class="admin-nav">
-            <button class="nav-btn active" onclick="showSection('overview')">
-                <i class="fas fa-chart-bar"></i> Visão Geral
-            </button>
-            <button class="nav-btn" onclick="showSection('users')">
-                <i class="fas fa-users"></i> Usuários
-            </button>
-            <button class="nav-btn" onclick="showSection('stats')">
-                <i class="fas fa-chart-line"></i> Estatísticas
-            </button>
-            <button class="nav-btn" onclick="showSection('logs')">
-                <i class="fas fa-history"></i> Logs
-            </button>
-            <button class="nav-btn" onclick="showSection('members')">
-                <i class="fas fa-users"></i> Membros
-            </button>
-            <button class="nav-btn" onclick="showSection('messages')">
-                <i class="fas fa-envelope"></i> Mensagens
-            </button>
-            <button class="nav-btn" onclick="showSection('notifications')">
-                <i class="fas fa-bell"></i> Notificações
-            </button>
+            <div class="nav-group left">
+                <button class="nav-btn active" onclick="showSection('overview')" id="overview-btn">
+                    <i class="fas fa-chart-bar"></i> Visão Geral
+                </button>
+                <button class="nav-btn" onclick="showSection('users')" id="users-btn">
+                    <i class="fas fa-users"></i> Usuários
+                </button>
+                <button class="nav-btn" onclick="showSection('stats')" id="stats-btn">
+                    <i class="fas fa-chart-line"></i> Estatísticas
+                </button>
+            </div>
+            <div class="nav-group right">
+                <button class="nav-btn" onclick="showSection('logs')" id="logs-btn">
+                    <i class="fas fa-history"></i> Logs
+                </button>
+                <button class="nav-btn" onclick="showSection('members')" id="members-btn">
+                    <i class="fas fa-church"></i> Membros
+                </button>
+                <button class="nav-btn" onclick="showSection('notifications')" id="notifications-btn">
+                    <i class="fas fa-bell"></i> Notificações
+                    <span class="notification-badge" id="notification-count">0</span>
+                </button>
+            </div>
         </nav>
+
+        <!-- Modal de Envio de Notificação -->
+        <div id="send-notification-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Enviar Notificação</h3>
+                    <span class="close" onclick="closeModal('send-notification-modal')">&times;</span>
+                </div>
+                <form id="notification-form" onsubmit="sendNotification(event)">
+                    <div class="form-group">
+                        <label for="notification-title">Título</label>
+                        <input type="text" id="notification-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="notification-message">Mensagem</label>
+                        <textarea id="notification-message" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="notify-all">
+                            Enviar para todos os usuários
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="send-push" checked>
+                            Enviar também como notificação push
+                        </label>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-paper-plane"></i> Enviar
+                        </button>
+                        <button type="button" class="btn-secondary" onclick="closeModal('send-notification-modal')">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <main class="admin-content">
             <!-- Seção de Visão Geral -->
@@ -819,42 +1291,436 @@
             <!-- Seção de Estatísticas -->
             <section id="stats-section" class="admin-section" style="display: none;">
                 <h2>Estatísticas do Sistema</h2>
-                <div class="stats-grid">
+                
+                <!-- Overview Cards -->
+                <div class="overview-cards">
                     <div class="stat-card">
-                        <h3>Total de Usuários</h3>
-                        <p id="total-users">0</p>
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total de Usuários</h3>
+                            <p id="total-users">0</p>
+                        </div>
                     </div>
                     <div class="stat-card">
-                        <h3>Total de Contatos</h3>
-                        <p id="total-contacts">0</p>
+                        <div class="stat-icon">
+                            <i class="fas fa-address-book"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total de Contatos</h3>
+                            <p id="total-contacts">0</p>
+                        </div>
                     </div>
                     <div class="stat-card">
-                        <h3>Contatos Hoje</h3>
-                        <p id="today-contacts">0</p>
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Contatos Hoje</h3>
+                            <p id="today-contacts">0</p>
+                        </div>
                     </div>
                     <div class="stat-card">
-                        <h3>Usuários Ativos</h3>
-                        <p id="active-users">0</p>
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Taxa de Crescimento</h3>
+                            <p id="growth-rate">0%</p>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Gráficos -->
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Distribuição de Contatos por Usuário</h3>
+                        <canvas id="contacts-by-user-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Contatos por Mês</h3>
+                        <canvas id="contacts-by-month-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Status das Mensagens</h3>
+                        <canvas id="message-status-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Tendência de Crescimento</h3>
+                        <canvas id="growth-trend-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Tabela de Últimos Contatos -->
+                <div class="contacts-table">
+                    <h3>Últimos Contatos</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Telefone</th>
+                                <th>Data de Nascimento</th>
+                                <th>Adicionado por</th>
+                                <th>Data de Criação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="latest-contacts">
+                            <!-- Contatos serão carregados aqui -->
+                        </tbody>
+                    </table>
+                </div>
             </section>
+
+            <style>
+            /* Estilos específicos para a seção de estatísticas */
+            .charts-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+                gap: 2rem;
+                margin: 2rem 0;
+            }
+
+            .chart-controls {
+                display: flex;
+                gap: 2rem;
+                margin-bottom: 2rem;
+                background: white;
+                padding: 1.5rem;
+                border-radius: var(--border-radius);
+                box-shadow: var(--shadow-sm);
+            }
+
+            .filter-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .filter-select {
+                padding: 0.8rem;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                min-width: 200px;
+            }
+
+            .metrics-table {
+                background: white;
+                border-radius: var(--border-radius);
+                padding: 2rem;
+                margin: 2rem 0;
+                box-shadow: var (--shadow-sm);
+            }
+
+            .metrics-table table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .metrics-table th, .metrics-table td {
+                padding: 1rem;
+                text-align: left;
+                border-bottom: 1px solid #eee;
+            }
+
+            .export-section {
+                display: flex;
+                gap: 1rem;
+                margin-top: 2rem;
+            }
+
+            .export-btn {
+                padding: 0.8rem 1.5rem;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                transition: all 0.3s ease;
+            }
+
+            .export-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-md);
+            }
+
+            @media (max-width: 768px) {
+                .charts-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .chart-controls {
+                    flex-direction: column;
+                }
+
+                .export-section {
+                    flex-direction: column;
+                }
+
+                .export-btn {
+                    width: 100%;
+                }
+            }
+            </style>
 
             <!-- Seção de Logs -->
             <section id="logs-section" class="admin-section" style="display: none;">
                 <h2>Logs do Sistema</h2>
-                <div class="logs-container" id="system-logs">
-                    <div class="log-filters">
-                        <select id="log-type">
-                            <option value="all">Todos os Logs</option>
-                            <option value="user">Logs de Usuário</option>
-                            <option value="system">Logs do Sistema</option>
-                            <option value="error">Logs de Erro</option>
-                        </select>
-                        <input type="date" id="log-date" />
+                
+                <!-- Dashboard de Logs -->
+                <div class="logs-dashboard">
+                    <div class="log-stats">
+                        <div class="stat-card">
+                            <i class="fas fa-list-alt stat-icon"></i>
+                            <div class="stat-info">
+                                <h3>Total de Logs</h3>
+                                <p id="total-logs">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-calendar-day stat-icon"></i>
+                            <div class="stat-info">
+                                <h3>Logs Hoje</h3>
+                                <p id="today-logs">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-exclamation-triangle stat-icon"></i>
+                            <div class="stat-info">
+                                <h3>Alertas</h3>
+                                <p id="alert-logs">0</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="logs-list" id="logs-list"></div>
+
+                    <!-- Filtros Avançados -->
+                    <div class="logs-filters">
+                        <div class="filter-group">
+                            <label>Tipo de Log</label>
+                            <select id="log-type" class="filter-select" multiple>
+                                <option value="all" selected>Todos</option>
+                                <option value="auth">Autenticação</option>
+                                <option value="create">Criação</option>
+                                <option value="update">Atualização</option>
+                                <option value="delete">Exclusão</option>
+                                <option value="message">Mensagens</option>
+                                <option value="system">Sistema</option>
+                                <option value="error">Erros</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Período</label>
+                            <div class="date-range">
+                                <input type="datetime-local" id="log-start-date" class="filter-date">
+                                <span>até</span>
+                                <input type="datetime-local" id="log-end-date" class="filter-date">
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label>Usuário</label>
+                            <input type="text" id="log-user" class="filter-input" placeholder="Filtrar por usuário">
+                        </div>
+                        <div class="filter-actions">
+                            <button onclick="filterLogs()" class="action-btn">
+                                <i class="fas fa-filter"></i> Aplicar Filtros
+                            </button>
+                            <button onclick="clearLogFilters()" class="action-btn secondary">
+                                <i class="fas fa-times"></i> Limpar
+                            </button>
+                            <button onclick="exportLogs()" class="action-btn export">
+                                <i class="fas fa-file-export"></i> Exportar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Logs -->
+                    <div class="logs-container">
+                        <div class="logs-header">
+                            <div class="log-column">Timestamp</div>
+                            <div class="log-column">Tipo</div>
+                            <div class="log-column">Usuário</div>
+                            <div class="log-column">Ação</div>
+                            <div class="log-column">Detalhes</div>
+                        </div>
+                        <div id="logs-list" class="logs-list"></div>
+                    </div>
+
+                    <!-- Paginação -->
+                    <div class="logs-pagination">
+                        <button onclick="previousPage()" class="page-btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span id="page-info">Página 1 de 1</span>
+                        <button onclick="nextPage()" class="page-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
                 </div>
             </section>
+
+            <style>
+            /* Estilos específicos para a seção de Logs */
+            .logs-dashboard {
+                display: flex;
+                flex-direction: column;
+                gap: 2rem;
+            }
+
+            .log-stats {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1.5rem;
+            }
+
+            .logs-filters {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 12px;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1.5rem;
+                box-shadow: var(--shadow-sm);
+            }
+
+            .filter-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .date-range {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .filter-input, .filter-select, .filter-date {
+                padding: 0.8rem;
+                border: 2px solid var(--border-color);
+                border-radius: 8px;
+                font-size: 0.9rem;
+            }
+
+            .filter-actions {
+                display: flex;
+                gap: 0.8rem;
+                align-items: flex-end;
+            }
+
+            .logs-container {
+                background: white;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: var(--shadow-sm);
+            }
+
+            .logs-header {
+                display: grid;
+                grid-template-columns: 180px 100px 120px 1fr 1fr;
+                gap: 1rem;
+                padding: 1rem;
+                background: var(--primary-gradient);
+                color: white;
+                font-weight: 600;
+            }
+
+            .logs-list {
+                max-height: 600px;
+                overflow-y: auto;
+            }
+
+            .log-entry {
+                display: grid;
+                grid-template-columns: 180px 100px 120px 1fr 1fr;
+                gap: 1rem;
+                padding: 1rem;
+                border-bottom: 1px solid var(--border-color);
+                transition: all 0.3s ease;
+            }
+
+            .log-entry:hover {
+                background: var(--bg-light);
+            }
+
+            .log-type {
+                padding: 0.3rem 0.8rem;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                font-weight: 500;
+                text-align: center;
+            }
+
+            .log-type.auth { background: #E3F2FD; color: #1976D2; }
+            .log-type.create { background: #E8F5E9; color: #2E7D32; }
+            .log-type.update { background: #FFF3E0; color: #F57C00; }
+            .log-type.delete { background: #FFEBEE; color: #D32F2F; }
+            .log-type.error { background: #FCE4EC; color: #C2185B; }
+
+            .logs-pagination {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 1rem;
+                margin-top: 1rem;
+            }
+
+            .page-btn {
+                padding: 0.5rem 1rem;
+                border: none;
+                border-radius: 8px;
+                background: var(--bg-light);
+                color: var(--primary-color);
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .page-btn:hover {
+                background: var(--primary-color);
+                color: white;
+            }
+
+            .page-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            /* Animações */
+            .log-entry {
+                animation: fadeIn 0.3s ease;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Responsividade */
+            @media (max-width: 768px) {
+                .logs-header, .log-entry {
+                    grid-template-columns: 1fr;
+                    gap: 0.5rem;
+                }
+
+                .logs-filters {
+                    grid-template-columns: 1fr;
+                }
+
+                .filter-actions {
+                    flex-direction: column;
+                }
+
+                .log-column:not(:first-child) {
+                    display: none;
+                }
+            }
+            </style>
 
             <!-- Seção de Membros -->
             <section id="members-section" class="admin-section" style="display: none;">
@@ -874,7 +1740,7 @@
                 <h2>Controle de Mensagens</h2>
                 <div class="controls">
                     <div class="filter-group">
-                        <select id="week-filter">
+                        <select id="week-filter"></select>
                             <option value="all">Todas as Semanas</option>
                             <option value="1">Semana 1</option>
                             <option value="2">Semana 2</option>
@@ -909,9 +1775,28 @@
 
             <!-- Adicione estas novas seções -->
             <section id="notifications-section" class="admin-section" style="display: none;">
-                <h2>Central de Notificações</h2>
-                <div class="notifications-list" id="notifications-list">
-                    <!-- Notificações serão carregadas aqui -->
+                <div class="section-header">
+                    <h2>Central de Notificações</h2>
+                    <button class="action-btn" onclick="showModal('send-notification-modal')">
+                        <i class="fas fa-paper-plane"></i> Nova Notificação
+                    </button>
+                </div>
+                
+                <div class="notifications-container">
+                    <div class="filter-bar">
+                        <select id="notification-type-filter" onchange="filterNotifications()">
+                            <option value="all">Todas as Notificações</option>
+                            <option value="unread">Não Lidas</option>
+                            <option value="system">Sistema</option>
+                            <option value="user">Usuários</option>
+                        </select>
+                        <div class="search-box">
+                            <input type="text" id="notification-search" placeholder="Buscar notificações...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="notifications-list" id="notifications-list"></div>
                 </div>
             </section>
 
@@ -934,503 +1819,7 @@
 
     <div id="notification" class="notification"></div>
 
-    <script>
-        // Verificação de Admin
-        document.addEventListener('DOMContentLoaded', async () => {
-            const username = localStorage.getItem('username');
-            const token = localStorage.getItem('token');
-
-            if (!username || !token || username !== 'Anderson') {
-                window.location.href = 'dashboard.html';
-                return;
-            }
-
-            document.getElementById('admin-username').textContent = `Administrador: ${username}`;
-            loadInitialData();
-        });
-
-        // Funções de navegação
-        function showSection(sectionName) {
-            document.querySelectorAll('.admin-section').forEach(section => {
-                section.style.display = 'none';
-            });
-            document.getElementById(`${sectionName}-section`).style.display = 'block';
-
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            loadSectionData(sectionName);
-        }
-
-        // Carregar dados iniciais
-        async function loadInitialData() {
-            await loadUsers();
-            await loadStats();
-            await loadLogs();
-        }
-
-        // Função para carregar dados de uma seção específica
-        async function loadSectionData(sectionName) {
-            showLoading();
-            try {
-                switch(sectionName) {
-                    case 'overview':
-                        await loadStats();
-                        break;
-                    case 'users':
-                        await loadUsers();
-                        break;
-                    case 'logs':
-                        await loadLogs();
-                        break;
-                    case 'members':
-                        loadMembers();
-                        break;
-                    case 'messages':
-                        loadMessages();
-                        break;
-                    case 'notifications':
-                        await loadNotifications();
-                        break;
-                }
-                showToast(`Dados de ${sectionName} carregados com sucesso`);
-            } catch (error) {
-                console.error(`Erro ao carregar ${sectionName}:`, error);
-                showToast(`Erro ao carregar ${sectionName}: ${error.message}`, 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Função para carregar estatísticas
-        async function loadStats() {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('/admin/stats', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) throw new Error('Falha ao carregar estatísticas');
-
-                const data = await response.json();
-                
-                // Atualiza os números nas cards
-                document.getElementById('total-users').textContent = data.totalUsers;
-                document.getElementById('total-contacts').textContent = data.totalContacts;
-                document.getElementById('today-contacts').textContent = data.contactsToday;
-                document.getElementById('active-users').textContent = data.activeUsers;
-
-                // Cria o gráfico
-                createActivityChart(data.chartData);
-
-            } catch (error) {
-                showNotification('Erro ao carregar estatísticas: ' + error.message, 'error');
-            }
-        }
-
-        // Função para carregar usuários
-        async function loadUsers() {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('/admin/users', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) throw new Error('Falha ao carregar usuários');
-
-                const data = await response.json();
-                const usersList = document.getElementById('users-list');
-                usersList.innerHTML = '<div class="users-grid"></div>';
-                const usersGrid = usersList.querySelector('.users-grid');
-
-                data.users.forEach(user => {
-                    const userCard = document.createElement('div');
-                    userCard.className = 'user-card';
-                    userCard.innerHTML = `
-                        <div class="user-header">
-                            <div class="user-avatar">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div class="user-info">
-                                <h3>${user.username}</h3>
-                                <span class="user-status ${user.lastActive ? 'status-active' : 'status-inactive'}">
-                                    ${user.lastActive ? 'Ativo' : 'Inativo'}
-                                </span>
-                            </div>
-                        </div>
-                        <div class="user-stats">
-                            <div class="stat-item">
-                                <div class="value">${user.contactCount}</div>
-                                <div class="label">Contatos</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="value">${user.messageCount || 0}</div>
-                                <div class="label">Mensagens</div>
-                            </div>
-                        </div>
-                        <div class="user-meta">
-                            <p><i class="fas fa-calendar"></i> Criado em: ${new Date(user.createdAt).toLocaleDateString('pt-BR')}</p>
-                            ${user.lastActive ? 
-                                `<p><i class="fas fa-clock"></i> Última atividade: ${new Date(user.lastActive).toLocaleDateString('pt-BR')}</p>` : 
-                                '<p><i class="fas fa-exclamation-circle"></i> Sem atividade recente</p>'
-                            }
-                        </div>
-                        ${user.username !== 'anderson' ? `
-                            <div class="user-actions">
-                                <button onclick="changeRole('${user.username}')" class="action-btn role-btn">
-                                    <i class="fas fa-user-shield"></i> Alterar Papel
-                                </button>
-                                <button onclick="deleteUser('${user.username}')" class="action-btn delete-btn">
-                                    <i class="fas fa-trash"></i> Excluir
-                                </button>
-                            </div>
-                        ` : ''}
-                    `;
-                    usersGrid.appendChild(userCard);
-                });
-            } catch (error) {
-                showNotification('Erro ao carregar usuários: ' + error.message, 'error');
-            }
-        }
-
-        // Função para carregar logs
-        async function loadLogs() {
-            try {
-                const token = localStorage.getItem('token');
-                const type = document.getElementById('log-type').value;
-                const date = document.getElementById('log-date').value;
-
-                const response = await fetch(`/admin/logs?type=${type}&date=${date}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) throw new Error('Falha ao carregar logs');
-
-                const data = await response.json();
-                const logsList = document.getElementById('logs-list');
-                logsList.innerHTML = '';
-
-                data.logs.forEach(log => {
-                    const logEntry = document.createElement('div');
-                    logEntry.className = `log-entry ${log.type}`;
-                    logEntry.innerHTML = `
-                        <span class="log-time">${new Date(log.timestamp).toLocaleString('pt-BR')}</span>
-                        <span class="log-type">${log.type}</span>
-                        <span class="log-message">${log.message}</span>
-                    `;
-                    logsList.appendChild(logEntry);
-                });
-            } catch (error) {
-                showNotification('Erro ao carregar logs: ' + error.message, 'error');
-            }
-        }
-
-        // Função de logout
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('username');
-            window.location.href = 'index.html';
-        }
-
-        // Notificações
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.style.display = 'block';
-
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
-
-        // Event Listeners
-        document.getElementById('log-type').addEventListener('change', loadLogs);
-        document.getElementById('log-date').addEventListener('change', loadLogs);
-
-        // Adicione essa função para criar o gráfico de atividades
-        function createActivityChart(data) {
-            const ctx = document.getElementById('activity-chart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        label: 'Atividades do Sistema',
-                        data: data.values,
-                        borderColor: '#4CAF50',
-                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        // Adicione esta função para melhorar a interação com os cards
-        function initializeStatCards() {
-            const cards = document.querySelectorAll('.stat-card');
-            
-            cards.forEach(card => {
-                card.addEventListener('mouseenter', () => {
-                    const icon = card.querySelector('.stat-icon');
-                    icon.style.transform = 'scale(1.1) rotate(5deg)';
-                });
-
-                card.addEventListener('mouseleave', () => {
-                    const icon = card.querySelector('.stat-icon');
-                    icon.style.transform = 'scale(1) rotate(0)';
-                });
-            });
-        }
-
-        // Chame a função quando a página carregar
-        document.addEventListener('DOMContentLoaded', initializeStatCards);
-
-        // Adicione suporte a gestos touch
-        let touchStartY = 0;
-        document.addEventListener('touchstart', e => {
-            touchStartY = e.touches[0].clientY;
-        });
-
-        document.addEventListener('touchmove', e => {
-            const touchY = e.touches[0].clientY;
-            const diff = touchStartY - touchY;
-
-            if (diff > 50) {
-                // Scroll para baixo
-                window.scrollBy({ top: 100, behavior: 'smooth' });
-            } else if (diff < -50) {
-                // Scroll para cima
-                window.scrollBy({ top: -100, behavior: 'smooth' });
-            }
-        });
-
-        async function loadMembers() {
-            try {
-                const response = await fetch('/api/members', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-
-                if (!response.ok) throw new Error('Erro ao carregar membros');
-
-                const members = await response.json();
-                displayMembers(members);
-            } catch (error) {
-                showNotification('Erro ao carregar membros: ' + error.message, 'error');
-            }
-        }
-
-        async function loadMessages() {
-            try {
-                const response = await fetch('/api/contacts/table', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-
-                if (!response.ok) throw new Error('Erro ao carregar mensagens');
-
-                const data = await response.json();
-                displayMessages(data.contacts);
-            } catch (error) {
-                showNotification('Erro ao carregar mensagens: ' + error.message, 'error');
-            }
-        }
-
-        function displayMembers(members) {
-            const membersList = document.getElementById('members-list');
-            membersList.innerHTML = '';
-
-            members.forEach(member => {
-                const memberCard = document.createElement('div');
-                memberCard.className = 'member-card';
-                memberCard.innerHTML = `
-                    <h3>${member.name}</h3>
-                    <p><i class="fas fa-phone"></i> ${member.phone}</p>
-                    ${member.birthday ? `<p><i class="fas fa-birthday-cake"></i> ${new Date(member.birthday).toLocaleDateString()}</p>` : ''}
-                    <div class="member-actions">
-                        <button onclick="editMember('${member._id}')" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button onclick="deleteMember('${member._id}')" class="btn btn-danger">
-                            <i class="fas fa-trash"></i> Excluir
-                        </button>
-                    </div>
-                `;
-                membersList.appendChild(memberCard);
-            });
-        }
-
-        function displayMessages(messages) {
-            const messagesTable = document.getElementById('messages-table');
-            messagesTable.innerHTML = '';
-
-            if (!messages || messages.length === 0) {
-                messagesTable.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="text-center">Nenhuma mensagem encontrada</td>
-                    </tr>
-                `;
-                return;
-            }
-
-            messages.forEach(message => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${message.name}</td>
-                    <td>${message.phone}</td>
-                    <td>${new Date(message.createdAt).toLocaleDateString()}</td>
-                    <td>
-                        <div class="week-status">
-                            ${generateWeekBadges(message)}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            ${generateMessageButtons(message)}
-                        </div>
-                    </td>
-                `;
-                messagesTable.appendChild(row);
-            });
-        }
-
-        function generateWeekBadges(message) {
-            let badges = '';
-            for (let week = 1; week <= 4; week++) {
-                const status = message[`week${week}Sent`] ? 'sent' : 'pending';
-                badges += `
-                    <span class="week-badge week-${status}">
-                        S${week}: ${status === 'sent' ? 'Enviado' : 'Pendente'}
-                    </span>
-                `;
-            }
-            return badges;
-        }
-
-        function generateMessageButtons(message) {
-            let buttons = '';
-            for (let week = 1; week <= 4; week++) {
-                if (!message[`week${week}Sent`]) {
-                    buttons += `
-                        <button onclick="sendMessage('${message.id}', ${week})" class="btn btn-primary">
-                            <i class="fas fa-paper-plane"></i> Semana ${week}
-                        </button>
-                    `;
-                }
-            }
-            return buttons || '<span class="status-sent">Todas mensagens enviadas</span>';
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const weekFilter = document.getElementById('week-filter');
-            if (weekFilter) {
-                weekFilter.addEventListener('change', () => {
-                    filterMessages();
-                });
-            }
-        });
-
-        // Adicione estas funções de utilidade
-        function showLoading() {
-            document.getElementById('loading-overlay').style.display = 'flex';
-        }
-
-        function hideLoading() {
-            document.getElementById('loading-overlay').style.display = 'none';
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById(`${type}-toast`);
-            const messageEl = document.getElementById(`${type}-message`);
-            
-            messageEl.textContent = message;
-            toast.classList.add('show');
-
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        // Adicione esta nova função
-        async function loadNotifications() {
-            try {
-                const response = await fetch('/api/admin/notifications', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-
-                if (!response.ok) throw new Error('Erro ao carregar notificações');
-
-                const data = await response.json();
-                const notificationsList = document.getElementById('notifications-list');
-                notificationsList.innerHTML = '';
-
-                data.notifications.forEach(notification => {
-                    const notificationElement = document.createElement('div');
-                    notificationElement.className = `notification-item ${notification.type}`;
-                    notificationElement.innerHTML = `
-                        <div class="notification-header">
-                            <i class="fas ${getNotificationIcon(notification.type)}"></i>
-                            <span class="notification-time">${formatDate(notification.createdAt)}</span>
-                        </div>
-                        <div class="notification-content">
-                            <h4>${notification.title}</h4>
-                            <p>${notification.message}</p>
-                        </div>
-                    `;
-                    notificationsList.appendChild(notificationElement);
-                });
-            } catch (error) {
-                console.error('Erro ao carregar notificações:', error);
-                throw error;
-            }
-        }
-
-        function getNotificationIcon(type) {
-            switch(type) {
-                case 'success': return 'fa-check-circle';
-                case 'warning': return 'fa-exclamation-triangle';
-                case 'error': return 'fa-exclamation-circle';
-                default: return 'fa-info-circle';
-            }
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-    </script>
+    <script src="js/chart.min.js"></script>
+    <script src="js/admin.js"></script>
 </body>
 </html>

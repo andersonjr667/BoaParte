@@ -6,6 +6,7 @@
     <title>Login - Boa Parte</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="images/image.png">
     <style>
         :root {
             --primary-color: #4CAF50;
@@ -305,6 +306,13 @@
                 console.log('Auth data stored successfully');
                 showNotification('Login realizado com sucesso!');
                 
+                // Get token from response header if present
+                const authHeader = response.headers.get('Authorization');
+                if (authHeader) {
+                    const token = authHeader.split(' ')[1];
+                    localStorage.setItem('token', token);
+                }
+
                 // Redirect with small delay
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
@@ -345,6 +353,17 @@
                 toggleButton.classList.remove('fa-eye-slash');
                 toggleButton.classList.add('fa-eye');
             }
+        }
+
+        // Register service worker and handle errors
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/js/notification-worker.js')
+                .then(registration => {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                })
+                .catch(error => {
+                    console.error('Service Worker registration failed:', error);
+                });
         }
     </script>
 </body>
