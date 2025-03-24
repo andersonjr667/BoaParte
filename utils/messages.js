@@ -13,28 +13,21 @@
     }
 
     // Mensagem inicial de boas-vindas
-    const welcomeMessage = (name) => {
-        const hora = parseInt(getBrazilHour());
-        const saudacao = hora >= 5 && hora < 12 ? "Bom dia" : 
-                         hora >= 12 && hora < 18 ? "Boa tarde" : 
-                         "Boa noite";
-
-        return `${saudacao}, ${name}! Graça e Paz do Senhor Jesus!\n\n` +
-            "Seja muito bem-vindo(a) à Igreja Batista Solidária! A Juventude da Igreja Batista Solidária (JIBS) também celebra a sua chegada e se alegra em recebê-lo(a). " +
-            "É uma honra tê-lo(a) conosco e agradecemos por compartilhar seu contato.\n\n" +
-            "Que este momento seja especial em sua vida e que você se sinta acolhido(a) e abençoado(a) por Deus. " +
-            "Estamos aqui para caminhar ao seu lado e auxiliar no que for preciso.\n\n" +
-            "📌 *Nossas programações:*\n" +
-            "• *Terças-feiras:* Culto de Oração às 20h\n" +
-            "• *Quintas-feiras:* Culto do Clamor às 20h\n" +
-            "• *Sábados:* Culto de Jovens e Adolescentes às 19h\n" +
-            "• *Domingos:*\n" +
-            "  - 09h: Escola Bíblica Dominical\n" +
-            "  - 10h: Culto da Manhã\n" +
-            "  - 19h: Culto da Noite\n\n" +
-            "Que o Senhor renove sua paz, sua alegria e sua esperança hoje e sempre!\n\n" +
-            "Com carinho,\nJuventude da Igreja Batista Solidária (JIBS) e Igreja Batista Solidária";
-    };
+    function welcomeMessage(name) {
+        return `Paz do Senhor ${name}! 🙏\n\n` +
+               "Somos da Igreja Batista Lugar de Benção, e gostaríamos de convidar você para conhecer nossa igreja!\n\n" +
+               "📌 *Programações da igreja:*\n" +
+               "• *Terças-feiras:* Culto de Oração às 20h\n" +
+               "• *Quintas-feiras:* Culto do Clamor às 20h\n" +
+               "• *Sábados:* Culto de Jovens e Adolescentes às 19h\n" +
+               "• *Domingos:*\n" +
+               "  - 09h: Escola Bíblica Dominical\n" +
+               "  - 10h: Culto da Manhã\n" +
+               "  - 19h: Culto da Noite\n\n" +
+               "Será uma alegria ter você conosco! 🤗\n\n" +
+               "_\"Vinde a mim, todos os que estai cansados e oprimidos, e eu vos aliviarei.\"_\n" +
+               "*Mateus 11:28*";
+    }
 
     // Programações da semana atualizadas
     const programacoesSemana = `

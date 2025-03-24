@@ -383,6 +383,45 @@ select {
     color: var(--danger-color);
 }
 
+.message-status {
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.status-toggle {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+    transition: color 0.3s ease;
+}
+
+.status-toggle:hover {
+    color: var(--primary-color);
+}
+
+.message-status.read .status-toggle {
+    color: var(--primary-color);
+}
+
+.message-status.unread .status-toggle {
+    color: #FFA000;
+}
+
+.message-status.read .fa-check-circle {
+    color: var(--primary-color);
+}
+
+.message-status.unread .fa-circle {
+    color: #FFA000;
+}
+
 /* Mobile Responsive Styles */
 @media (max-width: 768px) {
     .dashboard-container {

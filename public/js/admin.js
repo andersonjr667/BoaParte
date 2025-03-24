@@ -1040,6 +1040,9 @@ async function sendWhatsAppMessage(phone, name, contactId) {
         
         const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
         
+        // Get the welcome message for the contact
+        const message = welcomeMessage(name);
+
         // Add timestamp to log message
         const timestamp = new Date().toLocaleString('pt-BR');
         console.log(`[${timestamp}] Enviando mensagem para ${name} (${formattedPhone}) - ID: ${contactId}`);
@@ -1053,6 +1056,7 @@ async function sendWhatsAppMessage(phone, name, contactId) {
             body: JSON.stringify({
                 phone: formattedPhone,
                 name: name,
+                message: message, // Inclui a mensagem completa
                 contactId: contactId
             })
         });
@@ -1069,12 +1073,10 @@ async function sendWhatsAppMessage(phone, name, contactId) {
         const data = await response.json();
         
         if (data.success) {
-            // Log successful message
             console.log(`[${timestamp}] ✅ Mensagem enviada com sucesso para ${name}`);
             showNotification('✅ Mensagem enviada com sucesso!');
             await loadContacts();
         } else {
-            // Log failed message
             console.error(`[${timestamp}] ❌ Falha ao enviar mensagem para ${name}: ${data.message}`);
             throw new Error(data.message || 'Erro ao enviar mensagem');
         }
@@ -1087,6 +1089,23 @@ async function sendWhatsAppMessage(phone, name, contactId) {
             window.location.href = 'login.html';
         }
     }
+}
+
+// Adicione esta função para gerar a mensagem de boas-vindas
+function welcomeMessage(name) {
+    return `Paz do Senhor ${name}! 🙏\n\n` +
+           "Somos da Igreja Batista Lugar de Benção, e gostaríamos de convidar você para conhecer nossa igreja!\n\n" +
+           "📌 *Programações da igreja:*\n" +
+           "• *Terças-feiras:* Culto de Oração às 20h\n" +
+           "• *Quintas-feiras:* Culto do Clamor às 20h\n" +
+           "• *Sábados:* Culto de Jovens e Adolescentes às 19h\n" +
+           "• *Domingos:*\n" +
+           "  - 09h: Escola Bíblica Dominical\n" +
+           "  - 10h: Culto da Manhã\n" +
+           "  - 19h: Culto da Noite\n\n" +
+           "Será uma alegria ter você conosco! 🤗\n\n" +
+           "_\"Vinde a mim, todos os que estai cansados e oprimidos, e eu vos aliviarei.\"_\n" +
+           "*Mateus 11:28*";
 }
 
 async function deleteUser(username) {

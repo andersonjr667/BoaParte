@@ -31,7 +31,6 @@ async function deleteContact(contactId) {
 
 // ...existing code...
 
-// Function to load contacts and sort them in reverse order
 async function loadContacts() {
     try {
         const response = await fetch('/api/contacts/');
@@ -61,40 +60,112 @@ async function loadContacts() {
     }
 }
 
-// Function to send WhatsApp message using the message defined in mensages.js
+// Updated sendWhatsAppMessage function
 async function sendWhatsAppMessage(phone, name, contactId) {
     try {
-        const cleanPhone = phone.replace(/\D/g, ''); // Remove all non-numeric characters
+        let cleanPhone = phone.replace(/\D/g, '');
         
-        // Use the message defined in mensages.js
+        if (cleanPhone.length === 11) {
+            const ddd = cleanPhone.slice(0, 2);
+            const remainder = cleanPhone.slice(3);
+            if (cleanPhone[2] === '9') {
+                cleanPhone = ddd + remainder;
+            }
+        }
+        
+        const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+        
+        // Use the imported welcomeMessage function
         const message = welcomeMessage(name);
+        
+        console.log('Enviando mensagem para:', name);
+        console.log('Número formatado:', formattedPhone);
+        console.log('Mensagem:', message);
 
         const response = await fetch('/api/send-whatsapp', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             body: JSON.stringify({
-                phone: cleanPhone,
+                phone: formattedPhone,
+                name: name,
                 message: message,
                 contactId: contactId
             })
         });
 
+        if (!response.ok) {
+            throw new Error('Erro ao enviar mensagem');
+        }
+
         const data = await response.json();
         
         if (data.success) {
             showNotification('✅ Mensagem enviada com sucesso!');
-            // Reload contacts to update the status
-            await loadContacts();
-        } else if (data.message === 'Mensagem já enviada') {
-            showNotification('⚠️ Mensagem já foi enviada anteriormente. Não é recomendado reenviar.', true);
+            await loadContacts(); // Reload to update status
         } else {
-            showNotification('❌ ' + (data.message || 'Erro ao enviar mensagem'), true);
+            throw new Error(data.message || 'Erro ao enviar mensagem');
         }
     } catch (error) {
-        console.error('Erro:', error);
-        showNotification('❌ Erro ao enviar mensagem', true);
+        console.error('Erro ao enviar mensagem:', error);
+        showNotification('❌ ' + error.message, 'error');
+    }
+}
+
+// ...existing code...
+
+async function sendFollowUpMessage(phone, name, contactId) {
+    try {
+        let cleanPhone = phone.replace(/\D/g, '');
+        
+        if (cleanPhone.length === 11) {
+            const ddd = cleanPhone.slice(0, 2);
+            const remainder = cleanPhone.slice(3);
+            if (cleanPhone[2] === '9') {
+                cleanPhone = ddd + remainder;
+            }
+        }
+        
+        const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+        
+        // Use a função welcomeMessage do messages.js
+        const message = welcomeMessage(name);
+
+        console.log('Enviando mensagem para:', name);
+        console.log('Número formatado:', formattedPhone);
+        console.log('Mensagem:', message);
+
+        const response = await fetch('/api/send-whatsapp', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+                phone: formattedPhone,
+                name: name,
+                message: message, // Usando a mensagem de boas-vindas
+                contactId: contactId
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao enviar mensagem');
+        }
+
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('✅ Mensagem enviada com sucesso!');
+            await loadContacts(); // Reload to update status
+        } else {
+            throw new Error(data.message || 'Erro ao enviar mensagem');
+        }
+    } catch (error) {
+        console.error('Erro ao enviar mensagem:', error);
+        showNotification('❌ ' + error.message, 'error');
     }
 }
 
@@ -122,8 +193,9 @@ function createContactElement(contact) {
     const ownerDisplay = contact.owner || contact.username || 'Usuário';
 
     // Handle message status
-    const messageStatus = contact.receivedMessage ? 'sent' : 'not-sent';
-    const messageStatusText = contact.receivedMessage ? 'Mensagem já enviada' : 'Mensagem não foi mandada';
+    const messageStatus = contact.receivedMessage ? 'read' : 'unread';
+    const messageIcon = contact.receivedMessage ? 'fa-check-circle' : 'fa-circle';
+    const messageText = contact.receivedMessage ? 'Mensagem Lida' : 'Mensagem Não Lida';
     const messageButtonDisabled = contact.receivedMessage ? 'disabled' : '';
 
     contactElement.innerHTML = `
@@ -141,7 +213,12 @@ function createContactElement(contact) {
                     ${formattedCreatedAt}
                 </span>
             </div>
-            <div class="message-status ${messageStatus}">${messageStatusText}</div>
+            <div class="message-status ${messageStatus}">
+                <button onclick="toggleMessageStatus('${contact._id}', ${!contact.receivedMessage})" class="status-toggle">
+                    <i class="fas ${messageIcon}"></i>
+                    ${messageText}
+                </button>
+            </div>
         </div>
         <div class="button-container">
             <div class="main-button">
@@ -158,6 +235,11 @@ function createContactElement(contact) {
                         ${messageButtonDisabled}>
                     <i class="fab fa-whatsapp"></i> Enviar Mensagem
                 </button>
+                ${contact.receivedMessage ? `
+                <button onclick="markAsNotSent('${contact._id.$oid || contact._id}')" class="action-button mark-not-sent-btn">
+                    <i class="fas fa-times-circle"></i> Marcar como Não Enviada
+                </button>
+                ` : ''}
                 <button onclick="editContact('${contact._id.$oid || contact._id}')" class="action-button edit-button">
                     <i class="fas fa-edit"></i> Editar
                 </button>
@@ -170,4 +252,151 @@ function createContactElement(contact) {
     return contactElement;
 }
 
+async function toggleMessageStatus(contactId, newStatus) {
+    try {
+        const response = await fetch(`/api/contacts/${contactId}/message-status`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ receivedMessage: newStatus })
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                window.location.href = 'login.html';
+                return;
+            }
+            throw new Error('Erro ao atualizar status da mensagem');
+        }
+
+        showNotification(`✅ Status da mensagem ${newStatus ? 'marcado como lido' : 'marcado como não lido'}`);
+        await loadContacts(); // Recarrega a lista de contatos
+    } catch (error) {
+        console.error('Erro:', error);
+        showNotification('❌ ' + error.message, 'error');
+    }
+}
+
+// Function to mark message as not sent (corrigido)
+async function markAsNotSent(contactId) {
+    try {
+        const response = await fetch(`/api/contacts/${contactId}/message-status`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ receivedMessage: false })
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                window.location.href = 'login.html';
+                return;
+            }
+            throw new Error('Erro ao marcar mensagem como não enviada');
+        }
+
+        await loadContacts(); // Recarrega a lista de contatos
+        showNotification('✅ Mensagem marcada como não enviada');
+    } catch (error) {
+        console.error('Erro ao marcar mensagem como não enviada:', error);
+        showNotification('❌ ' + error.message, 'error');
+    }
+}
+
+// Function to edit contact
+async function editContact(contactId) {
+    try {
+        console.log('Editando contato:', contactId);
+        const response = await fetch(`/api/contacts/${contactId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        console.log('Status da resposta:', response.status);
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                window.location.href = 'login.html';
+                return;
+            }
+            throw new Error('Erro ao carregar dados do contato');
+        }
+
+        const contact = await response.json();
+        console.log('Dados do contato:', contact);
+
+        if (!contact) {
+            throw new Error('Contato não encontrado');
+        }
+
+        // Preenche o formulário de edição
+        document.getElementById('edit-contact-id').value = contactId;
+        document.getElementById('edit-name').value = contact.name || '';
+        document.getElementById('edit-phone').value = contact.phone || '';
+        if (contact.birthday) {
+            const birthday = new Date(contact.birthday);
+            document.getElementById('edit-birthday').value = birthday.toISOString().split('T')[0];
+        } else {
+            document.getElementById('edit-birthday').value = '';
+        }
+
+        // Mostra o modal de edição
+        const modal = document.getElementById('edit-modal');
+        if (!modal) {
+            throw new Error('Modal de edição não encontrado');
+        }
+        modal.style.display = 'flex';
+    } catch (error) {
+        console.error('Erro ao editar contato:', error);
+        showNotification('❌ ' + error.message, 'error');
+    }
+}
+
+// Function to update contact
+async function updateContact(event) {
+    event.preventDefault();
+    
+    const contactId = document.getElementById('edit-contact-id').value;
+    const formData = {
+        name: document.getElementById('edit-name').value,
+        phone: document.getElementById('edit-phone').value,
+        birthday: document.getElementById('edit-birthday').value
+    };
+
+    try {
+        const response = await fetch(`/api/contacts/${contactId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao atualizar contato');
+        }
+
+        showNotification('✅ Contato atualizado com sucesso');
+        document.getElementById('edit-modal').style.display = 'none';
+        await loadContacts(); // Recarrega a lista de contatos
+    } catch (error) {
+        console.error('Erro:', error);
+        showNotification('❌ ' + error.message, 'error');
+    }
+}
+
 // ...existing code...
+
+function getAuthHeaders() {
+    const token = localStorage.getItem('token');
+    return {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    };
+}

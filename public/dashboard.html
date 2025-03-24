@@ -573,7 +573,7 @@
     <div class="dashboard-container">
         <div class="dashboard-header">
             <h2>Dashboard</h2>
-            <p>Gerencie seus contatos</p>
+            <p>Gerencie os contatos dos visitantes</p>
             <!-- Admin buttons only visible to admins -->
             <div id="admin-buttons" class="admin-buttons" style="display: none;"></div>
         </div>
@@ -606,6 +606,9 @@
             </button>
             <button onclick="markAllMessaged()" class="bulk-action-btn">
                 <i class="fas fa-check-double"></i> Marcar Todos como Enviado
+            </button>
+            <button onclick="markAllNotMessaged()" class="bulk-action-btn">
+                <i class="fas fa-times-circle"></i> Marcar Todos como Não Enviada
             </button>
         </div>
         <div class="content">
@@ -706,6 +709,38 @@
                 </div>
             </div>
 
+            <!-- Modal Editar Contato -->
+            <div id="edit-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Editar Contato</h3>
+                        <span class="close" onclick="document.getElementById('edit-modal').style.display='none'">&times;</span>
+                    </div>
+                    <form id="edit-contact-form" onsubmit="updateContact(event)">
+                        <input type="hidden" id="edit-contact-id">
+                        <div class="form-group">
+                            <label for="edit-name">Nome</label>
+                            <input type="text" id="edit-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-phone">Telefone</label>
+                            <input type="text" id="edit-phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-birthday">Data de Nascimento</label>
+                            <input type="date" id="edit-birthday">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="submit" class="btn-primary">Salvar</button>
+                            <button type="button" class="btn-secondary" 
+                                    onclick="document.getElementById('edit-modal').style.display='none'">
+                                Cancelar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <!-- Área de Filtros e Busca -->
             <div class="filter-container">
                 <div class="filter-group">
@@ -786,6 +821,7 @@
     </div>
 
     <script src="js/messages.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/dashboard.js"></script>
     <script>
         // Add this function at the top
@@ -1321,6 +1357,9 @@
                                 class="action-button reminder-btn">
                             <i class="fas fa-church"></i> Enviar Msg Lembrete
                         </button>
+                        <button onclick="markAsNotMessaged('${contact._id}')" class="action-button not-messaged-button">
+                            <i class="fas fa-times-circle"></i> Marcar como Não Enviada
+                        </button>
                     </div>
                 </div>
             `;
@@ -1337,12 +1376,9 @@
 
                 let cleanPhone = phone.replace(/\D/g, '');
                 
-                // Remove extra '9' after DDD
                 if (cleanPhone.length === 11) {
-                    // Extract DDD and remaining numbers
                     const ddd = cleanPhone.slice(0, 2);
                     const remainder = cleanPhone.slice(3);
-                    // Only keep remaining numbers if the first digit after DDD is 9
                     if (cleanPhone[2] === '9') {
                         cleanPhone = ddd + remainder;
                     }
@@ -1350,7 +1386,14 @@
                 
                 const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
                 
+                // Generate welcome message
+                const welcomeMsg = welcomeMessage(name);
+                if (!welcomeMsg) {
+                    throw new Error('Erro ao gerar mensagem de boas-vindas');
+                }
+
                 console.log(`Enviando mensagem para ${formattedPhone} (ID do contato: ${contactId})`);
+                console.log('Mensagem:', welcomeMsg);
 
                 const response = await fetch('/api/send-whatsapp', {
                     method: 'POST',
@@ -1360,7 +1403,7 @@
                     },
                     body: JSON.stringify({
                         phone: formattedPhone,
-                        name: name,
+                        message: welcomeMsg,
                         contactId: contactId
                     })
                 });
@@ -2007,6 +2050,90 @@ localStorage.removeItem('role');
             showNotification('❌ ' + error.message, true);
         }
     }
-    </script>
+
+    async function markAllNotMessaged() {
+        if (!confirm('Deseja marcar todos os contatos como "mensagem não enviada"?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/mark-all-not-messaged', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                showNotification('✅ ' + data.message);
+                await loadContacts();
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            showNotification('❌ ' + error.message, true);
+        }
+    }
+
+    async function markAsNotMessaged(contactId) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            console.log('Marking message as not sent for contact:', contactId);
+
+            const response = await fetch(`/api/contacts/${contactId}/mark-not-messaged`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('Server response status:', response.status);
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const errorText = await response.text();
+                console.error('Error response:', errorText);
+                
+                try {
+                    const errorData = JSON.parse(errorText);
+                    throw new Error(errorData.message || 'Erro ao marcar mensagem como não enviada');
+                } catch (e) {
+                    throw new Error('Erro ao processar resposta do servidor');
+                }
+            }
+
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.message || 'Erro ao atualizar status da mensagem');
+            }
+
+            showNotification('✅ Mensagem marcada como não enviada');
+            await loadContacts();
+
+        } catch (error) {
+            console.error('Erro ao marcar mensagem:', error);
+            showNotification('❌ ' + error.message, true);
+            
+            if (error.message.includes('Token')) {
+                window.location.href = 'login.html';
+            }
+        }
+    }
+</script>
 </body>
 </html>

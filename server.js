@@ -1109,28 +1109,48 @@ app.get('/api/auth/verify', (req, res) => {
     }
 });
 
-// Route to send WhatsApp message
+// Replace the /api/send-whatsapp route
 app.post('/api/send-whatsapp', authenticateToken, async (req, res) => {
-    const { phone, name, contactId } = req.body;
+    const { phone, name, message: customMessage, contactId } = req.body;
     const timestamp = getBrazilTimestamp();
-    
+
     try {
-        if (!req.user) {
-            return res.status(401).json({ 
-                success: false, 
-                message: 'Usuário não autenticado'
-            });
+        console.log(`[${timestamp}] Request received:`, { phone, name, contactId });
+
+        // Validate phone number
+        if (!phone) {
+            throw new Error('Número de telefone é obrigatório');
         }
 
-        console.log(`[${timestamp}] Enviando mensagem para ${name}`);
-        
-        if (!whatsappClient) {
-            throw new Error('Cliente WhatsApp não inicializado');
+        // Format phone number
+        let cleanPhone = phone.replace(/\D/g, '');
+        if (cleanPhone.length === 11 && cleanPhone[2] === '9') {
+            cleanPhone = cleanPhone.slice(0, 2) + cleanPhone.slice(3);
+        }
+        const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+
+        // Generate or use provided message
+        let messageToSend;
+        if (customMessage) {
+            messageToSend = customMessage;
+        } else if (name) {
+            messageToSend = welcomeMessage(name);
+            if (!messageToSend) {
+                throw new Error('Erro ao gerar mensagem de boas-vindas');
+            }
+        } else {
+            throw new Error('Nome ou mensagem personalizada é obrigatório');
         }
 
-        await sendMessage(phone, name, contactId);
+        console.log(`[${timestamp}] Sending message to ${formattedPhone}`);
 
-        // Update contact message status if contactId is provided
+        // Send message using WhatsApp client
+        const sent = await sendMessage(formattedPhone, messageToSend);
+        if (!sent) {
+            throw new Error('Falha ao enviar mensagem');
+        }
+
+        // Update contact status if ID provided
         if (contactId) {
             await Contact.findByIdAndUpdate(contactId, { 
                 receivedMessage: true,
@@ -1138,16 +1158,16 @@ app.post('/api/send-whatsapp', authenticateToken, async (req, res) => {
             });
         }
 
-        res.json({ 
-            success: true, 
-            message: 'Mensagem enviada com sucesso' 
+        res.json({
+            success: true,
+            message: 'Mensagem enviada com sucesso'
         });
+
     } catch (error) {
-        console.error(`[${timestamp}] Erro:`, error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Erro ao enviar mensagem',
-            error: error.message
+        console.error(`[${timestamp}] Error:`, error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Erro ao enviar mensagem'
         });
     }
 });
@@ -1824,6 +1844,200 @@ app.post('/api/mark-all-messaged', authenticateToken, async (req, res) => {
     }
 });
 
+// Rota para atualizar o status da mensagem
+app.put('/api/contacts/:id/message-status', authenticateToken, async (req, res) => {
+    try {
+        const contactId = req.params.id;
+        const { receivedMessage } = req.body;
+
+        const updatedContact = await Contact.findByIdAndUpdate(
+            contactId,
+            { receivedMessage },
+            { new: true }
+        );
+
+        if (!updatedContact) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Contato não encontrado' 
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Status atualizado com sucesso',
+            contact: updatedContact
+        });
+
+    } catch (error) {
+        console.error('Erro ao atualizar status:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao atualizar status da mensagem'
+        });
+    }
+});
+
+// Rota para buscar um contato específico
+app.get('/api/contacts/:id', authenticateToken, async (req, res) => {
+    try {
+        const contactId = req.params.id;
+        const contact = await Contact.findById(contactId);
+        
+        if (!contact) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Contato não encontrado' 
+            });
+        }
+
+        res.json({ 
+            success: true, 
+            contact 
+        });
+    } catch (error) {
+        console.error('Erro ao buscar contato:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Erro ao buscar contato' 
+        });
+    }
+});
+
+// Rota para atualizar um contato
+app.put('/api/contacts/:id', authenticateToken, async (req, res) => {
+    try {
+        const contactId = req.params.id;
+        const updates = req.body;
+        
+        const contact = await Contact.findByIdAndUpdate(
+            contactId, 
+            updates,
+            { new: true }
+        );
+
+        if (!contact) {
+            return res.status(404).json({
+                success: false,
+                message: 'Contato não encontrado'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Contato atualizado com sucesso',
+            contact
+        });
+    } catch (error) {
+        console.error('Erro ao atualizar contato:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao atualizar contato'
+        });
+    }
+});
+
+// Rota para atualizar o status da mensagem
+app.put('/api/contacts/:id/update-status', authenticateToken, async (req, res) => {
+    try {
+        const contactId = req.params.id;
+        const { receivedMessage } = req.body;
+
+        console.log('Atualizando status para contato:', {
+            contactId,
+            receivedMessage
+        });
+
+        const updatedContact = await Contact.findByIdAndUpdate(
+            contactId,
+            { receivedMessage },
+            { new: true }
+        );
+
+        if (!updatedContact) {
+            return res.status(404).json({
+                success: false,
+                message: 'Contato não encontrado'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Status atualizado com sucesso',
+            contact: updatedContact
+        });
+
+    } catch (error) {
+        console.error('Erro ao atualizar status:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao atualizar status da mensagem'
+        });
+    }
+});
+
+// Rota específica para marcar mensagem como não enviada
+app.post('/api/contacts/:id/mark-not-sent', authenticateToken, async (req, res) => {
+    try {
+        const contactId = req.params.id;
+        
+        const updatedContact = await Contact.findByIdAndUpdate(
+            contactId,
+            { receivedMessage: false },
+            { new: true }
+        );
+
+        if (!updatedContact) {
+            return res.status(404).json({
+                success: false,
+                message: 'Contato não encontrado'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Mensagem marcada como não enviada',
+            contact: updatedContact
+        });
+    } catch (error) {
+        console.error('Erro ao marcar mensagem como não enviada:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao marcar mensagem como não enviada'
+        });
+    }
+});
+
+app.post('/api/contacts/:id/mark-not-messaged', authenticateToken, async (req, res) => {
+    try {
+        const contactId = req.params.id;
+        const updatedContact = await Contact.findByIdAndUpdate(
+            contactId,
+            { receivedMessage: false },
+            { new: true }
+        );
+
+        if (!updatedContact) {
+            return res.status(404).json({
+                success: false,
+                message: 'Contato não encontrado'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Status da mensagem atualizado com sucesso',
+            contact: updatedContact
+        });
+    } catch (error) {
+        console.error('Erro ao atualizar status da mensagem:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao atualizar status da mensagem'
+        });
+    }
+});
+
 // Servir arquivos estáticos depois das rotas da API
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -2317,48 +2531,22 @@ app.get('/api/admin/detailed-stats', authenticateToken, async (req, res) => {
             });
         }
 
-        const stats = {
-            totalUsers: await User.countDocuments(),
-            totalContacts: await Contact.countDocuments(),
-            contactsToday: await Contact.countDocuments({
-                createdAt: { $gte: new Date().setHours(0, 0, 0, 0) }
-            }),
-            // ...rest of stats calculation...
-        };
-
+        const totalUsers = await User.countDocuments();
+        const totalContacts = await Contact.countDocuments();
+        
         res.json({
             success: true,
-            stats: stats
-        });
-
-    } catch (error) {
-        console.error('Error in /api/admin/detailed-stats:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error loading statistics',
-            error: error.message
-        });
-    }
-});
-
-// Admin check endpoint
-app.get('/api/check-admin', authenticateToken, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.id);
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
-        }
-
-        const isAdmin = user.role === 'admin';
-        res.json({ 
-            success: true, 
-            isAdmin,
-            username: user.username,
-            role: user.role
+            totalUsers,
+            totalContacts,
+            username: req.user.username,
+            role: req.user.role
         });
     } catch (error) {
-        console.error('Erro ao verificar admin:', error);
-        res.status(500).json({ success: false, message: 'Erro ao verificar permissões de admin' });
+        console.error('Erro ao carregar estatísticas detalhadas:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Erro ao carregar estatísticas detalhadas'
+        });
     }
 });
 
