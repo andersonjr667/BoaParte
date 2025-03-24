@@ -1,4 +1,5 @@
-require('dotenv').config();
+// Carrega as variáveis de ambiente do arquivo .env
+require('dotenv').config({ path: './.env' });
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -33,19 +34,26 @@ const saveState = async (state) => {
 };
 
 const app = express();
+
+// Agora, as variáveis de ambiente são carregadas a partir do .env
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://anderson:152070@database.o6gmd.mongodb.net/test?retryWrites=true&w=majority';
-const JWT_SECRET = process.env.JWT_SECRET || 'WPYvz*z_ZC5L:?mW.:,MPJ$_U?RD8X';
-const VALID_REGISTRATION_CODE = process.env.REGISTRATION_CODE || 'BOAPARTE2024';
-const TOKEN_EXPIRATION = '7d'; // Aumentado para 7 dias
+const MONGODB_URI = process.env.MONGODB_URI;
+const JWT_SECRET = process.env.JWT_SECRET;
+const VALID_REGISTRATION_CODE = process.env.REGISTRATION_CODE;
+const TOKEN_EXPIRATION = process.env.TOKEN_EXPIRATION || '7d'; // Usando a variável de ambiente para expiração
 
 let whatsappClient = null;
 let isInitializing = false;
 let state = null;
 
-// Add this at the top of your script
-const API_BASE_URL = '/api'; // Change this to match your API URL
+// API Base URL
+const API_BASE_URL = '/api'; // Mantenha o valor que você precisa
 console.log('API Base URL:', API_BASE_URL);
+
+// Continue com o restante do código para inicialização do app e configuração do servidor
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+});
 
 // Replace the vapidKeys and webpush configuration with:
 const vapidDetails = {
