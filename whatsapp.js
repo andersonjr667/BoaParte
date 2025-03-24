@@ -3,8 +3,8 @@ const { Boom } = require('@hapi/boom');
 const P = require('pino');
 const fs = require('fs');
 const path = require('path');
-const qrcode = require('qrcode'); // Certifique-se de que esta linha está presente
-const { welcomeMessage, getMessageByDay } = require('./utils/messages'); // Update the import path
+const qrcode = require('qrcode');
+const messages = require('./utils/messages');
 
 let sock = null;
 let qr = null;
@@ -129,17 +129,11 @@ async function sendMessage(phone, message) {
             throw new Error('WhatsApp não está conectado');
         }
 
-        // Validate phone parameter
-        if (!phone) {
-            throw new Error('Número de telefone é obrigatório');
+        if (!phone || !message) {
+            throw new Error('Número de telefone e mensagem são obrigatórios');
         }
 
-        // Validate message parameter
-        if (!message) {
-            throw new Error('Mensagem é obrigatória');
-        }
-
-        // Format phone number if needed
+        // Format phone number
         const cleanPhone = phone.replace(/\D/g, '');
         const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
 

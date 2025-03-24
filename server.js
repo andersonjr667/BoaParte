@@ -12,6 +12,7 @@ const multer = require('multer');
 const { connectToWhatsApp, getConnectionStatus, sendMessage } = require('./whatsapp');
 const webpush = require('web-push');
 const { welcomeMessage, getMessageByDay, serviceReminderMessage, bulkReminderMessage } = require('./utils/messages');
+const messages = require('./utils/messages');
 
 // Adicione no início do server.js, após as importações
 const authPath = './auth_info.json';
@@ -1134,7 +1135,7 @@ app.post('/api/send-whatsapp', authenticateToken, async (req, res) => {
         if (customMessage) {
             messageToSend = customMessage;
         } else if (name) {
-            messageToSend = welcomeMessage(name);
+            messageToSend = messages.welcomeMessage(name);
             if (!messageToSend) {
                 throw new Error('Erro ao gerar mensagem de boas-vindas');
             }
