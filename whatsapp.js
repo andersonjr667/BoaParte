@@ -5,52 +5,87 @@ const fs = require('fs');
 const path = require('path');
 const qrcode = require('qrcode');
 const messages = require('./utils/messages');
+const { promisify } = require('util');
+const exec = promisify(require('child_process').exec);
 
 let sock = null;
-let qr = null;
-let connectionStatus = 'disconnected';
-const AUTH_FOLDER = './auth_info_baileys';
-
-let retryCount = 0;
+let isConnecting = false;
+const RECONNECT_INTERVAL = 3000;
 const MAX_RETRIES = 5;
-const RETRY_INTERVAL = 5000; // 5 seconds
+let retryCount = 0;
+let qr = null;
+
+// Configuração do logger
+const logger = P({ 
+    timestamp: () => `,"time":"${new Date().toJSON()}"`,
+    level: 'silent' 
+});
+
+// Add disk space check function
+async function checkDiskSpace() {
+    try {
+        // For Windows
+        const { stdout } = await exec('wmic logicaldisk get freespace,size /format:csv');
+        const lines = stdout.trim().split('\n');
+        const values = lines[1].split(',');
+        const freeSpace = parseInt(values[1]);
+        const totalSpace = parseInt(values[2]);
+        
+        // Ensure at least 100MB free
+        const MIN_FREE_SPACE = 100 * 1024 * 1024; // 100MB in bytes
+        if (freeSpace < MIN_FREE_SPACE) {
+            throw new Error('Insufficient disk space');
+        }
+        return true;
+    } catch (error) {
+        console.error('Error checking disk space:', error);
+        return false;
+    }
+}
 
 // Função para inicializar o WhatsApp
 async function connectToWhatsApp() {
+    if (isConnecting) return;
     try {
-        // Ensure auth folder exists
+        isConnecting = true;
+
+        // Check disk space before proceeding
+        const hasSpace = await checkDiskSpace();
+        if (!hasSpace) {
+            throw new Error('Insufficient disk space for WhatsApp operation');
+        }
+
+        // Create AUTH_FOLDER if it doesn't exist
+        const AUTH_FOLDER = './auth_info_baileys';
         if (!fs.existsSync(AUTH_FOLDER)) {
-            fs.mkdirSync(AUTH_FOLDER, { recursive: true });
+            await fs.promises.mkdir(AUTH_FOLDER, { recursive: true });
         }
 
-        // Initialize auth state
         const { state, saveCreds } = await useMultiFileAuthState(AUTH_FOLDER);
-
-        // Close existing connection if any
-        if (sock) {
-            sock.ws.close();
-            sock = null;
-        }
-
-        // Create WhatsApp socket connection with additional configurations
+        
         sock = makeWASocket({
+            printQRInTerminal: true,
             auth: state,
-            printQRInTerminal: false,
-            logger: P({ level: 'silent' }),
-            connectTimeoutMs: 30000,
-            retryRequestDelayMs: 1000,
-            browser: ['JIBS Bot', 'Chrome', '1.0.0']
+            logger,
+            connectTimeoutMs: 60000,
+            keepAliveIntervalMs: 30000,
+            retryRequestDelayMs: 2000,
+            browser: ['Ubuntu', 'Chrome', '22.04.4'],
+            defaultQueryTimeoutMs: 60000,
         });
 
-        // Evento de conexão
         sock.ev.on('connection.update', async (update) => {
             const { connection, lastDisconnect, qr: newQr } = update;
 
             if (newQr) {
-                // Converte o QR code para base64
-                qr = await qrcode.toDataURL(newQr);
-                console.log('Novo QR Code disponível');
-                retryCount = 0; // Reset retry count when new QR is generated
+                try {
+                    qr = await generateQRWithLogo(newQr);
+                    console.log('New QR code generated with logo');
+                    retryCount = 0;
+                } catch (qrError) {
+                    console.error('Error generating QR code:', qrError);
+                    qr = null;
+                }
             }
 
             if (connection === 'close') {
@@ -58,12 +93,21 @@ async function connectToWhatsApp() {
                 const statusCode = error?.output?.statusCode;
                 console.log('Conexão fechada. Status code:', statusCode);
 
-                // Handle specific error cases
-                if (statusCode === 440) { // Conflict error
-                    console.log('Detectado conflito de conexão. Limpando credenciais...');
+                // Clear any existing reconnection timeout
+                if (reconnectTimeout) {
+                    clearTimeout(reconnectTimeout);
+                }
+
+                // Handle specific disconnection cases
+                if (statusCode === DisconnectReason.loggedOut || 
+                    statusCode === DisconnectReason.connectionLost ||
+                    statusCode === DisconnectReason.connectionReplaced) {
+                    console.log('Limpando credenciais devido a desconexão permanente...');
                     try {
                         await fs.promises.rm(AUTH_FOLDER, { recursive: true, force: true });
                         console.log('Credenciais antigas removidas');
+                        connectionStatus = 'disconnected';
+                        retryCount = 0;
                     } catch (err) {
                         console.error('Erro ao limpar credenciais:', err);
                     }
@@ -73,16 +117,19 @@ async function connectToWhatsApp() {
                 
                 if (shouldReconnect) {
                     retryCount++;
-                    console.log(`Tentativa de reconexão ${retryCount}/${MAX_RETRIES} em ${RETRY_INTERVAL/1000} segundos...`);
-                    setTimeout(async () => {
+                    console.log(`Tentativa de reconexão ${retryCount}/${MAX_RETRIES} em ${RECONNECT_INTERVAL/1000} segundos...`);
+                    connectionStatus = 'reconnecting';
+                    
+                    reconnectTimeout = setTimeout(async () => {
                         try {
                             await connectToWhatsApp();
                         } catch (err) {
                             console.error('Erro na tentativa de reconexão:', err);
+                            connectionStatus = 'error';
                         }
-                    }, RETRY_INTERVAL);
-                } else if (retryCount >= MAX_RETRIES) {
-                    console.log('Número máximo de tentativas atingido. Por favor, reinicie o servidor.');
+                    }, RECONNECT_INTERVAL);
+                } else {
+                    console.log('Número máximo de tentativas atingido ou logout detectado');
                     connectionStatus = 'error';
                 }
             } else if (connection === 'open') {
@@ -90,63 +137,77 @@ async function connectToWhatsApp() {
                 connectionStatus = 'connected';
                 qr = null;
                 retryCount = 0;
+                reconnectAttempts = 0;
             }
         });
 
-        // Save credentials when updated
-        sock.ev.on('creds.update', saveCreds);
+        // Modify credentials update handler
+        sock.ev.on('creds.update', async () => {
+            try {
+                const hasSpace = await checkDiskSpace();
+                if (!hasSpace) {
+                    console.error('Low disk space detected during credentials update');
+                    return;
+                }
+                await saveCreds();
+            } catch (error) {
+                console.error('Error saving credentials:', error);
+                // If we can't save credentials, mark connection as error
+                connectionStatus = 'error';
+            }
+        });
 
+        return sock;
     } catch (error) {
-        console.error('Erro ao conectar WhatsApp:', error);
+        console.error('Erro ao inicializar WhatsApp:', error);
         connectionStatus = 'error';
         
-        if (retryCount < MAX_RETRIES) {
-            retryCount++;
-            console.log(`Tentativa de reconexão ${retryCount}/${MAX_RETRIES} em ${RETRY_INTERVAL/1000} segundos...`);
-            setTimeout(connectToWhatsApp, RETRY_INTERVAL);
-        } else {
-            console.error('Número máximo de tentativas atingido');
-            throw error;
+        // If error is disk space related, try cleanup
+        if (error.code === 'ENOSPC') {
+            try {
+                await fs.promises.rm(AUTH_FOLDER, { recursive: true, force: true });
+                console.log('Cleaned up auth folder due to disk space issues');
+            } catch (cleanupError) {
+                console.error('Failed to clean up:', cleanupError);
+            }
         }
+        
+        throw error;
+    } finally {
+        isConnecting = false;
     }
-
-    return sock;
 }
 
-// Função para obter status da conexão
-function getConnectionStatus() {
-    return {
-        status: connectionStatus,
-        qr: qr // Retorna o QR code em base64
-    };
-}
-
-// Função para enviar mensagem
+// Função para enviar mensagem com melhor tratamento de erros
 async function sendMessage(phone, message) {
     try {
-        // Validate WhatsApp connection
         if (!sock || connectionStatus !== 'connected') {
-            throw new Error('WhatsApp não está conectado');
+            throw new Boom('WhatsApp não está conectado', { statusCode: 428 });
         }
 
         if (!phone || !message) {
-            throw new Error('Número de telefone e mensagem são obrigatórios');
+            throw new Boom('Número de telefone e mensagem são obrigatórios', { statusCode: 400 });
         }
 
-        // Format phone number
         const cleanPhone = phone.replace(/\D/g, '');
         const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
-
-        // Format JID for WhatsApp
         const jid = `${formattedPhone}@s.whatsapp.net`;
 
-        // Check if number exists on WhatsApp
-        const [exists] = await sock.onWhatsApp(formattedPhone);
-        if (!exists) {
-            throw new Error(`O número ${formattedPhone} não está registrado no WhatsApp`);
+        try {
+            const [exists] = await sock.onWhatsApp(formattedPhone);
+            if (!exists) {
+                throw new Boom(`O número ${formattedPhone} não está registrado no WhatsApp`, { statusCode: 404 });
+            }
+        } catch (error) {
+            if (error.output?.statusCode === 428) {
+                // Se a conexão foi perdida durante a verificação, tenta reconectar
+                connectionStatus = 'disconnected';
+                await connectToWhatsApp();
+                throw new Boom('Tentando reconectar ao WhatsApp. Por favor, tente novamente em alguns segundos.', { statusCode: 503 });
+            }
+            throw error;
         }
 
-        // Send message with retry logic
         let retries = 3;
         while (retries > 0) {
             try {
@@ -161,6 +222,32 @@ async function sendMessage(phone, message) {
         }
     } catch (error) {
         console.error('Erro ao enviar mensagem:', error);
+        throw error;
+    }
+}
+
+// Função para obter status da conexão
+function getConnectionStatus() {
+    return {
+        status: connectionStatus,
+        qr: qr
+    };
+}
+
+async function generateQRWithLogo(qrData) {
+    try {
+        // Generate QR code with optimal settings for reliable scanning
+        return await qrcode.toDataURL(qrData, {
+            errorCorrectionLevel: 'H',
+            margin: 2,
+            width: 400,
+            color: {
+                dark: '#000000',
+                light: '#ffffff',
+            }
+        });
+    } catch (error) {
+        console.error('Error generating QR code:', error);
         throw error;
     }
 }

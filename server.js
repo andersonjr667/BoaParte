@@ -118,25 +118,17 @@ const authenticateToken = (req, res, next) => {
         const token = authHeader && authHeader.split(' ')[1];
 
         if (!token) {
-            console.log('Missing token in request:', {
-                headers: req.headers,
-                path: req.path,
-                method: req.method
-            });
-            return res.status(401).json({ 
-                success: false, 
-                message: 'Token não fornecido',
-                redirect: '/login.html'
+            return res.status(401).json({
+                success: false,
+                message: 'Token não fornecido'
             });
         }
 
         jwt.verify(token, JWT_SECRET, (err, decoded) => {
             if (err) {
-                console.log('Token verification failed:', err.message);
-                return res.status(401).json({ 
-                    success: false, 
-                    message: 'Token inválido',
-                    redirect: '/login.html'
+                return res.status(401).json({
+                    success: false,
+                    message: 'Token inválido ou expirado'
                 });
             }
 
@@ -144,13 +136,24 @@ const authenticateToken = (req, res, next) => {
             next();
         });
     } catch (error) {
-        console.error('Authentication error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Erro interno de autenticação',
-            redirect: '/login.html'
+        console.error('Erro na autenticação:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno de autenticação'
         });
     }
+};
+
+// Middleware para verificar status do WhatsApp
+const checkWhatsAppStatus = async (req, res, next) => {
+    if (!whatsappClient) {
+        try {
+            whatsappClient = await connectToWhatsApp();
+        } catch (error) {
+            console.error('Erro ao reconectar WhatsApp:', error);
+        }
+    }
+    next();
 };
 
 // Endpoint /ping
@@ -304,23 +307,22 @@ const logSchema = new mongoose.Schema({
 
 const Log = mongoose.model('Log', logSchema);
 
-// Rota de login simplificada
+// Atualizar a rota de login
 app.post("/api/auth/login", async (req, res) => {
     try {
         const { username, password } = req.body;
-        console.log('Login attempt:', { username }); // Debug log
+        console.log('Login attempt:', { username });
 
         if (!username || !password) {
             return res.status(400).json({
                 success: false,
-                message: 'Usuário e senha são obrigatórios'
+                message: 'Username e senha são obrigatórios'
             });
         }
 
         const user = await User.findOne({ username });
         
         if (!user) {
-            console.log('User not found:', username);
             return res.status(401).json({
                 success: false,
                 message: 'Usuário não encontrado'
@@ -329,7 +331,6 @@ app.post("/api/auth/login", async (req, res) => {
 
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {
-            console.log('Invalid password for user:', username);
             return res.status(401).json({
                 success: false,
                 message: 'Senha incorreta'
@@ -347,9 +348,6 @@ app.post("/api/auth/login", async (req, res) => {
         );
 
         console.log('Login successful:', { username, role: user.role });
-        
-        // Set token in the response header
-        res.setHeader('Authorization', `Bearer ${token}`);
         
         res.json({
             success: true,
@@ -476,46 +474,53 @@ app.post("/api/register", async (req, res) => {
 // Rota para obter contatos
 app.get('/api/contacts', authenticateToken, async (req, res) => {
     try {
-        const contacts = await Contact.find();
-        res.json({ success: true, contacts });
+        const contacts = await Contact.find().sort({ createdAt: -1 });
+
+        res.json({
+            success: true,
+            contacts
+        });
     } catch (error) {
-        console.error('Erro ao listar contatos:', error);
+        console.error('Erro ao buscar contatos:', error);
         res.status(500).json({
             success: false,
-            message: 'Erro ao listar contatos'
+            message: 'Erro ao buscar contatos'
         });
     }
 });
 
-// Rota para obter contatos do mês atual
-app.get('/api/contacts/month', async (req, res) => {
+// Rota para obter contatos do mês atual (removida duplicata e padronizado response)
+app.get('/api/contacts/month', authenticateToken, async (req, res) => {
     try {
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
         const contacts = await Contact.find({
-            createdAt: {
-                $gte: startOfMonth,
-                $lte: endOfMonth
-            }
+            createdAt: { $gte: startOfMonth, $lte: endOfMonth }
         }).sort({ createdAt: -1 });
 
-        res.json(contacts);
+        res.json({
+            success: true,
+            message: 'Contatos do mês atual obtidos com sucesso',
+            data: contacts
+        });
     } catch (error) {
         console.error('Erro ao buscar contatos do mês:', error);
         res.status(500).json({
             success: false,
-            message: 'Erro ao buscar contatos do mês'
+            message: 'Erro ao buscar contatos do mês',
+            error: error.message
         });
     }
 });
 
 // Rota para obter contatos por mês específico
-app.get('/api/contacts/month/:month', async (req, res) => {
+app.get('/api/contacts/month/:month', authenticateToken, async (req, res) => {
     try {
         const month = parseInt(req.params.month);
-
+        const year = new Date().getFullYear();
+        
         if (isNaN(month) || month < 1 || month > 12) {
             return res.status(400).json({
                 success: false,
@@ -523,23 +528,22 @@ app.get('/api/contacts/month/:month', async (req, res) => {
             });
         }
 
-        const year = new Date().getFullYear();
         const startDate = new Date(year, month - 1, 1);
-        const endDate = new Date(year, month, 0);
+        const endDate = new Date(year, month, 0, 23, 59, 59, 999);
 
-        let query = {
-            birthday: {
+        const query = {
+            createdAt: {
                 $gte: startDate,
                 $lte: endDate
             }
         };
 
-        // Se não for admin, filtrar apenas os contatos do usuário
+        // Add user filter if not admin
         if (req.user.role !== 'admin') {
             query.username = req.user.username;
         }
 
-        const contacts = await Contact.find(query).sort({ birthday: 1 });
+        const contacts = await Contact.find(query).sort({ createdAt: -1 });
 
         res.json({
             success: true,
@@ -554,60 +558,74 @@ app.get('/api/contacts/month/:month', async (req, res) => {
     }
 });
 
-// Rota para adicionar contato
-app.post("/api/contacts", authenticateToken, async (req, res) => {
+// Rota para adicionar contato (adicionadas validações e padronizado response)
+app.post('/api/contacts', authenticateToken, async (req, res) => {
     try {
         const { name, phone, birthday } = req.body;
-        const username = req.user.username;
+
+        if (!name || typeof name !== 'string' || name.trim().length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Nome é obrigatório e deve ser uma string válida'
+            });
+        }
+
+        if (!phone || typeof phone !== 'string' || !/^\d{10,11}$/.test(phone)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Telefone é obrigatório e deve conter 10 ou 11 dígitos'
+            });
+        }
 
         const contact = new Contact({
-            name,
-            phone,
+            name: name.trim(),
+            phone: phone.trim(),
             birthday: birthday ? new Date(birthday) : null,
-            owner: username,
-            username,
-            createdAt: new Date() // Use current date directly
+            owner: req.user.username,
+            createdAt: new Date()
         });
 
         await contact.save();
 
-        // Add log entry
-        await new Log({
-            type: 'create',
-            action: 'Novo contato criado',
-            description: `Contato "${contact.name}" foi adicionado`,
-            username: req.user.username,
-            details: {
-                contactId: contact._id,
-                name: contact.name,
-                phone: contact.phone
-            }
-        }).save();
-
-        res.json({
+        res.status(201).json({
             success: true,
             message: 'Contato adicionado com sucesso',
-            contact
+            data: contact
         });
     } catch (error) {
         console.error('Erro ao adicionar contato:', error);
         res.status(500).json({
             success: false,
-            message: 'Erro ao adicionar contato'
+            message: 'Erro ao adicionar contato',
+            error: error.message
         });
     }
 });
 
-// Rota para atualizar contato
+// Rota para atualizar contato (adicionadas validações e padronizado response)
 app.put("/api/contacts/:id", authenticateToken, async (req, res) => {
     try {
         const { name, phone, birthday } = req.body;
         const contactId = req.params.id;
 
-        if (!name || !phone) {
+        if (!mongoose.Types.ObjectId.isValid(contactId)) {
             return res.status(400).json({
                 success: false,
-                message: 'Nome e telefone são obrigatórios'
+                message: 'ID do contato inválido'
+            });
+        }
+
+        if (!name || typeof name !== 'string' || name.trim().length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Nome é obrigatório e deve ser uma string válida'
+            });
+        }
+
+        if (!phone || typeof phone !== 'string' || !/^\d{10,11}$/.test(phone)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Telefone é obrigatório e deve conter 10 ou 11 dígitos'
             });
         }
 
@@ -627,59 +645,41 @@ app.put("/api/contacts/:id", authenticateToken, async (req, res) => {
             });
         }
 
-        contact.name = name;
-        contact.phone = phone;
-        contact.birthday = birthday || contact.birthday;
+        contact.name = name.trim();
+        contact.phone = phone.trim();
+        contact.birthday = birthday ? new Date(birthday) : contact.birthday;
 
         await contact.save();
-
-        // Add log entry
-        await new Log({
-            type: 'update',
-            action: 'Contato atualizado',
-            description: `Contato "${contact.name}" foi atualizado`,
-            username: req.user.username,
-            details: {
-                contactId: contact._id,
-                name: contact.name,
-                phone: contact.phone
-            }
-        }).save();
 
         res.json({
             success: true,
             message: 'Contato atualizado com sucesso',
-            contact
+            data: contact
         });
     } catch (error) {
         console.error('Erro ao atualizar contato:', error);
         res.status(500).json({
             success: false,
-            message: 'Erro ao atualizar contato'
+            message: 'Erro ao atualizar contato',
+            error: error.message
         });
     }
 });
 
-// Rota para deletar contato
+// Rota para deletar contato (adicionadas validações e padronizado response)
 app.delete("/api/contacts/:id", authenticateToken, async (req, res) => {
     try {
         const contactId = req.params.id;
-        
-        console.log('Delete request received:', {
-            contactId,
-            user: req.user,
-            headers: req.headers
-        });
 
         if (!mongoose.Types.ObjectId.isValid(contactId)) {
             return res.status(400).json({
                 success: false,
-                message: 'ID inválido'
+                message: 'ID do contato inválido'
             });
         }
 
         const contact = await Contact.findById(contactId);
-        
+
         if (!contact) {
             return res.status(404).json({
                 success: false,
@@ -687,39 +687,45 @@ app.delete("/api/contacts/:id", authenticateToken, async (req, res) => {
             });
         }
 
-        // Only allow admins or contact owner to delete
-        if (req.user.role !== 'admin' && contact.username !== req.user.username) {
+        if (contact.owner !== req.user.username && req.user.role !== 'admin') {
             return res.status(403).json({
                 success: false,
-                message: 'Sem permissão para deletar este contato'
+                message: 'Não autorizado a deletar este contato'
             });
         }
 
         await Contact.findByIdAndDelete(contactId);
 
-        // Add log entry
-        await new Log({
-            type: 'delete',
-            action: 'Contato deletado',
-            description: `Contato "${contact.name}" foi deletado`,
-            username: req.user.username,
-            details: {
-                contactId: contact._id,
-                name: contact.name,
-                phone: contact.phone
-            }
-        }).save();
-        
         res.json({
             success: true,
             message: 'Contato deletado com sucesso'
         });
-
     } catch (error) {
-        console.error('Error deleting contact:', error);
+        console.error('Erro ao deletar contato:', error);
         res.status(500).json({
             success: false,
-            message: 'Erro interno ao deletar contato'
+            message: 'Erro ao deletar contato',
+            error: error.message
+        });
+    }
+});
+
+// Rota para obter todos os contatos (removida duplicata e padronizado response)
+app.get('/api/contacts/all', authenticateToken, async (req, res) => {
+    try {
+        console.log('Buscando todos os contatos...');
+        const contacts = await Contact.find()
+            .sort({ createdAt: -1 });
+
+        res.json({
+            success: true,
+            contacts: contacts
+        });
+    } catch (error) {
+        console.error('Erro ao buscar contatos:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao buscar contatos'
         });
     }
 });
@@ -1102,7 +1108,7 @@ app.get('/api/user/profile', authenticateToken, async (req, res) => {
 });
 
 // Rota para verificar token
-app.get('/api/auth/verify', (req, res) => {
+app.get('/api/auth/verify', authenticateToken, (req, res) => {
     try {
         res.json({
             success: true,
@@ -1110,7 +1116,7 @@ app.get('/api/auth/verify', (req, res) => {
             role: req.user.role
         });
     } catch (error) {
-        console.error('Erro na verificação:', error);
+        console.error('Erro na verificação do token:', error);
         res.status(500).json({
             success: false,
             message: 'Erro ao verificar token'
@@ -1119,7 +1125,7 @@ app.get('/api/auth/verify', (req, res) => {
 });
 
 // Replace the /api/send-whatsapp route
-app.post('/api/send-whatsapp', authenticateToken, async (req, res) => {
+app.post('/api/send-whatsapp', [authenticateToken, checkWhatsAppStatus], async (req, res) => {
     const { phone, name, message: customMessage, contactId } = req.body;
     const timestamp = getBrazilTimestamp();
 
@@ -1167,6 +1173,15 @@ app.post('/api/send-whatsapp', authenticateToken, async (req, res) => {
             });
         }
 
+        // Log de sucesso
+        await Log.create({
+            type: 'message',
+            action: 'Mensagem WhatsApp',
+            description: `Mensagem enviada para ${name}`,
+            username: req.user.username,
+            timestamp: new Date()
+        });
+
         res.json({
             success: true,
             message: 'Mensagem enviada com sucesso'
@@ -1174,6 +1189,16 @@ app.post('/api/send-whatsapp', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error(`[${timestamp}] Error:`, error);
+        
+        // Log de erro
+        await Log.create({
+            type: 'error',
+            action: 'Erro WhatsApp',
+            description: error.message,
+            username: req.user.username,
+            timestamp: new Date()
+        });
+
         res.status(500).json({
             success: false,
             message: error.message || 'Erro ao enviar mensagem'
@@ -2047,6 +2072,42 @@ app.post('/api/contacts/:id/mark-not-messaged', authenticateToken, async (req, r
     }
 });
 
+// Add bulk reminder endpoint
+app.post('/api/contacts/send-reminder-all', authenticateToken, async (req, res) => {
+    try {
+        const contacts = await Contact.find({ receivedMessage: false });
+        const reminderMessage = "Olá! Este é um lembrete do seu convite para nossa igreja. Esperamos você! 🙏";
+        
+        let successCount = 0;
+        let failureCount = 0;
+
+        for (const contact of contacts) {
+            try {
+                await sendMessage(contact.phone, reminderMessage);
+                await Contact.findByIdAndUpdate(contact._id, { receivedMessage: true });
+                successCount++;
+            } catch (err) {
+                console.error(`Erro ao enviar mensagem para ${contact.phone}:`, err);
+                failureCount++;
+            }
+            // Add small delay between messages
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+        res.json({
+            success: true,
+            message: `Lembretes enviados: ${successCount} sucesso, ${failureCount} falhas`,
+            details: { successCount, failureCount }
+        });
+    } catch (error) {
+        console.error('Erro ao enviar lembretes em massa:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao enviar lembretes'
+        });
+    }
+});
+
 // Servir arquivos estáticos depois das rotas da API
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -2072,10 +2133,25 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Keep only one server start block at the end of the file
-const port = process.env.PORT || 5000;
-app.listen(port, () => {
-    console.log(`Servidor rodando na porta ${port}`);
+const os = require('os');
+const port = 8080;
+
+const interfaces = os.networkInterfaces();
+const localIPs = [];
+
+for (let iface of Object.values(interfaces)) {
+    for (let config of iface) {
+        if (config.family === 'IPv4' && !config.internal) {
+            localIPs.push(config.address);
+        }
+    }
+}
+
+app.listen(port, '0.0.0.0', () => {
+    console.log('Servidor rodando nos seguintes endereços:');
+    for (let ip of localIPs) {
+        console.log(`→ http://${ip}:${port}`);
+    }
 }).on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
         console.log(`Porta ${port} já está em uso`);
@@ -2083,6 +2159,7 @@ app.listen(port, () => {
         console.error('Erro ao iniciar servidor:', err);
     }
 });
+
 
 // Modifique a rota de validação de token
 app.get('/api/auth/validate-token', (req, res) => {
@@ -2558,4 +2635,370 @@ app.get('/api/admin/detailed-stats', authenticateToken, async (req, res) => {
         });
     }
 });
+
+app.get('/api/contacts/all', authenticateToken, async (req, res) => {
+    try {
+        // Busca todos os contatos no banco de dados, ordenados por data de criação (mais recentes primeiro)
+        const contacts = await Contact.find().sort({ createdAt: -1 });
+        res.json({ success: true, contacts });
+    } catch (error) {
+        console.error('Erro ao buscar contatos:', error);
+        res.status(500).json({ success: false, message: 'Erro ao buscar contatos' });
+    }
+});
+
+// Rota para obter todos os contatos sem restrição de usuário
+app.get('/api/contacts/all', authenticateToken, async (req, res) => {
+    try {
+        console.log('Buscando todos os contatos...');
+        const contacts = await Contact.find()
+            .sort({ createdAt: -1 })
+            .lean(); // Adiciona .lean() para melhor performance
+
+        console.log(`Encontrados ${contacts.length} contatos`);
+
+        res.json({
+            success: true,
+            contacts: contacts
+        });
+    } catch (error) {
+        console.error('Erro ao buscar contatos:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao buscar contatos',
+            error: error.message
+        });
+    }
+});
+
+// Substitua ou adicione a rota /api/contacts/all
+app.get('/api/contacts/all', authenticateToken, async (req, res) => {
+    try {
+        console.log('Buscando contatos...');
+        const contacts = await Contact.find().sort({ createdAt: -1 });
+        console.log(`Encontrados ${contacts.length} contatos`);
+
+        res.json({ 
+            success: true, 
+            contacts: contacts 
+        });
+    } catch (error) {
+        console.error('Erro ao buscar contatos:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao buscar contatos',
+            error: error.message
+        });
+    }
+});
+
+// Rota para enviar mensagem via WhatsApp
+app.post('/api/send-whatsapp', authenticateToken, async (req, res) => {
+    const { phone, name, contactId } = req.body;
+
+    try {
+        // Simula o envio de mensagem (substitua pela lógica real)
+        console.log(`Enviando mensagem para ${phone} (${name})`);
+
+        // Atualiza o status do contato
+        if (contactId) {
+            await Contact.findByIdAndUpdate(contactId, { receivedMessage: true });
+        }
+
+        res.json({ success: true, message: 'Mensagem enviada com sucesso' });
+    } catch (error) {
+        console.error('Erro ao enviar mensagem:', error);
+        res.status(500).json({ success: false, message: 'Erro ao enviar mensagem' });
+    }
+});
+
+// Rota para atualizar o status da mensagem
+app.put('/api/contacts/:id/message-status', authenticateToken, async (req, res) => {
+    try {
+        const contactId = req.params.id;
+        const { receivedMessage } = req.body;
+
+        const updatedContact = await Contact.findByIdAndUpdate(
+            contactId,
+            { receivedMessage },
+            { new: true }
+        );
+
+        if (!updatedContact) {
+            return res.status(404).json({ success: false, message: 'Contato não encontrado' });
+        }
+
+        res.json({ success: true, message: 'Status atualizado com sucesso', contact: updatedContact });
+    } catch (error) {
+        console.error('Erro ao atualizar status da mensagem:', error);
+        res.status(500).json({ success: false, message: 'Erro ao atualizar status da mensagem' });
+    }
+});
+
+// Rota para enviar mensagem
+app.post('/api/send-whatsapp', authenticateToken, async (req, res) => {
+    const { phone, name, contactId, messageType = 'welcome' } = req.body;
+    const timestamp = getBrazilTimestamp();
+
+    try {
+        let messageToSend;
+        if (messageType === 'reminder') {
+            messageToSend = serviceReminderMessage(name);
+        } else {
+            messageToSend = welcomeMessage(name);
+        }
+
+        const cleanPhone = phone.replace(/\D/g, '');
+        const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+
+        const sent = await sendMessage(formattedPhone, messageToSend);
+        
+        if (!sent) {
+            throw new Error('Falha ao enviar mensagem');
+        }
+
+        if (contactId) {
+            await Contact.findByIdAndUpdate(contactId, { 
+                receivedMessage: true,
+                lastMessageDate: new Date()
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Mensagem enviada com sucesso'
+        });
+
+    } catch (error) {
+        console.error(`[${timestamp}] Error:`, error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// Rota para tornar contato membro
+app.post('/api/contacts/:id/make-member', authenticateToken, async (req, res) => {
+    try {
+        const contact = await Contact.findById(req.params.id);
+        if (!contact) {
+            return res.status(404).json({ success: false, message: 'Contato não encontrado' });
+        }
+
+        const member = new Member({
+            name: contact.name,
+            phone: contact.phone,
+            birthday: contact.birthday
+        });
+
+        await member.save();
+        await Contact.findByIdAndDelete(req.params.id);
+
+        res.json({
+            success: true,
+            message: 'Contato transformado em membro com sucesso'
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// ... existing code ...
+
+// Rota para enviar lembrete
+app.post('/api/send-reminder', [authenticateToken, checkWhatsAppStatus], async (req, res) => {
+    const { phone, name } = req.body;
+    const timestamp = getBrazilTimestamp();
+
+    try {
+        // Format phone number
+        let cleanPhone = phone.replace(/\D/g, '');
+        if (cleanPhone.length === 11 && cleanPhone[2] === '9') {
+            cleanPhone = cleanPhone.slice(0, 2) + cleanPhone.slice(3);
+        }
+        const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+
+        // Get reminder message
+        const reminderMessage = serviceReminderMessage(name);
+        
+        console.log(`[${timestamp}] Sending reminder to ${formattedPhone}`);
+
+        // Send message using WhatsApp client
+        const sent = await sendMessage(formattedPhone, reminderMessage);
+        if (!sent) {
+            throw new Error('Falha ao enviar lembrete');
+        }
+
+        // Log reminder sent
+        await Log.create({
+            type: 'message',
+            action: 'Lembrete',
+            description: `Lembrete enviado para ${name}`,
+            username: req.user.username,
+            timestamp: new Date(),
+            details: { messageType: 'reminder' }
+        });
+
+        res.json({
+            success: true,
+            message: 'Lembrete enviado com sucesso'
+        });
+
+    } catch (error) {
+        console.error(`[${timestamp}] Error:`, error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Erro ao enviar lembrete'
+        });
+    }
+});
+
+// ... existing code ...
+
+// Rota para estatísticas detalhadas do admin
+app.get('/api/admin/stats', authenticateToken, async (req, res) => {
+    try {
+        // Verifica se o usuário é admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Acesso negado' });
+        }
+
+        const days = parseInt(req.query.days) || 30;
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
+
+        // Busca dados das estatísticas
+        const stats = await Promise.all([
+            // Total de usuários
+            User.countDocuments(),
+            
+            // Total de contatos
+            Contact.countDocuments(),
+            
+            // Contatos hoje
+            Contact.countDocuments({
+                createdAt: { 
+                    $gte: new Date().setHours(0,0,0,0) 
+                }
+            }),
+
+            // Contatos por usuário
+            Contact.aggregate([
+                {
+                    $group: {
+                        _id: '$owner',
+                        count: { $sum: 1 }
+                    }
+                }
+            ]),
+
+            // Contatos por mês
+            Contact.aggregate([
+                {
+                    $match: {
+                        createdAt: { $gte: startDate }
+                    }
+                },
+                {
+                    $group: {
+                        _id: {
+                            year: { $year: '$createdAt' },
+                            month: { $month: '$createdAt' }
+                        },
+                        count: { $sum: 1 }
+                    }
+                },
+                {
+                    $sort: { 
+                        '_id.year': 1, 
+                        '_id.month': 1 
+                    }
+                }
+            ]),
+
+            // Status das mensagens
+            Contact.aggregate([
+                {
+                    $group: {
+                        _id: '$receivedMessage',
+                        count: { $sum: 1 }
+                    }
+                }
+            ]),
+
+            // Horários de atividade
+            Contact.aggregate([
+                {
+                    $match: {
+                        createdAt: { $gte: startDate }
+                    }
+                },
+                {
+                    $group: {
+                        _id: { $hour: '$createdAt' },
+                        count: { $sum: 1 }
+                    }
+                },
+                {
+                    $sort: { '_id': 1 }
+                }
+            ])
+        ]);
+
+        // Calcula taxa de crescimento
+        const previousPeriodContacts = await Contact.countDocuments({
+            createdAt: {
+                $gte: new Date(startDate.getTime() - (days * 24 * 60 * 60 * 1000)),
+                $lt: startDate
+            }
+        });
+
+        const currentPeriodContacts = await Contact.countDocuments({
+            createdAt: { $gte: startDate }
+        });
+
+        const growthRate = previousPeriodContacts === 0 ? 
+            100 : // Se não havia contatos antes, crescimento é 100%
+            ((currentPeriodContacts - previousPeriodContacts) / previousPeriodContacts) * 100;
+
+        // Organiza os dados para retornar
+        const [
+            totalUsers,
+            totalContacts,
+            contactsToday,
+            contactsByUser,
+            contactsByMonth,
+            messageStats,
+            activityHours
+        ] = stats;
+
+        res.json({
+            success: true,
+            stats: {
+                totalUsers,
+                totalContacts,
+                contactsToday,
+                growthRate: Math.round(growthRate * 100) / 100, // Arredonda para 2 casas decimais
+                contactsByUser,
+                contactsByMonth,
+                messageStats,
+                activityHours
+            }
+        });
+
+    } catch (error) {
+        console.error('Erro ao buscar estatísticas:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Erro ao buscar estatísticas',
+            error: error.message 
+        });
+    }
+});
+
+// ...existing code...
 

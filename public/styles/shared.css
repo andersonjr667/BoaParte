@@ -255,16 +255,19 @@ body.dashboard::after {
 }
 
 :root {
-  --primary-color: #4CAF50;
-  --primary-dark: #2E7D32;
-  --primary-light: #E8F5E9;
-  --primary-gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-  --bg-main: #ffffff;
-  --text-primary: #333333;
-  --text-secondary: #666666;
-  --border-radius: 8px;
-  --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+    --primary-color: #2e7d32;
+    --primary-dark: #2e7d32;
+    --primary-light: #66bb6a;
+    --primary-lighter: #c8e6c9;
+    --danger-color: #f44336;
+    --text-light: #f9f9f9;
+    --bg-main: #ffffff;
+    --text-primary: #2e7d32;
+    --text-secondary: #66bb6a;
+    --border-radius: 8px;
+    --shadow-sm: 0 2px 4px rgba(46, 125, 50, 0.05);
+    --shadow-md: 0 4px 6px rgba(46, 125, 50, 0.1);
+    --primary-gradient: linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%);
 }
 
 body {
@@ -332,7 +335,7 @@ contacts-table table {
     border-collapse: collapse;
 }
 
-.contacts-table th, .contacts-table td {
+contacts-table th, .contacts-table td {
     padding: 0.8rem;
     text-align: left;
     border-bottom: 1px solid var(--border-color);

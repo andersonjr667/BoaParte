@@ -1,0 +1,214 @@
+/* Base responsive styles */
+:root {
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+}
+
+/* Responsive typography */
+html {
+    font-size: 16px;
+}
+
+@media (max-width: 768px) {
+    html {
+        font-size: 14px;
+    }
+}
+
+/* Container responsiveness */
+.container {
+    width: 95%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-md);
+}
+
+/* Flexbox grid system */
+.flex-grid {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -var(--spacing-sm);
+}
+
+.flex-grid > * {
+    flex: 1 1 300px;
+    margin: var(--spacing-sm);
+}
+
+/* Card responsiveness */
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+/* Button responsiveness */
+.btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .btn {
+        width: 100%;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .card {
+        margin: var(--spacing-sm) 0;
+    }
+
+    .container {
+        padding: var(--spacing-sm);
+    }
+
+    .flex-grid > * {
+        flex: 1 1 100%;
+    }
+
+    /* Touch targets */
+    .btn, 
+    .card,
+    input[type="button"],
+    input[type="submit"],
+    select {
+        min-height: 44px;
+    }
+
+    /* Improve scrolling */
+    .scrollable {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+
+    body {
+        padding: 1rem;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .function-card {
+        width: 100%;
+    }
+
+    .admin-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .users-button {
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+
+    .modal-content {
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .flex-grid > * {
+        flex: 1 1 calc(50% - var(--spacing-md));
+    }
+
+    .dashboard-container {
+        width: 90%;
+        margin: 2rem auto;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .function-card {
+        width: calc(50% - 1rem);
+    }
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+    position: relative;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+    .dashboard-container {
+        width: 100%;
+        margin: 1rem 0;
+        padding: 1rem;
+    }
+
+    .dashboard-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .function-card {
+        padding: 1rem;
+    }
+    
+    .function-title {
+        font-size: 1rem;
+    }
+
+    .function-description {
+        font-size: 0.875rem;
+    }
+}

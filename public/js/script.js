@@ -372,26 +372,7 @@ async function deleteContact(contactId) {
 // Função para enviar mensagem WhatsApp
 async function sendWhatsAppMessage(phone, name, contactId) {
     try {
-        const cleanPhone = phone.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
-        
-        // Determina a saudação com base na hora
-        const hora = new Date().getHours();
-        let saudacao;
-        if (hora >= 5 && hora < 12) {
-            saudacao = "Bom dia";
-        } else if (hora >= 12 && hora < 18) {
-            saudacao = "Boa tarde";
-        } else {
-            saudacao = "Boa noite";
-        }
-
-        const message = `${saudacao}, ${name}! Graça e Paz do Senhor Jesus!\n\n` +
-            "Seja muito bem-vindo(a) à Igreja Batista Solidária! A Juventude da Igreja Batista Solidária (JIBS) também celebra a sua chegada e se alegra em recebê-lo(a). " +
-            "É uma honra tê-lo(a) conosco e agradecemos por compartilhar seu contato.\n\n" +
-            "Que este momento seja especial em sua vida e que você se sinta acolhido(a) e abençoado(a) por Deus. " +
-            "Estamos aqui para caminhar ao seu lado e auxiliar no que for preciso.\n\n" +
-            "Que o Senhor renove sua paz, sua alegria e sua esperança hoje e sempre!\n\n" +
-            "Com carinho,\nJuventude da Igreja Batista Solidária (JIBS) e Igreja Batista Solidária";
+        const cleanPhone = phone.replace(/\D/g, '');
         
         const response = await fetch('/api/send-whatsapp', {
             method: 'POST',
@@ -401,7 +382,7 @@ async function sendWhatsAppMessage(phone, name, contactId) {
             },
             body: JSON.stringify({
                 phone: cleanPhone,
-                message: message,
+                name: name,
                 contactId: contactId
             })
         });
@@ -410,12 +391,9 @@ async function sendWhatsAppMessage(phone, name, contactId) {
         
         if (data.success) {
             showNotification('✅ Mensagem enviada com sucesso!');
-            // Recarrega a lista de contatos para atualizar o status
             await loadContacts();
-        } else if (data.message === 'Mensagem já enviada') {
-            showNotification('⚠️ Mensagem já foi enviada anteriormente. Não é recomendado reenviar.', true);
         } else {
-            showNotification('❌ ' + (data.message || 'Erro ao enviar mensagem'), true);
+            throw new Error(data.message || 'Erro ao enviar mensagem');
         }
     } catch (error) {
         console.error('Erro:', error);

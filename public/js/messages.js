@@ -13,24 +13,12 @@ function getBrazilHour() {
 
 // Mensagem inicial de boas-vindas
 function welcomeMessage(name) {
-    // Get current hour for appropriate greeting
-    const hour = new Date().getHours();
-    let greeting;
-    
-    if (hour >= 5 && hour < 12) {
-        greeting = "Bom dia";
-    } else if (hour >= 12 && hour < 18) {
-        greeting = "Boa tarde";
-    } else {
-        greeting = "Boa noite";
-    }
-
-    return `${greeting}, ${name}! Graça e Paz do Senhor Jesus!\n\n` +
-           `Seja muito bem-vindo(a) à Igreja Batista Solidária! A Juventude da Igreja Batista Solidária (JIBS) também celebra a sua chegada e se alegra em recebê-lo(a). É uma honra tê-lo(a) conosco e agradecemos por compartilhar seu contato.\n\n` +
-           `Que este momento seja especial em sua vida e que você se sinta acolhido(a) e abençoado(a) por Deus. Estamos aqui para caminhar ao seu lado e auxiliar no que for preciso.\n\n` +
-           `Que o Senhor renove sua paz, sua alegria e sua esperança hoje e sempre!\n\n` +
-           `Com carinho,\n` +
-           `Juventude da Igreja Batista Solidária (JIBS) e Igreja Batista Solidária`;
+    return `Paz do Senhor ${name}! 🙏\n\n` +
+           `Seja bem-vindo(a) à Igreja Batista Boa Parte! 🏠\n\n` +
+           `Nossos cultos acontecem aos domingos às 18h e nas quartas às 19:30h.\n\n` +
+           `Endereço: Rua Tocantins, N° 91, Bairro Santa Rita\n` +
+           `São José dos Campos - SP\n\n` +
+           `Esperamos você!`;
 }
 
 // Programações da semana atualizadas
@@ -171,28 +159,10 @@ const getMessageByDay = (name) => {
 };
 
 const serviceReminderMessage = (name) => {
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    
-    let message = `Olá ${name}! 🙏\n\n`;
-    message += `Programação da semana:\n\n`;
-    message += `• Domingo 18h: Culto de Celebração\n`;
-    message += `• Quarta 19h30: Culto de Oração\n`;
-    message += `• Sábado 19h: Culto de Jovens\n\n`;
-    
-    if (dayOfWeek === 0) { // Domingo
-        message += `Hoje é nosso Culto de Celebração às 18h! Contamos com sua presença!\n`;
-    } else if (dayOfWeek === 3) { // Quarta
-        message += `Hoje é nosso Culto de Oração às 19h30! Venha buscar a Deus conosco!\n`;
-    } else if (dayOfWeek === 6) { // Sábado
-        message += `Hoje é nosso Culto de Jovens às 19h! Não perca!\n`;
-    }
-    
-    message += `\nEndereço: [Endereço da Igreja]\n`;
-    message += `Informações: [Telefone/Contato]\n\n`;
-    message += `Deus abençoe! 🙌`;
-    
-    return message;
+    return `Paz do Senhor ${name}! 🙏\n\n` +
+           `Lembramos que hoje é dia de culto!\n` +
+           `Você é nosso convidado especial.\n\n` +
+           `Deus abençoe!`;
 };
 
 const bulkReminderMessage = (name) => {
@@ -202,7 +172,7 @@ const bulkReminderMessage = (name) => {
            `Sua presença é muito importante para nós!`;
 };
 
-// Remove the window.messages assignment and keep only the module.exports
+// Update to directly export the functions instead of using the IIFE pattern
 const messages = {
     welcomeMessage,
     getMessageByDay,
@@ -214,11 +184,4 @@ const messages = {
     programacoesSemana
 };
 
-if (typeof window !== 'undefined') {
-    window.welcomeMessage = welcomeMessage;
-    window.getMessageByDay = getMessageByDay;
-    window.serviceReminderMessage = serviceReminderMessage;
-    window.bulkReminderMessage = bulkReminderMessage;
-} else {
-    module.exports = messages;
-}
+module.exports = messages;

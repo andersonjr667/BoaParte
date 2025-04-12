@@ -10,6 +10,8 @@
     <link rel="icon" type="image/png" href="images/image.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/notifications.js"></script>
+    <link rel="stylesheet" href="styles/background.css">
+    <link rel="stylesheet" href="styles/responsive.css">
     <style>
         :root {
             --primary-color: #4CAF50;
@@ -1155,6 +1157,81 @@
                 display: none;
             }
         }
+
+        /* Estilos para a seção de estatísticas */
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 2rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .control-group select {
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            min-width: 200px;
+            cursor: pointer;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            min-height: 400px;
+        }
+
+        .chart-container h3 {
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-controls {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .control-group select {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1202,46 +1279,6 @@
                 </button>
             </div>
         </nav>
-
-        <!-- Modal de Envio de Notificação -->
-        <div id="send-notification-modal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Enviar Notificação</h3>
-                    <span class="close" onclick="closeModal('send-notification-modal')">&times;</span>
-                </div>
-                <form id="notification-form" onsubmit="sendNotification(event)">
-                    <div class="form-group">
-                        <label for="notification-title">Título</label>
-                        <input type="text" id="notification-title" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="notification-message">Mensagem</label>
-                        <textarea id="notification-message" rows="4" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="notify-all">
-                            Enviar para todos os usuários
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="send-push" checked>
-                            Enviar também como notificação push
-                        </label>
-                    </div>
-                    <div class="modal-actions">
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-paper-plane"></i> Enviar
-                        </button>
-                        <button type="button" class="btn-secondary" onclick="closeModal('send-notification-modal')">
-                            <i class="fas fa-times"></i> Cancelar
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
 
         <main class="admin-content">
             <!-- Seção de Visão Geral -->
@@ -1292,8 +1329,8 @@
             <section id="stats-section" class="admin-section" style="display: none;">
                 <h2>Estatísticas do Sistema</h2>
                 
-                <!-- Overview Cards -->
-                <div class="overview-cards">
+                <!-- Cards de Visão Geral -->
+                <div class="stats-overview">
                     <div class="stat-card">
                         <div class="stat-icon">
                             <i class="fas fa-users"></i>
@@ -1332,137 +1369,48 @@
                     </div>
                 </div>
 
-                <!-- Gráficos -->
+                <!-- Controles dos Gráficos -->
+                <div class="chart-controls">
+                    <div class="control-group">
+                        <label>Tipo de Visualização</label>
+                        <select id="chart-type" onchange="updateChartTypes(this.value)">
+                            <option value="line">Linha</option>
+                            <option value="bar">Barras</option>
+                            <option value="pie">Pizza</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Período</label>
+                        <select id="date-range" onchange="filterChartsByDate(this.value)">
+                            <option value="7">Últimos 7 dias</option>
+                            <option value="30" selected>Últimos 30 dias</option>
+                            <option value="90">Últimos 3 meses</option>
+                            <option value="180">Últimos 6 meses</option>
+                            <option value="365">Último ano</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Grade de Gráficos -->
                 <div class="charts-grid">
                     <div class="chart-container">
-                        <h3>Distribuição de Contatos por Usuário</h3>
+                        <h3>Contatos por Usuário</h3>
                         <canvas id="contacts-by-user-chart"></canvas>
                     </div>
                     <div class="chart-container">
-                        <h3>Contatos por Mês</h3>
-                        <canvas id="contacts-by-month-chart"></canvas>
+                        <h3>Evolução Mensal</h3>
+                        <canvas id="monthly-evolution-chart"></canvas>
                     </div>
                     <div class="chart-container">
                         <h3>Status das Mensagens</h3>
                         <canvas id="message-status-chart"></canvas>
                     </div>
                     <div class="chart-container">
-                        <h3>Tendência de Crescimento</h3>
-                        <canvas id="growth-trend-chart"></canvas>
+                        <h3>Horários de Atividade</h3>
+                        <canvas id="activity-hours-chart"></canvas>
                     </div>
                 </div>
-
-                <!-- Tabela de Últimos Contatos -->
-                <div class="contacts-table">
-                    <h3>Últimos Contatos</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Telefone</th>
-                                <th>Data de Nascimento</th>
-                                <th>Adicionado por</th>
-                                <th>Data de Criação</th>
-                            </tr>
-                        </thead>
-                        <tbody id="latest-contacts">
-                            <!-- Contatos serão carregados aqui -->
-                        </tbody>
-                    </table>
-                </div>
             </section>
-
-            <style>
-            /* Estilos específicos para a seção de estatísticas */
-            .charts-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-                gap: 2rem;
-                margin: 2rem 0;
-            }
-
-            .chart-controls {
-                display: flex;
-                gap: 2rem;
-                margin-bottom: 2rem;
-                background: white;
-                padding: 1.5rem;
-                border-radius: var(--border-radius);
-                box-shadow: var(--shadow-sm);
-            }
-
-            .filter-group {
-                display: flex;
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .filter-select {
-                padding: 0.8rem;
-                border: 1px solid #e0e0e0;
-                border-radius: 8px;
-                min-width: 200px;
-            }
-
-            .metrics-table {
-                background: white;
-                border-radius: var(--border-radius);
-                padding: 2rem;
-                margin: 2rem 0;
-                box-shadow: var (--shadow-sm);
-            }
-
-            .metrics-table table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-
-            .metrics-table th, .metrics-table td {
-                padding: 1rem;
-                text-align: left;
-                border-bottom: 1px solid #eee;
-            }
-
-            .export-section {
-                display: flex;
-                gap: 1rem;
-                margin-top: 2rem;
-            }
-
-            .export-btn {
-                padding: 0.8rem 1.5rem;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                transition: all 0.3s ease;
-            }
-
-            .export-btn:hover {
-                transform: translateY(-2px);
-                box-shadow: var(--shadow-md);
-            }
-
-            @media (max-width: 768px) {
-                .charts-grid {
-                    grid-template-columns: 1fr;
-                }
-
-                .chart-controls {
-                    flex-direction: column;
-                }
-
-                .export-section {
-                    flex-direction: column;
-                }
-
-                .export-btn {
-                    width: 100%;
-                }
-            }
-            </style>
 
             <!-- Seção de Logs -->
             <section id="logs-section" class="admin-section" style="display: none;">
@@ -1559,169 +1507,6 @@
                 </div>
             </section>
 
-            <style>
-            /* Estilos específicos para a seção de Logs */
-            .logs-dashboard {
-                display: flex;
-                flex-direction: column;
-                gap: 2rem;
-            }
-
-            .log-stats {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 1.5rem;
-            }
-
-            .logs-filters {
-                background: white;
-                padding: 1.5rem;
-                border-radius: 12px;
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 1.5rem;
-                box-shadow: var(--shadow-sm);
-            }
-
-            .filter-group {
-                display: flex;
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .date-range {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
-
-            .filter-input, .filter-select, .filter-date {
-                padding: 0.8rem;
-                border: 2px solid var(--border-color);
-                border-radius: 8px;
-                font-size: 0.9rem;
-            }
-
-            .filter-actions {
-                display: flex;
-                gap: 0.8rem;
-                align-items: flex-end;
-            }
-
-            .logs-container {
-                background: white;
-                border-radius: 12px;
-                overflow: hidden;
-                box-shadow: var(--shadow-sm);
-            }
-
-            .logs-header {
-                display: grid;
-                grid-template-columns: 180px 100px 120px 1fr 1fr;
-                gap: 1rem;
-                padding: 1rem;
-                background: var(--primary-gradient);
-                color: white;
-                font-weight: 600;
-            }
-
-            .logs-list {
-                max-height: 600px;
-                overflow-y: auto;
-            }
-
-            .log-entry {
-                display: grid;
-                grid-template-columns: 180px 100px 120px 1fr 1fr;
-                gap: 1rem;
-                padding: 1rem;
-                border-bottom: 1px solid var(--border-color);
-                transition: all 0.3s ease;
-            }
-
-            .log-entry:hover {
-                background: var(--bg-light);
-            }
-
-            .log-type {
-                padding: 0.3rem 0.8rem;
-                border-radius: 20px;
-                font-size: 0.8rem;
-                font-weight: 500;
-                text-align: center;
-            }
-
-            .log-type.auth { background: #E3F2FD; color: #1976D2; }
-            .log-type.create { background: #E8F5E9; color: #2E7D32; }
-            .log-type.update { background: #FFF3E0; color: #F57C00; }
-            .log-type.delete { background: #FFEBEE; color: #D32F2F; }
-            .log-type.error { background: #FCE4EC; color: #C2185B; }
-
-            .logs-pagination {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                gap: 1rem;
-                margin-top: 1rem;
-            }
-
-            .page-btn {
-                padding: 0.5rem 1rem;
-                border: none;
-                border-radius: 8px;
-                background: var(--bg-light);
-                color: var(--primary-color);
-                cursor: pointer;
-                transition: all 0.3s ease;
-            }
-
-            .page-btn:hover {
-                background: var(--primary-color);
-                color: white;
-            }
-
-            .page-btn:disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
-
-            /* Animações */
-            .log-entry {
-                animation: fadeIn 0.3s ease;
-            }
-
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(-10px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            /* Responsividade */
-            @media (max-width: 768px) {
-                .logs-header, .log-entry {
-                    grid-template-columns: 1fr;
-                    gap: 0.5rem;
-                }
-
-                .logs-filters {
-                    grid-template-columns: 1fr;
-                }
-
-                .filter-actions {
-                    flex-direction: column;
-                }
-
-                .log-column:not(:first-child) {
-                    display: none;
-                }
-            }
-            </style>
-
             <!-- Seção de Membros -->
             <section id="members-section" class="admin-section" style="display: none;">
                 <h2>Gerenciamento de Membros</h2>
@@ -1730,50 +1515,10 @@
                         <i class="fas fa-plus"></i> Adicionar Membro
                     </button>
                 </div>
-                <div id="members-list" class="members-grid">
-                    <!-- Membros serão carregados aqui -->
-                </div>
+                <div id="members-list" class="members-grid"></div>
             </section>
 
-            <!-- Seção de Mensagens -->
-            <section id="messages-section" class="admin-section" style="display: none;">
-                <h2>Controle de Mensagens</h2>
-                <div class="controls">
-                    <div class="filter-group">
-                        <select id="week-filter"></select>
-                            <option value="all">Todas as Semanas</option>
-                            <option value="1">Semana 1</option>
-                            <option value="2">Semana 2</option>
-                            <option value="3">Semana 3</option>
-                            <option value="4">Semana 4</option>
-                        </select>
-                        <button class="btn btn-primary" onclick="filterMessages()">
-                            <i class="fas fa-filter"></i> Filtrar
-                        </button>
-                    </div>
-                    <button class="btn btn-primary" onclick="exportToExcel()">
-                        <i class="fas fa-file-excel"></i> Exportar Excel
-                    </button>
-                </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Telefone</th>
-                                <th>Data de Cadastro</th>
-                                <th>Status Mensagens</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="messages-table">
-                            <!-- Mensagens serão carregadas aqui -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Adicione estas novas seções -->
+            <!-- Seção de Notificações -->
             <section id="notifications-section" class="admin-section" style="display: none;">
                 <div class="section-header">
                     <h2>Central de Notificações</h2>
@@ -1795,31 +1540,33 @@
                             <i class="fas fa-search"></i>
                         </div>
                     </div>
-                    
                     <div class="notifications-list" id="notifications-list"></div>
                 </div>
             </section>
-
-            <div id="loading-overlay" class="loading-overlay">
-                <div class="spinner"></div>
-                <p>Carregando...</p>
-            </div>
-
-            <div id="success-toast" class="toast success">
-                <i class="fas fa-check-circle"></i>
-                <span id="success-message"></span>
-            </div>
-
-            <div id="error-toast" class="toast error">
-                <i class="fas fa-exclamation-circle"></i>
-                <span id="error-message"></span>
-            </div>
         </main>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="spinner"></div>
+            <p>Carregando...</p>
+        </div>
+
+        <!-- Toasts de Notificação -->
+        <div id="success-toast" class="toast success">
+            <i class="fas fa-check-circle"></i>
+            <span id="success-message"></span>
+        </div>
+
+        <div id="error-toast" class="toast error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="error-message"></span>
+        </div>
+
+        <div id="notification" class="notification"></div>
     </div>
 
-    <div id="notification" class="notification"></div>
-
-    <script src="js/chart.min.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/admin.js"></script>
 </body>
 </html>

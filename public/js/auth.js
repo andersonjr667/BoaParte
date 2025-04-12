@@ -1,25 +1,38 @@
 // Função para verificar autenticação
 async function checkAuthentication() {
-    console.log('Verificando autenticação...');
     const token = localStorage.getItem('token');
-    const currentPage = window.location.pathname;
     
-    console.log('Token encontrado:', token ? 'Sim' : 'Não');
-    console.log('Página atual:', currentPage);
-
     if (!token) {
-        if (currentPage !== '/login.html') {
-            console.log('Redirecionando para login por falta de token');
-            window.location.href = 'login.html';
-        }
-        return;
+        console.warn('Token ausente.');
+        return false;
     }
 
-    const isValid = await verifyToken(token);
-    
-    if (!isValid && currentPage !== '/login.html') {
-        console.log('Redirecionando para login por token inválido');
-        window.location.href = 'login.html';
+    try {
+        const response = await fetch('/api/auth/verify', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Token inválido ou expirado');
+        }
+
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error('Falha na verificação do token');
+        }
+
+        console.log('Usuário autenticado:', data.username);
+        localStorage.setItem('username', data.username);
+        localStorage.setItem('role', data.role);
+        return true;
+    } catch (error) {
+        console.error('Erro na verificação do token:', error);
+        localStorage.clear();
+        return false;
     }
 }
 
@@ -59,8 +72,8 @@ async function verifyToken(token) {
 
 // Function to redirect to the login page
 function redirectToLogin() {
-    localStorage.clear(); // Clear all tokens and local storage items
-    window.location.href = 'login.html';
+    localStorage.clear(); // Limpa todos os itens do localStorage
+    console.warn('Redirecionamento para login removido.');
 }
 
 // Call checkAuthentication on page load
@@ -77,7 +90,7 @@ async function login(event) {
         loginButton.disabled = true;
         loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
 
-        const response = await fetch('/api/login', {
+        const response = await fetch('/api/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -91,34 +104,17 @@ async function login(event) {
             throw new Error(data.message || 'Erro ao fazer login');
         }
 
-        // Ensure we have all required data
-        if (!data.token || !data.username) {
-            throw new Error('Resposta inválida do servidor');
+        if (data.success) {
+            localStorage.setItem('token', data.token); // Armazenar o token no localStorage
+            window.location.href = 'dashboard.html'; // Redirecionar para o dashboard
+        } else {
+            throw new Error(data.message || 'Erro ao fazer login');
         }
-
-        // Clear any existing auth data first
-        localStorage.clear();
-        
-        // Store new auth data
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('username', data.username);
-        localStorage.setItem('role', data.role || 'user');
-        
-        // Log successful storage
-        console.log('Auth data stored:', {
-            token: data.token ? 'present' : 'missing',
-            username: data.username,
-            role: data.role || 'user'
-        });
-
-        // Redirect with a small delay to ensure storage is complete
-        setTimeout(() => {
-            window.location.href = 'dashboard.html';
-        }, 100);
 
     } catch (error) {
         console.error('Erro no login:', error);
         showNotification(error.message || 'Falha no login. Tente novamente.', true);
+        localStorage.clear();
     } finally {
         loginButton.disabled = false;
         loginButton.innerHTML = '<i class="fas fa-sign-in-alt"></i> Entrar';
@@ -172,4 +168,36 @@ function isTokenValid() {
     const payload = JSON.parse(atob(token.split('.')[1]));
     const expiry = payload.exp * 1000;
     return Date.now() < expiry;
+}
+
+// Auth helper functions
+function isAuthenticated() {
+    return !!localStorage.getItem('token');
+}
+
+function getAuthHeaders() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('No token found');
+    }
+    return {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    };
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    localStorage.removeItem('role');
+    console.log('Logout realizado. Redirecionamento para login removido.');
+}
+
+// Export functions if using modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        isAuthenticated,
+        getAuthHeaders,
+        logout
+    };
 }

@@ -642,6 +642,161 @@ function filterChartsByDate(days) {
     loadStatsData(days); // Reload data with new date range
 }
 
+// Função para carregar dados das estatísticas
+async function loadStatsData(days = 30) {
+    try {
+        showLoading();
+        const response = await fetch(`/api/admin/stats?days=${days}`, {
+            headers: getAuthHeaders()
+        });
+
+        if (!response.ok) throw new Error('Falha ao carregar estatísticas');
+        const data = await response.json();
+
+        updateDashboardStats(data);
+        createAllCharts(data);
+        
+    } catch (error) {
+        console.error('Erro:', error);
+        showNotification('Erro ao carregar estatísticas', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+// Função para criar todos os gráficos
+function createAllCharts(data) {
+    // Gráfico de Contatos por Usuário
+    createUserContactsChart(data.contactsByUser);
+    
+    // Gráfico de Evolução Mensal
+    createMonthlyEvolutionChart(data.monthlyStats);
+    
+    // Gráfico de Status das Mensagens
+    createMessageStatusChart(data.messageStats);
+    
+    // Gráfico de Horários de Atividade
+    createActivityHoursChart(data.activityHours);
+}
+
+// Gráfico de Contatos por Usuário
+function createUserContactsChart(data) {
+    const ctx = document.getElementById('contacts-by-user-chart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: data.map(d => d.username),
+            datasets: [{
+                data: data.map(d => d.count),
+                backgroundColor: [
+                    '#4CAF50', '#2196F3', '#FFC107', '#9C27B0',
+                    '#F44336', '#00BCD4', '#795548', '#FF5722'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+}
+
+// Gráfico de Evolução Mensal
+function createMonthlyEvolutionChart(data) {
+    const ctx = document.getElementById('monthly-evolution-chart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(d => d.month),
+            datasets: [{
+                label: 'Novos Contatos',
+                data: data.map(d => d.count),
+                borderColor: '#4CAF50',
+                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Gráfico de Status das Mensagens
+function createMessageStatusChart(data) {
+    const ctx = document.getElementById('message-status-chart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Enviadas', 'Pendentes', 'Falhas'],
+            datasets: [{
+                data: [
+                    data.sent || 0,
+                    data.pending || 0,
+                    data.failed || 0
+                ],
+                backgroundColor: ['#4CAF50', '#FFC107', '#F44336']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+// Gráfico de Horários de Atividade
+function createActivityHoursChart(data) {
+    const ctx = document.getElementById('activity-hours-chart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.map(d => `${d.hour}h`),
+            datasets: [{
+                label: 'Atividades',
+                data: data.map(d => d.count),
+                backgroundColor: '#2196F3',
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+}
+
 async function loadLogsData() {
     try {
         const response = await fetch('/admin/logs', {
@@ -1040,13 +1195,6 @@ async function sendWhatsAppMessage(phone, name, contactId) {
         
         const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
         
-        // Get the welcome message for the contact
-        const message = welcomeMessage(name);
-
-        // Add timestamp to log message
-        const timestamp = new Date().toLocaleString('pt-BR');
-        console.log(`[${timestamp}] Enviando mensagem para ${name} (${formattedPhone}) - ID: ${contactId}`);
-
         const response = await fetch('/api/send-whatsapp', {
             method: 'POST',
             headers: {
@@ -1056,7 +1204,6 @@ async function sendWhatsAppMessage(phone, name, contactId) {
             body: JSON.stringify({
                 phone: formattedPhone,
                 name: name,
-                message: message, // Inclui a mensagem completa
                 contactId: contactId
             })
         });
@@ -1089,23 +1236,6 @@ async function sendWhatsAppMessage(phone, name, contactId) {
             window.location.href = 'login.html';
         }
     }
-}
-
-// Adicione esta função para gerar a mensagem de boas-vindas
-function welcomeMessage(name) {
-    return `Paz do Senhor ${name}! 🙏\n\n` +
-           "Somos da Igreja Batista Lugar de Benção, e gostaríamos de convidar você para conhecer nossa igreja!\n\n" +
-           "📌 *Programações da igreja:*\n" +
-           "• *Terças-feiras:* Culto de Oração às 20h\n" +
-           "• *Quintas-feiras:* Culto do Clamor às 20h\n" +
-           "• *Sábados:* Culto de Jovens e Adolescentes às 19h\n" +
-           "• *Domingos:*\n" +
-           "  - 09h: Escola Bíblica Dominical\n" +
-           "  - 10h: Culto da Manhã\n" +
-           "  - 19h: Culto da Noite\n\n" +
-           "Será uma alegria ter você conosco! 🤗\n\n" +
-           "_\"Vinde a mim, todos os que estai cansados e oprimidos, e eu vos aliviarei.\"_\n" +
-           "*Mateus 11:28*";
 }
 
 async function deleteUser(username) {
