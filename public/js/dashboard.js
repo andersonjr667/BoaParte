@@ -203,8 +203,6 @@ function getAuthHeaders() {
 // Função para exibir contatos
 function displayContacts(contacts) {
     const contactsList = document.getElementById('contacts-list');
-    if (!contactsList) return;
-    
     contactsList.innerHTML = '';
 
     if (!contacts || contacts.length === 0) {
@@ -543,40 +541,44 @@ document.addEventListener('keydown', (e) => {
 
 // Função para carregar contatos do mês
 async function handleMonthFilter() {
-    // Verificar autenticação
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showNotification('❌ Você precisa estar autenticado para filtrar contatos', true);
-        return;
-    }
-    
     try {
-        const selectedMonth = document.getElementById('month-select').value;
+        const monthSelect = document.getElementById('month-select');
+        const selectedMonth = monthSelect.value;
+        const monthResult = document.getElementById('month-result');
+        
+        // Oculta a mensagem se for "Todos os meses"
+        if (selectedMonth === "0") {
+            monthResult.style.display = 'none';
+            const response = await fetch('/api/contacts/all', {
+                headers: getAuthHeaders()
+            });
+            if (!response.ok) throw new Error('Erro ao carregar contatos');
+            const data = await response.json();
+            if (data.success) {
+                displayContacts(data.contacts);
+            }
+            return;
+        }
+
+        // Mostra a mensagem apenas quando um mês específico é selecionado
+        const monthName = monthNames[parseInt(selectedMonth) - 1];
+        monthResult.style.display = 'block';
+        document.getElementById('selected-month').textContent = monthName;
         
         const response = await fetch(`/api/contacts/month/${selectedMonth}`, {
             headers: getAuthHeaders()
         });
 
-        if (!response.ok) {
-            if (response.status === 401) {
-                showNotification('❌ Não autorizado. Faça login novamente.', true);
-                window.location.href = '/login.html';
-                return;
-            }
-            throw new Error('Erro ao filtrar contatos');
-        }
-        
+        if (!response.ok) throw new Error('Erro ao filtrar contatos');
+
         const data = await response.json();
-        
-        if (data.success) {
-            displayContacts(data.contacts);
-            updateMonthHeading(selectedMonth);
-            showNotification('✅ Filtro aplicado com sucesso!');
-        } else {
-            throw new Error(data.message || 'Erro ao filtrar contatos');
-        }
+        if (!data.success) throw new Error('Erro ao carregar dados dos contatos filtrados');
+
+        displayContacts(data.contacts);
+        showNotification(`✅ Mostrando contatos de ${monthName}`);
+
     } catch (error) {
-        console.error('Erro:', error);
+        console.error('Erro ao filtrar contatos:', error);
         showNotification('❌ ' + error.message, true);
     }
 }
@@ -794,38 +796,7 @@ async function sendServiceReminder(phone, name, contactId) {
             throw new Error(data.message);
         }
     } catch (error) {
-        console.error('Erro:', error);
-        showNotification('❌ ' + error.message, true);
-    }
-}
-
-async function markAsNotSent(contactId) {
-    // Verificar autenticação
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showNotification('❌ Você precisa estar autenticado para atualizar status', true);
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/api/contacts/${contactId}/mark-not-sent`, {
-            method: 'POST',
-            headers: getAuthHeaders()
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                showNotification('❌ Não autorizado. Faça login novamente.', true);
-                window.location.href = '/login.html';
-                return;
-            }
-            throw new Error('Erro ao marcar como não enviada');
-        }
-
-        showNotification('✅ Mensagem marcada como não enviada');
-        await loadContacts();
-    } catch (error) {
-        console.error('Erro:', error);
+        console.error('Erro ao enviar lembrete:', error);
         showNotification('❌ ' + error.message, true);
     }
 }
@@ -958,3 +929,63 @@ function logout() {
     localStorage.removeItem('role');
     window.location.href = 'login.html';
 }
+
+function showConfirmDialog(message) {
+    return new Promise((resolve) => {
+        const confirmed = window.confirm(message);
+        resolve(confirmed);
+    });
+}
+
+async function executeBulkAction() {
+    const action = document.getElementById('bulk-action').value;
+    if (!action) return;
+
+    try {
+        const confirmed = await showConfirmDialog('Tem certeza que deseja executar esta ação em massa?');
+        if (!confirmed) return;
+
+        showLoading();
+        const response = await fetch(`/api/contacts/bulk/${action}`, {
+            method: 'POST',
+            headers: getAuthHeaders()
+        });
+
+        if (!response.ok) throw new Error('Falha ao executar ação');
+
+        const data = await response.json();
+        showNotification(data.message || 'Ação executada com sucesso!');
+        await loadContacts(); // Recarrega a lista
+    } catch (error) {
+        console.error('Erro:', error);
+        showNotification('❌ ' + error.message, true);
+    } finally {
+        hideLoading();
+        document.getElementById('bulk-action').value = ''; // Reset select
+    }
+}
+
+// Configurações Globais
+const monthNames = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 
+    'Maio', 'Junho', 'Julho', 'Agosto',
+    'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+];
+
+// Export functions that need to be accessible globally
+window.handleMonthFilter = handleMonthFilter;
+window.showAddContactForm = showAddContactForm;
+window.hideAddContactForm = hideAddContactForm;
+window.createContact = createContact;
+window.editContact = editContact;
+window.deleteContact = deleteContact;
+window.updateMember = updateMember;
+window.closeModal = closeModal;
+window.sendWhatsAppMessage = sendWhatsAppMessage;
+window.makeMember = makeMember;
+window.markAsNotSent = markAsNotSent;
+window.sendServiceReminder = sendServiceReminder;
+window.executeBulkAction = executeBulkAction;
+window.toggleActionMenu = toggleActionMenu;
+window.formatPhoneNumber = formatPhoneNumber;
+window.logout = logout;

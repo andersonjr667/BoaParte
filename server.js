@@ -3002,3 +3002,64 @@ app.get('/api/admin/stats', authenticateToken, async (req, res) => {
 
 // ...existing code...
 
+// Bulk Actions Routes
+app.post('/api/contacts/bulk/:action', authenticateToken, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Acesso negado. Somente administradores podem executar ações em massa.' 
+            });
+        }
+
+        const { action } = req.params;
+        let message = '';
+
+        switch(action) {
+            case 'send-all-pending':
+                const pendingContacts = await Contact.find({ receivedMessage: false });
+                for (const contact of pendingContacts) {
+                    // Enviar mensagem para cada contato
+                    await sendWhatsAppMessage(contact.phone, contact.name, contact._id);
+                }
+                message = `Mensagens enviadas para ${pendingContacts.length} contatos`;
+                break;
+
+            case 'send-all-reminders':
+                const allContacts = await Contact.find({});
+                for (const contact of allContacts) {
+                    // Enviar lembrete para cada contato
+                    await sendServiceReminder(contact.phone, contact.name, contact._id);
+                }
+                message = `Lembretes enviados para ${allContacts.length} contatos`;
+                break;
+
+            case 'mark-all-sent':
+                await Contact.updateMany({}, { receivedMessage: true });
+                message = 'Todos os contatos marcados como mensagem enviada';
+                break;
+
+            case 'mark-all-not-sent':
+                await Contact.updateMany({}, { receivedMessage: false });
+                message = 'Todos os contatos marcados como mensagem não enviada';
+                break;
+
+            default:
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Ação inválida' 
+                });
+        }
+
+        res.json({ success: true, message });
+    } catch (error) {
+        console.error('Erro na ação em massa:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Erro ao executar ação em massa' 
+        });
+    }
+});
+
+// ...existing code...
+

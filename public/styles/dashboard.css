@@ -35,16 +35,18 @@ body {
     width: 90%;
     max-width: 1300px;
     margin: 2rem auto;
-    padding: 2rem;
-    background: var(--white);
+    padding: 1.5rem; /* Reduzido de 2rem */
+    background: linear-gradient(135deg, var(--white) 0%, #f8f9fa 100%);
     min-height: 85vh;
     border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(4px);
     position: relative;
     z-index: 1;
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.5rem; /* Reduzido de 2rem */
 }
 
 /* ======================
@@ -54,18 +56,20 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: var(--gradient-primary);
-    border-radius: var(--border-radius);
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+    padding: 1.2rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     color: var(--white);
 }
 
 .dashboard-header h2 {
     margin: 0;
-    font-size: 2.8rem;
-    font-weight: 600;
+    font-size: 2.2rem; /* Reduzido de 2.8rem */
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
 .user-info {
@@ -118,10 +122,10 @@ body {
 
 .dashboard-btn {
     flex: 0 1 220px;
-    background: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     color: var(--white);
     border: none;
-    padding: 1.2rem;
+    padding: 1rem; /* Reduzido de 1.2rem */
     border-radius: var(--border-radius);
     font-size: 1.1rem;
     font-weight: 600;
@@ -130,15 +134,18 @@ body {
     justify-content: center;
     gap: 0.8rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     max-width: 280px;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    will-change: transform; /* Otimização de performance */
 }
 
 .dashboard-btn:hover {
-    transform: translateY(-3px);
+    transform: translateY(-5px);
     background: var(--primary-light);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
 }
 
 .dashboard-btn.admin-only {
@@ -241,12 +248,13 @@ body {
 
 /* Estilo da seção de filtro */
 .filter-section {
-    background: var(--white);
+    background: linear-gradient(135deg, #f8f9fa 0%, var(--white) 100%);
     border-radius: var(--border-radius);
     padding: 1.5rem;
     margin-bottom: 2rem;
     box-shadow: var(--box-shadow);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--primary-lighter);
+    backdrop-filter: blur(4px);
 }
 
 .filter-title {
@@ -271,11 +279,12 @@ body {
     flex: 1;
     padding: 0.8rem;
     border-radius: var(--border-radius-sm);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--primary-lighter);
     font-size: 1rem;
     background: var(--white);
     cursor: pointer;
     transition: all 0.3s ease;
+    border: 1px solid rgba(67, 160, 71, 0.2);
 }
 
 .filter-select:hover {
@@ -394,16 +403,24 @@ body {
 }
 
 .contact-card {
-    background: var(--white);
+    background: linear-gradient(135deg, var(--white) 0%, #f8f9fa 100%);
     border-radius: var(--border-radius);
-    padding: 1.5rem;
+    padding: 1.2rem; /* Reduzido de 1.5rem */
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    border: 1px solid var(--border-color);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     position: relative;
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease-out;
+    will-change: transform; /* Otimização de performance */
+}
+
+.contact-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .contact-card:has(.action-menu.show) {
@@ -467,13 +484,16 @@ body {
 .action-menu {
     position: static;
     display: none;
-    background: var(--white);
+    background: rgba(255, 255, 255, 0.95);
     border-radius: var(--border-radius);
     padding: 1rem;
     margin-top: 1rem;
     width: 100%;
     box-sizing: border-box;
     transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .action-menu.show {
@@ -491,15 +511,17 @@ body {
     display: flex;
     align-items: center;
     gap: 0.8rem;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-size: 1rem;
     font-weight: 500;
     text-align: left;
     color: var(--white);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .action-button:hover {
-    transform: translateY(-2px);
+    transform: translateX(5px);
     filter: brightness(110%);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
@@ -556,13 +578,15 @@ body {
 }
 
 .modal-content {
-    background: white;
+    background: linear-gradient(135deg, var(--white) 0%, #f8f9fa 100%);
     padding: 1.5rem;
     border-radius: var(--border-radius);
     width: 100%;
     max-width: 400px;
     position: relative;
     animation: modalSlideIn 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(10px);
 }
 
 .modal-header {
@@ -658,12 +682,17 @@ body {
 }
 
 .logo {
-    max-width: 90px; /* Ajustado o tamanho da imagem */
+    max-width: 60px; /* Reduzido de 90px para 60px */
     height: auto;
     border-radius: 50%;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     background: var(--white);
-    padding: 0.5rem;
+    padding: 0.4rem;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.1);
 }
 
 /* ======================
@@ -776,6 +805,10 @@ body {
         text-align: center;
     }
 
+    .dashboard-header h2 {
+        font-size: 1.8rem;
+    }
+
     .navigation-buttons {
         flex-direction: column;
     }
@@ -789,7 +822,7 @@ body {
     }
 
     .logo {
-        max-width: 70px; /* Reduz ainda mais o tamanho da imagem */
+        max-width: 50px; /* Ainda menor em mobile */
     }
 
     .decorative-circle {
@@ -815,6 +848,21 @@ body {
     .dashboard-btn {
         flex: 1 1 100%;
         max-width: none;
+    }
+
+    .contact-card {
+        padding: 1rem;
+    }
+
+    .message-status {
+        width: auto; /* Removido width: 100% */
+        margin: 0.5rem 0;
+    }
+
+    /* Melhorar performance em scroll */
+    .contacts-list {
+        contain: content; /* Otimização de performance */
+        will-change: transform; /* Otimização de performance */
     }
 }
 
@@ -853,27 +901,552 @@ body {
     }
 }
 
-/* Status da Mensagem */
+/* Melhorias na Responsividade */
+@media (max-width: 1200px) {
+    .dashboard-container {
+        width: 95%;
+        padding: 1.5rem;
+    }
+
+    .button-container {
+        gap: 1rem;
+    }
+
+    .dashboard-btn {
+        flex: 0 1 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        width: 100%;
+        padding: 1rem;
+        margin: 0.5rem auto;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    .dashboard-header h2 {
+        font-size: 1.8rem;
+        text-align: center;
+    }
+
+    .user-info {
+        flex-direction: column;
+        gap: 0.8rem;
+        width: 100%;
+    }
+
+    .user-badge, .logout-btn {
+        width: 100%;
+        text-align: center;
+        padding: 0.8rem;
+    }
+
+    .button-container {
+        flex-direction: column;
+        padding: 0 1rem;
+    }
+
+    .dashboard-btn {
+        width: 100%;
+        max-width: none;
+        flex: none;
+    }
+
+    .contact-card {
+        padding: 1rem;
+    }
+
+    .action-menu {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+        z-index: 1000;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .action-menu.show {
+        padding: 1.5rem;
+        padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    }
+
+    .action-button {
+        padding: 1.2rem;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .filter-section {
+        margin: 1rem;
+    }
+
+    .filter-container {
+        flex-direction: column;
+    }
+
+    .filter-select, .ok-button {
+        width: 100%;
+    }
+
+    .month-result {
+        position: static;
+        margin: 1rem;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .contact-card {
+        margin: 0.5rem 0;
+    }
+
+    .contact-info h3 {
+        font-size: 1.1rem;
+    }
+
+    .contact-info p {
+        font-size: 0.9rem;
+    }
+
+    .contact-metadata {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .message-status {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .modal-content {
+        padding: 1rem;
+        margin: 0.5rem;
+    }
+
+    .form-group input {
+        font-size: 16px; /* Evita zoom em iOS */
+    }
+
+    .action-menu {
+        padding: 1rem;
+    }
+
+    .action-button {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+
+    /* Ajustes para telas muito pequenas */
+    .decorative-circle {
+        display: none;
+    }
+
+    .logo {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* Ajustes para rolagem em dispositivos móveis */
+@media (max-width: 768px) {
+    html, body {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .dashboard-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 1rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .contacts-list {
+        padding-bottom: 120px; /* Espaço extra para evitar que o último item fique sob o menu de ações */
+    }
+
+    #contacts-list {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .contact-card {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    /* Impede rolagem horizontal em elementos internos */
+    .dashboard-header,
+    .button-container,
+    .visitor-container,
+    .filter-section,
+    .bulk-actions,
+    .action-menu {
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+
+    /* Garante que o menu de ações fique fixo na parte inferior */
+    .action-menu.show {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        max-height: 70vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Ajustes para dispositivos com notch */
+@supports (padding: max(0px)) {
+    .dashboard-container {
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+
+    .action-menu.show {
+        padding-bottom: max(1.5rem, env(safe-area-inset-bottom) + 1rem);
+    }
+}
+
+/* Melhorias para tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .dashboard-container {
+        width: 90%;
+    }
+
+    .button-container {
+        gap: 1rem;
+        justify-content: flex-start;
+    }
+
+    .dashboard-btn {
+        flex: 0 1 calc(33.333% - 1rem);
+    }
+
+    .contact-card {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .contact-info {
+        flex: 1;
+    }
+
+    .button-container .action-menu {
+        width: auto;
+        min-width: 200px;
+    }
+}
+
+/* Otimizações para performance em dispositivos móveis */
+@media (max-width: 768px) {
+    * {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .contact-card, .action-button, .dashboard-btn {
+        cursor: default;
+    }
+
+    .action-menu {
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .contacts-list {
+        overscroll-behavior: contain;
+    }
+}
+
+/* Status da Mensagem - Design Atualizado */
 .message-status {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.4rem 0.8rem;
+    padding: 0.5rem 1rem;
     border-radius: 20px;
     font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border: 2px solid transparent;
+    margin: 0.5rem 0;
+    width: auto;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+    text-align: center;
 }
 
 .status-sent {
-    background: var(--primary-lighter);
-    color: var(--primary-dark);
+    background: #22c55e; /* Verde sólido */
+    color: #ffffff; /* Texto branco */
+    border-color: #16a34a; /* Borda verde escuro */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .status-pending {
-    background: #fff3e0;
-    color: #e65100;
+    background: #ef4444; /* Vermelho sólido */
+    color: #ffffff; /* Texto branco */
+    border-color: #dc2626; /* Borda vermelho escuro */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .message-status i {
+    font-size: 1.2rem;
+    margin-right: 6px;
+    color: #ffffff; /* Ícone branco */
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+/* Hover states para melhor feedback visual */
+.status-sent:hover {
+    background: #16a34a;
+    border-color: #15803d;
+}
+
+.status-pending:hover {
+    background: #dc2626;
+    border-color: #b91c1c;
+}
+
+/* Status da Mensagem - Correção de Cores */
+.contact-card .message-status {
+    color: #ffffff !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border: 2px solid transparent;
+    margin: 0.5rem 0;
+    text-align: center;
+}
+
+.contact-card .status-sent {
+    background: #22c55e;
+    border-color: #16a34a;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.contact-card .status-pending {
+    background: #ef4444;
+    border-color: #dc2626;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.contact-card .message-status i {
+    color: #ffffff !important;
+    font-size: 1.2rem;
+    margin-right: 6px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+/* Previne rolagem vertical em dispositivos móveis */
+@media (max-width: 768px) {
+    html, body {
+        position: relative; /* Alterado de fixed para relative */
+        width: 100%;
+        height: 100%;
+        overflow-y: auto; /* Alterado de hidden para auto */
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dashboard-container {
+        position: relative; /* Alterado de fixed para relative */
+        width: 100%;
+        min-height: 100vh;
+        height: auto; /* Alterado de 100% para auto */
+        margin: 0;
+        padding: 1rem;
+        overflow-y: visible; /* Alterado de hidden para visible */
+    }
+
+    .contacts-list {
+        flex: 1;
+        overflow-y: visible; /* Alterado de auto para visible */
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+        margin-bottom: 0;
+        will-change: transform; /* Melhoria de performance */
+    }
+
+    #contacts-list {
+        overflow-y: visible;
+        padding-bottom: 100px; /* Espaço extra para evitar que o conteúdo fique sob o menu de ações */
+    }
+
+    .action-menu.show {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        max-height: 70vh;
+        border-radius: 20px 20px 0 0;
+        z-index: 1000;
+        background: white;
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+        overflow-y: auto;
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    }
+
+    /* Melhorar a experiência de toque */
+    .contact-card {
+        touch-action: pan-y;
+    }
+
+    /* Garantir que o conteúdo não fique preso sob elementos fixos */
+    .dashboard-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    }
+}
+
+/* Estilos para Ações em Massa */
+.bulk-actions {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--white) 0%, #f8f9fa 100%);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-sm);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(4px);
+}
+
+.bulk-actions-container {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.bulk-select {
+    flex: 1;
+    padding: 0.8rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
     font-size: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(67, 160, 71, 0.2);
+}
+
+.bulk-select:hover {
+    border-color: var(--primary-color);
+}
+
+.bulk-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(67, 160, 71, 0.1);
+}
+
+.bulk-action-btn {
+    padding: 0.8rem 1.5rem;
+    background: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bulk-action-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.bulk-action-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Responsividade para Ações em Massa */
+@media (max-width: 768px) {
+    .bulk-actions {
+        margin: 0.5rem;
+        padding: 0.8rem;
+    }
+
+    .bulk-actions-container {
+        flex-direction: column;
+    }
+
+    .bulk-select,
+    .bulk-action-btn {
+        width: 100%;
+    }
+}
+
+/* Animações suaves */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Notificações mais elegantes */
+.notification {
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-light);
+    border-radius: 10px;
+    border: 2px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Melhorar performance geral */
+* {
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
