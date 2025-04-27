@@ -1284,3 +1284,55 @@ async function checkAdminAccess() {
         return false;
     }
 }
+
+async function initVisitorsChart() {
+    try {
+        const response = await fetch('/api/visitors/stats');
+        const data = await response.json();
+
+        const dates = data.map(item => item.date);
+        const counts = data.map(item => item.count);
+
+        const ctx = document.getElementById('visitorsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Número de Visitantes',
+                    data: counts,
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Histórico de Visitantes por Dia'
+                    },
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Erro ao carregar dados do gráfico:', error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initVisitorsChart();
+});

@@ -3,163 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuração WhatsApp</title>
+    <title>WhatsApp Config - JIBS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="icon" type="image/png" href="images/image.png">
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 20px;
-            background: #f5f5f5;
+            background: #4CAF50;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .container {
             max-width: 600px;
-            margin: 0 auto;
+            width: 100%;
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #2E7D32;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-card {
+            background: #E8F5E9;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .status-card.connected {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .status-card.disconnected {
+            background: #FFEBEE;
+            color: #C62828;
         }
 
         .qr-container {
             text-align: center;
-            padding: 20px;
-            margin: 20px 0;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            margin: 2rem 0;
+            padding: 2rem;
+            border: 2px dashed #4CAF50;
+            border-radius: 12px;
         }
 
-        .qr-image {
+        #qrCode {
             max-width: 300px;
-            margin: 20px auto;
+            height: auto;
         }
 
-        .status {
-            text-align: center;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
+        .instructions {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #F5F5F5;
+            border-radius: 12px;
         }
 
-        .status.connected {
-            background: #e8f5e9;
-            color: #2e7d32;
+        .instructions h3 {
+            color: #2E7D32;
+            margin-bottom: 1rem;
         }
 
-        .status.disconnected {
-            background: #ffebee;
-            color: #c62828;
+        .instructions ol {
+            margin: 0;
+            padding-left: 1.5rem;
         }
 
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background: #4CAF50;
+        .instructions li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-button {
+            background: #2E7D32;
             color: white;
             border: none;
-            border-radius: 5px;
+            padding: 1rem 2rem;
+            border-radius: 10px;
             cursor: pointer;
-            margin: 10px 0;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            transition: all 0.3s ease;
         }
 
-        .btn:hover {
-            background: #45a049;
+        .back-button:hover {
+            background: #1B5E20;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+                margin: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Configuração do WhatsApp</h1>
-        <div class="status" id="status">Verificando status...</div>
-        <div class="qr-container" id="qr-container">
-            <p>Aguardando QR Code...</p>
+        <div class="header">
+            <h1>Configuração do WhatsApp</h1>
+            <p>Conecte sua conta do WhatsApp para enviar mensagens</p>
         </div>
-        <button class="btn" onclick="connectWhatsApp()">
-            <i class="fab fa-whatsapp"></i> Conectar WhatsApp
-        </button>
-        <button class="btn" onclick="window.location.href='dashboard.html'">
+
+        <div id="statusCard" class="status-card disconnected">
+            <h2><i class="fas fa-plug"></i> Status: <span id="connectionStatus">Desconectado</span></h2>
+        </div>
+
+        <div id="qrContainer" class="qr-container">
+            <h3>Escaneie o QR Code</h3>
+            <img id="qrCode" src="" alt="QR Code" style="display: none;">
+            <p id="qrStatus">Aguardando QR Code...</p>
+        </div>
+
+        <div class="instructions">
+            <h3>Instruções:</h3>
+            <ol>
+                <li>Abra o WhatsApp no seu celular</li>
+                <li>Toque em Menu ou Configurações e selecione WhatsApp Web</li>
+                <li>Aponte seu celular para esta tela para capturar o código</li>
+                <li>Aguarde a conexão ser estabelecida</li>
+            </ol>
+        </div>
+
+        <button class="back-button" onclick="window.location.href='dashboard.html'">
             <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
         </button>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-        async function checkStatus() {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('/api/whatsapp/status', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+        const socket = io();
+        const qrContainer = document.getElementById('qrCode');
+        const qrStatus = document.getElementById('qrStatus');
+        const statusCard = document.getElementById('statusCard');
+        const connectionStatus = document.getElementById('connectionStatus');
 
-                if (!response.ok) {
-                    throw new Error('Erro ao verificar status');
-                }
-
-                const data = await response.json();
-                console.log('Status recebido:', data); // Debug
-                updateStatus(data);
-            } catch (error) {
-                console.error('Erro ao verificar status:', error);
-                document.getElementById('status').innerHTML = 
-                    '<i class="fas fa-exclamation-circle"></i> Erro ao verificar status';
-            }
-        }
-
-        function updateStatus(data) {
-            const statusDiv = document.getElementById('status');
-            const qrContainer = document.getElementById('qr-container');
-
-            console.log('Atualizando status:', data); // Debug
-
-            if (data.status === 'connected') {
-                statusDiv.className = 'status connected';
-                statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> WhatsApp Conectado';
-                qrContainer.innerHTML = '<p>WhatsApp conectado com sucesso!</p>';
-            } else if (data.qr) {
-                statusDiv.className = 'status disconnected';
-                statusDiv.innerHTML = '<i class="fas fa-qrcode"></i> Aguardando leitura do QR Code';
-                qrContainer.innerHTML = `
-                    <p>Escaneie o QR Code com seu WhatsApp:</p>
-                    <img src="${data.qr}" alt="QR Code" class="qr-image">
-                `;
-                console.log('QR Code atualizado'); // Debug
-            } else {
-                statusDiv.className = 'status disconnected';
-                statusDiv.innerHTML = '<i class="fas fa-times-circle"></i> WhatsApp Desconectado';
-                qrContainer.innerHTML = '<p>Clique em "Conectar WhatsApp" para começar.</p>';
-            }
-        }
-
-        async function connectWhatsApp() {
-            try {
-                const token = localStorage.getItem('token');
-                await fetch('/api/whatsapp/connect', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                // Inicia verificação de status
-                checkStatus();
-            } catch (error) {
-                console.error('Erro ao conectar WhatsApp:', error);
-            }
-        }
-
-        // Verifica status a cada 3 segundos (reduzido de 5 para 3)
-        setInterval(checkStatus, 3000);
-
-        // Verifica status inicial e inicia conexão
-        document.addEventListener('DOMContentLoaded', async () => {
-            await checkStatus();
-            // Tenta conectar automaticamente
-            await connectWhatsApp();
+        socket.on('qr', (data) => {
+            console.log('QR received');
+            qrContainer.src = data.qr;
+            qrContainer.style.display = 'block';
+            qrStatus.style.display = 'none';
+            statusCard.className = 'status-card disconnected';
+            connectionStatus.textContent = 'Aguardando conexão';
         });
+
+        socket.on('connection-status', (data) => {
+            console.log('Connection status:', data);
+            if (data.connected) {
+                qrContainer.style.display = 'none';
+                qrStatus.textContent = 'Conectado com sucesso!';
+                statusCard.className = 'status-card connected';
+                connectionStatus.textContent = 'Conectado';
+            } else if (data.qr) {
+                qrContainer.src = data.qr;
+                qrContainer.style.display = 'block';
+                qrStatus.style.display = 'none';
+            }
+        });
+
+        // Check initial status
+        fetch('/api/whatsapp/status')
+            .then(res => res.json())
+            .then(data => {
+                if (data.connected) {
+                    qrContainer.style.display = 'none';
+                    qrStatus.textContent = 'Conectado com sucesso!';
+                    statusCard.className = 'status-card connected';
+                    connectionStatus.textContent = 'Conectado';
+                } else if (data.qr) {
+                    qrContainer.src = data.qr;
+                    qrContainer.style.display = 'block';
+                    qrStatus.style.display = 'none';
+                }
+            });
     </script>
 </body>
 </html>

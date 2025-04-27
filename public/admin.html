@@ -1281,268 +1281,10 @@
         </nav>
 
         <main class="admin-content">
-            <!-- Seção de Visão Geral -->
-            <section id="overview-section" class="admin-section">
-                <h2>Visão Geral do Sistema</h2>
-                <div class="overview-cards">
-                    <div class="stat-card total-users">
-                        <i class="fas fa-users stat-icon"></i>
-                        <div class="stat-info">
-                            <h3>Total de Usuários</h3>
-                            <p id="total-users">0</p>
-                        </div>
-                    </div>
-                    <div class="stat-card total-contacts">
-                        <i class="fas fa-address-book stat-icon"></i>
-                        <div class="stat-info">
-                            <h3>Total de Contatos</h3>
-                            <p id="total-contacts">0</p>
-                        </div>
-                    </div>
-                    <div class="stat-card today-contacts">
-                        <i class="fas fa-calendar-day stat-icon"></i>
-                        <div class="stat-info">
-                            <h3>Contatos Hoje</h3>
-                            <p id="today-contacts">0</p>
-                        </div>
-                    </div>
-                    <div class="stat-card active-users">
-                        <i class="fas fa-user-check stat-icon"></i>
-                        <div class="stat-info">
-                            <h3>Usuários Ativos</h3>
-                            <p id="active-users">0</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="activity-chart"></canvas>
-                </div>
-            </section>
-
-            <!-- Seção de Usuários -->
-            <section id="users-section" class="admin-section" style="display: none;">
-                <h2>Gerenciamento de Usuários</h2>
-                <div class="users-list" id="users-list"></div>
-            </section>
-
-            <!-- Seção de Estatísticas -->
-            <section id="stats-section" class="admin-section" style="display: none;">
-                <h2>Estatísticas do Sistema</h2>
-                
-                <!-- Cards de Visão Geral -->
-                <div class="stats-overview">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Total de Usuários</h3>
-                            <p id="total-users">0</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-address-book"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Total de Contatos</h3>
-                            <p id="total-contacts">0</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-calendar-day"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Contatos Hoje</h3>
-                            <p id="today-contacts">0</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Taxa de Crescimento</h3>
-                            <p id="growth-rate">0%</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Controles dos Gráficos -->
-                <div class="chart-controls">
-                    <div class="control-group">
-                        <label>Tipo de Visualização</label>
-                        <select id="chart-type" onchange="updateChartTypes(this.value)">
-                            <option value="line">Linha</option>
-                            <option value="bar">Barras</option>
-                            <option value="pie">Pizza</option>
-                        </select>
-                    </div>
-                    <div class="control-group">
-                        <label>Período</label>
-                        <select id="date-range" onchange="filterChartsByDate(this.value)">
-                            <option value="7">Últimos 7 dias</option>
-                            <option value="30" selected>Últimos 30 dias</option>
-                            <option value="90">Últimos 3 meses</option>
-                            <option value="180">Últimos 6 meses</option>
-                            <option value="365">Último ano</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Grade de Gráficos -->
-                <div class="charts-grid">
-                    <div class="chart-container">
-                        <h3>Contatos por Usuário</h3>
-                        <canvas id="contacts-by-user-chart"></canvas>
-                    </div>
-                    <div class="chart-container">
-                        <h3>Evolução Mensal</h3>
-                        <canvas id="monthly-evolution-chart"></canvas>
-                    </div>
-                    <div class="chart-container">
-                        <h3>Status das Mensagens</h3>
-                        <canvas id="message-status-chart"></canvas>
-                    </div>
-                    <div class="chart-container">
-                        <h3>Horários de Atividade</h3>
-                        <canvas id="activity-hours-chart"></canvas>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Seção de Logs -->
-            <section id="logs-section" class="admin-section" style="display: none;">
-                <h2>Logs do Sistema</h2>
-                
-                <!-- Dashboard de Logs -->
-                <div class="logs-dashboard">
-                    <div class="log-stats">
-                        <div class="stat-card">
-                            <i class="fas fa-list-alt stat-icon"></i>
-                            <div class="stat-info">
-                                <h3>Total de Logs</h3>
-                                <p id="total-logs">0</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <i class="fas fa-calendar-day stat-icon"></i>
-                            <div class="stat-info">
-                                <h3>Logs Hoje</h3>
-                                <p id="today-logs">0</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <i class="fas fa-exclamation-triangle stat-icon"></i>
-                            <div class="stat-info">
-                                <h3>Alertas</h3>
-                                <p id="alert-logs">0</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Filtros Avançados -->
-                    <div class="logs-filters">
-                        <div class="filter-group">
-                            <label>Tipo de Log</label>
-                            <select id="log-type" class="filter-select" multiple>
-                                <option value="all" selected>Todos</option>
-                                <option value="auth">Autenticação</option>
-                                <option value="create">Criação</option>
-                                <option value="update">Atualização</option>
-                                <option value="delete">Exclusão</option>
-                                <option value="message">Mensagens</option>
-                                <option value="system">Sistema</option>
-                                <option value="error">Erros</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Período</label>
-                            <div class="date-range">
-                                <input type="datetime-local" id="log-start-date" class="filter-date">
-                                <span>até</span>
-                                <input type="datetime-local" id="log-end-date" class="filter-date">
-                            </div>
-                        </div>
-                        <div class="filter-group">
-                            <label>Usuário</label>
-                            <input type="text" id="log-user" class="filter-input" placeholder="Filtrar por usuário">
-                        </div>
-                        <div class="filter-actions">
-                            <button onclick="filterLogs()" class="action-btn">
-                                <i class="fas fa-filter"></i> Aplicar Filtros
-                            </button>
-                            <button onclick="clearLogFilters()" class="action-btn secondary">
-                                <i class="fas fa-times"></i> Limpar
-                            </button>
-                            <button onclick="exportLogs()" class="action-btn export">
-                                <i class="fas fa-file-export"></i> Exportar
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Lista de Logs -->
-                    <div class="logs-container">
-                        <div class="logs-header">
-                            <div class="log-column">Timestamp</div>
-                            <div class="log-column">Tipo</div>
-                            <div class="log-column">Usuário</div>
-                            <div class="log-column">Ação</div>
-                            <div class="log-column">Detalhes</div>
-                        </div>
-                        <div id="logs-list" class="logs-list"></div>
-                    </div>
-
-                    <!-- Paginação -->
-                    <div class="logs-pagination">
-                        <button onclick="previousPage()" class="page-btn">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <span id="page-info">Página 1 de 1</span>
-                        <button onclick="nextPage()" class="page-btn">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Seção de Membros -->
-            <section id="members-section" class="admin-section" style="display: none;">
-                <h2>Gerenciamento de Membros</h2>
-                <div class="controls">
-                    <button class="btn btn-primary" onclick="showAddMemberModal()">
-                        <i class="fas fa-plus"></i> Adicionar Membro
-                    </button>
-                </div>
-                <div id="members-list" class="members-grid"></div>
-            </section>
-
-            <!-- Seção de Notificações -->
-            <section id="notifications-section" class="admin-section" style="display: none;">
-                <div class="section-header">
-                    <h2>Central de Notificações</h2>
-                    <button class="action-btn" onclick="showModal('send-notification-modal')">
-                        <i class="fas fa-paper-plane"></i> Nova Notificação
-                    </button>
-                </div>
-                
-                <div class="notifications-container">
-                    <div class="filter-bar">
-                        <select id="notification-type-filter" onchange="filterNotifications()">
-                            <option value="all">Todas as Notificações</option>
-                            <option value="unread">Não Lidas</option>
-                            <option value="system">Sistema</option>
-                            <option value="user">Usuários</option>
-                        </select>
-                        <div class="search-box">
-                            <input type="text" id="notification-search" placeholder="Buscar notificações...">
-                            <i class="fas fa-search"></i>
-                        </div>
-                    </div>
-                    <div class="notifications-list" id="notifications-list"></div>
-                </div>
-            </section>
+            <div class="chart-container">
+                <h3 class="chart-title">Histórico de Visitantes</h3>
+                <canvas id="visitorsChart"></canvas>
+            </div>
         </main>
 
         <!-- Loading Overlay -->
@@ -1568,5 +1310,24 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/admin.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('role');
+            if (role !== 'admin') {
+                window.location.href = 'dashboard.html';
+            }
+
+            // Carregar informações do usuário logado
+            const username = localStorage.getItem('username');
+            document.getElementById('admin-username').textContent = username;
+
+            // Carregar contagem de notificações
+            loadNotificationCount();
+
+            // Exibir seção padrão
+            showSection('overview');
+        });
+    </script>
 </body>
 </html>

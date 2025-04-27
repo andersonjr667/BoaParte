@@ -3,39 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Boa Parte</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Login - JIBS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="styles/login.css">
     <link rel="icon" type="image/png" href="images/image.png">
 </head>
 <body>
-    <!-- Imagem no canto superior esquerdo -->
-    <img src="images/image.png" alt="Logo Top Left" class="top-left-logo">
-    
-    <!-- Adicionar círculos decorativos -->
-    <div class="circle circle-1"></div>
-    <div class="circle circle-2"></div>
-    <div class="circle circle-3"></div>
-    <div class="circle circle-4"></div>
-    
-    <div class="circle-1"></div>
-    <div class="circle-2"></div>
-    <div class="circle-3"></div>
+    <!-- Círculos decorativos -->
+    <div class="decorative-circle circle-1"></div>
+    <div class="decorative-circle circle-2"></div>
+    <div class="decorative-circle circle-3"></div>
+
     <div class="login-container">
         <div class="login-box">
-            <img src="images/image2.png" alt="Logo" class="logo">
-            <h1>Bem-vindo(a)!</h1>
-            <p class="subtitle">Faça login para continuar</p>
+            <img src="images/image2.png" alt="Logo JIBS" class="logo">
+            <h1>Bem-vindo de volta!</h1>
+            <p class="subtitle">Digite seus dados para acessar o sistema</p>
             
-            <form class="login-form" id="loginForm" onsubmit="login(event)">
+            <form id="login-form" onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <div class="input-container">
                         <i class="fas fa-user"></i>
                         <input type="text" id="username" placeholder="Usuário" required>
                     </div>
                 </div>
-
+                
                 <div class="form-group">
                     <div class="input-container">
                         <i class="fas fa-lock"></i>
@@ -46,7 +39,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="login-btn" id="loginButton">
+                <button type="submit" class="login-btn">
                     <i class="fas fa-sign-in-alt"></i>
                     <span>Entrar</span>
                 </button>
@@ -54,104 +47,76 @@
         </div>
     </div>
 
-    <div id="notification" class="notification">
-        <span id="notification-message"></span>
-    </div>
+    <div id="notification" class="notification"></div>
 
     <script>
-        // Verificar se o usuário foi redirecionado por falta de autorização
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('unauthorized') && urlParams.get('unauthorized') === 'true') {
-                showNotification('Você não tem autorização. Por favor, faça login para acessar o sistema.', true);
-            }
-        });
-        
-        async function login(event) {
+        async function handleLogin(event) {
             event.preventDefault();
             
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const loginButton = document.getElementById('loginButton');
-
+            const loginBtn = document.querySelector('.login-btn');
+            const btnText = loginBtn.querySelector('span');
+            const btnIcon = loginBtn.querySelector('i');
+            
             try {
-                loginButton.disabled = true;
-                loginButton.classList.add('loading');
-                loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+                // Disable button and show loading state
+                loginBtn.disabled = true;
+                btnText.textContent = 'Entrando...';
+                btnIcon.className = 'fas fa-spinner fa-spin';
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
 
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({ username, password })
                 });
 
                 const data = await response.json();
 
-                if (!response.ok || !data.success) {
+                if (!response.ok) {
                     throw new Error(data.message || 'Erro ao fazer login');
                 }
 
+                // Store token and user info
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('username', data.username);
-                localStorage.setItem('role', data.role || 'user');
+                localStorage.setItem('role', data.role);
 
-                const authHeader = response.headers.get('Authorization');
-                if (authHeader) {
-                    const token = authHeader.split(' ')[1];
-                    localStorage.setItem('token', token);
-                }
-
-                showNotification('Login realizado com sucesso!');
-
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 500);
-
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
             } catch (error) {
-                showNotification(error.message || 'Falha no login. Tente novamente.', true);
-            } finally {
-                loginButton.disabled = false;
-                loginButton.classList.remove('loading');
-                loginButton.innerHTML = '<i class="fas fa-sign-in-alt"></i> <span>Entrar</span>';
+                // Show error notification
+                const notification = document.getElementById('notification');
+                notification.textContent = error.message;
+                notification.className = 'notification error';
+                notification.style.display = 'block';
+                
+                // Reset button state
+                loginBtn.disabled = false;
+                btnText.textContent = 'Entrar';
+                btnIcon.className = 'fas fa-sign-in-alt';
+                
+                // Hide notification after 3 seconds
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
             }
-        }
-
-        function showNotification(message, isError = false) {
-            const notification = document.getElementById('notification');
-            const notificationMessage = document.getElementById('notification-message');
-            
-            notification.className = 'notification ' + (isError ? 'error' : 'success');
-            notificationMessage.textContent = message;
-            notification.style.display = 'flex';
-
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
         }
 
         function togglePassword() {
             const passwordInput = document.getElementById('password');
-            const toggleIcon = document.querySelector('.toggle-password i');
-
+            const toggleBtn = document.querySelector('.toggle-password i');
+            
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
-                toggleIcon.classList.remove('fa-eye');
-                toggleIcon.classList.add('fa-eye-slash');
+                toggleBtn.className = 'fas fa-eye-slash';
             } else {
                 passwordInput.type = 'password';
-                toggleIcon.classList.remove('fa-eye-slash');
-                toggleIcon.classList.add('fa-eye');
+                toggleBtn.className = 'fas fa-eye';
             }
-        }
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/js/notification-worker.js')
-                .then(registration => {
-                    console.log('Service Worker registrado com escopo:', registration.scope);
-                })
-                .catch(error => {
-                    console.error('Erro ao registrar Service Worker:', error);
-                });
         }
     </script>
 </body>

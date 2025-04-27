@@ -10,8 +10,7 @@ const memberSchema = new mongoose.Schema({
         required: true
     },
     birthday: {
-        type: Date,
-        required: false // Make birthday optional
+        type: Date
     },
     isDisciple: {
         type: Boolean,
@@ -19,14 +18,16 @@ const memberSchema = new mongoose.Schema({
     },
     discipleBy: {
         type: String,
-        required: false
+        default: null
     },
     photo: {
         type: String,
-        required: false
+        default: null
     }
-}, { timestamps: true });
+}, {
+    timestamps: true
+});
 
-const Member = mongoose.model('Member', memberSchema, 'members');
+const Member = mongoose.model('Member', memberSchema);
 
 module.exports = Member;

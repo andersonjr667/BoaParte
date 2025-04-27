@@ -10,10 +10,8 @@ const contactSchema = new mongoose.Schema({
         required: true
     },
     birthday: {
-        type: Date,
-        required: false
+        type: Date
     },
-    owner: String,
     receivedMessage: {
         type: Boolean,
         default: false
@@ -22,8 +20,8 @@ const contactSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     }
+}, {
+    collection: 'contacts' // Force collection name
 });
 
-const Contact = mongoose.model('Contact', contactSchema);
-
-module.exports = Contact;
+module.exports = mongoose.model('Contact', contactSchema, 'contacts');

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membros Ausentes - JIBS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/absent-members.css">
+    <link rel="icon" type="image/png" href="images/image.png">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Membros Ausentes - JIBS</h1>
+            <div class="header-actions">
+                <button id="sendSelectedBtn" class="action-btn" onclick="sendToSelected()" disabled>
+                    <i class="fas fa-paper-plane"></i> Enviar para Selecionados
+                </button>
+                <button onclick="window.location.href='dashboard.html'" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+            </div>
+        </div>
+        <div class="members-table">
+            <div class="table-header">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="selectAll" onclick="toggleSelectAll()">
+                    <span class="checkmark"></span>
+                    Selecionar Todos
+                </label>
+            </div>
+            <table id="membersTable">
+                <thead>
+                    <tr>
+                        <th>Selecionar</th>
+                        <th>Nome</th>
+                        <th>Telefone</th>
+                    </tr>
+                </thead>
+                <tbody id="membersTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const members = [
+            { name: "Alyne", phone: "5531993259908" },
+            { name: "Alysson", phone: "5531984353383" },
+            { name: "Ana", phone: "5531987401274" },
+            { name: "André", phone: "5531987812303" },
+            { name: "Arthur 🫒", phone: "5531986832164" },
+            { name: "Arthur 🤓", phone: "5531987748972" },
+            { name: "Bianca", phone: "5531975953540" },
+            { name: "Davi", phone: "5531995611124" },
+            { name: "Débora", phone: "5531992344897" },
+            { name: "Dudah", phone: "5531995359296" },
+            { name: "Elias", phone: "5531997506403" },
+            { name: "Ester", phone: "5531982670832" },
+            { name: "Gabi J.", phone: "5531985252076" },
+            { name: "Gabi Deps", phone: "5531971164949" },
+            { name: "Heitor", phone: "5531980230446" },
+            { name: "Ian", phone: "5531989346041" },
+            { name: "Ingryd", phone: "5531988868991" },
+            { name: "Isaac", phone: "5531971652421" },
+            { name: "João Paulo", phone: "5531989383386" },
+            { name: "João Pedro", phone: "5531991578504" },
+            { name: "Juninho", phone: "5531971533882" },
+            { name: "Julia", phone: "5531998388190" },
+            { name: "Kaique", phone: "5531993935510" },
+            { name: "Larissa", phone: "5531995033990" },
+            { name: "Laura(Luan)", phone: "5531997621357" },
+            { name: "Laura", phone: "5531984258629" },
+            { name: "Lu", phone: "5531993939752" },
+            { name: "Luan", phone: "5531999792892" },
+            { name: "Luiz", phone: "5531985464249" },
+            { name: "Luiz (outro)", phone: "5531995297164" },
+            { name: "Manu Melo", phone: "5531989446562" },
+            { name: "Maria", phone: "5531972660695" },
+            { name: "Mari C", phone: "5531993014289" },
+            { name: "Mari", phone: "5531971747001" },
+            { name: "Mari T", phone: "5531983951289" },
+            { name: "Mariana Andrade", phone: "5531973166612" },
+            { name: "Mateus", phone: "5533988882030" },
+            { name: "Mateuzin", phone: "5531991299240" },
+            { name: "Nicolas", phone: "5531985702117" },
+            { name: "Paulo", phone: "5531971938925" },
+            { name: "Pedro", phone: "5531992601919" },
+            { name: "Rafique", phone: "5531982003128" },
+            { name: "Richard", phone: "5531999954812" },
+            { name: "Roberta", phone: "5531989580017" },
+            { name: "Sabrina", phone: "5531995560774" },
+            { name: "Talita", phone: "5531987063884" },
+            { name: "Thayná", phone: "5533999424001" },
+            { name: "Thiago", phone: "5531987245639" },
+            { name: "Thais", phone: "5531997741862" },
+            { name: "Val", phone: "5531987397393" },
+            { name: "Vivi", phone: "5531989118778" }
+        ];
+
+        function formatPhoneNumber(phone) {
+            return phone.replace(/(\d{2})(\d{2})(\d{5})(\d{4})/, "+$1 $2 $3-$4");
+        }
+
+        function displayMembers() {
+            const tbody = document.getElementById('membersTableBody');
+            tbody.innerHTML = '';
+
+            members.forEach((member, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <label class="checkbox-container">
+                            <input type="checkbox" class="member-checkbox" data-index="${index}">
+                            <span class="checkmark"></span>
+                        </label>
+                    </td>
+                    <td>${member.name}</td>
+                    <td>${formatPhoneNumber(member.phone)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Add event listeners to checkboxes
+            document.querySelectorAll('.member-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', updateSendButton);
+            });
+        }
+
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.member-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+            });
+            updateSendButton();
+        }
+
+        function updateSendButton() {
+            const selectedCount = document.querySelectorAll('.member-checkbox:checked').length;
+            const sendButton = document.getElementById('sendSelectedBtn');
+            sendButton.disabled = selectedCount === 0;
+            sendButton.innerHTML = `<i class="fas fa-paper-plane"></i> Enviar para ${selectedCount} selecionado${selectedCount !== 1 ? 's' : ''}`;
+        }
+
+        async function sendToSelected() {
+            try {
+                const selectedCheckboxes = document.querySelectorAll('.member-checkbox:checked');
+                const selectedMembers = Array.from(selectedCheckboxes).map(checkbox => 
+                    members[checkbox.dataset.index]
+                );
+
+                if (selectedMembers.length === 0) {
+                    alert('Selecione pelo menos um membro');
+                    return;
+                }
+
+                for (const member of selectedMembers) {
+                    try {
+                        const response = await fetch('/api/send-whatsapp', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            },
+                            body: JSON.stringify({
+                                phone: member.phone,
+                                name: member.name
+                            })
+                        });
+
+                        const data = await response.json();
+                        
+                        if (!data.success) {
+                            throw new Error(data.message);
+                        }
+                    } catch (error) {
+                        console.error(`Error sending message to ${member.name}:`, error);
+                        alert(`Erro ao enviar mensagem para ${member.name}: ${error.message}`);
+                    }
+                }
+
+                alert(`Mensagens enviadas com sucesso para ${selectedMembers.length} membro(s)!`);
+                
+                // Reset checkboxes
+                document.getElementById('selectAll').checked = false;
+                document.querySelectorAll('.member-checkbox').forEach(cb => cb.checked = false);
+                updateSendButton();
+
+            } catch (error) {
+                console.error('Error sending messages:', error);
+                alert('Erro ao enviar mensagens: ' + error.message);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            displayMembers();
+            updateSendButton();
+        });
+    </script>
+
+    <style>
+        /* Add these styles */
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .checkbox-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .checkbox-container input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .table-header {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        #sendSelectedBtn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #sendSelectedBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        #sendSelectedBtn:not(:disabled):hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+    </style>
+</body>
+</html>

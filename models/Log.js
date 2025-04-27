@@ -4,22 +4,19 @@ const logSchema = new mongoose.Schema({
     type: {
         type: String,
         required: true,
-        enum: ['user', 'system', 'error']
+        enum: ['auth', 'message', 'contact', 'error']
     },
-    message: {
+    action: {
         type: String,
         required: true
     },
+    description: String,
+    username: String,
     timestamp: {
         type: Date,
         default: Date.now
     },
-    user: {
-        type: String
-    },
-    details: {
-        type: mongoose.Schema.Types.Mixed
-    }
+    details: mongoose.Schema.Types.Mixed
 });
 
 module.exports = mongoose.model('Log', logSchema);

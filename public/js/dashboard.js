@@ -115,877 +115,320 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-async function deleteContact(contactId) {
-    // Verificar autenticação
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showNotification('❌ Você precisa estar autenticado para excluir contatos', true);
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/api/contacts/${contactId}`, {
-            method: 'DELETE',
-            headers: getAuthHeaders()
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                showNotification('❌ Não autorizado. Faça login novamente.', true);
-                window.location.href = '/login.html';
-                return;
-            }
-            throw new Error('Erro ao excluir contato');
-        }
-
-        const result = await response.json();
-        console.log('Contato excluído:', result);
-        showNotification('✅ Contato excluído com sucesso!');
-        await loadContacts(); // Recarregar a lista de contatos
-    } catch (error) {
-        console.error('Erro:', error);
-        showNotification('❌ Erro ao excluir contato', true);
-    }
-}
-
-// Função para carregar contatos
-async function loadContacts() {
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            console.warn('Token ausente. Não é possível carregar contatos.');
-            return;
-        }
-
-        const response = await fetch('/api/contacts', {
-            headers: getAuthHeaders()
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                console.warn('Token inválido ou expirado.');
-                localStorage.removeItem('token');
-                localStorage.removeItem('username');
-                localStorage.removeItem('role');
-                window.location.href = '/login.html';
-                return;
-            }
-            throw new Error('Erro ao carregar contatos');
-        }
-
-        const data = await response.json();
-        if (!data.success) {
-            throw new Error('Erro ao carregar dados dos contatos');
-        }
-
-        displayContacts(data.contacts);
-        console.log('Contatos carregados:', data.contacts.length);
-    } catch (error) {
-        console.error('Erro ao carregar contatos:', error);
-        showNotification('❌ Erro ao carregar contatos', true);
-    }
-}
-
+// Funções de autenticação e headers
 function getAuthHeaders() {
     const token = localStorage.getItem('token');
-    if (!token) {
-        console.warn('Token ausente ao gerar cabeçalhos de autenticação.');
-        return {
-            'Content-Type': 'application/json'
-        };
-    }
     return {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
     };
 }
 
-// Função para exibir contatos
-function displayContacts(contacts) {
+// Carregar contatos
+async function loadContacts(month = 0) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        const response = await fetch('/api/contacts', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.message || 'Failed to load contacts');
+        }
+
+        displayContacts(data.contacts, month);
+    } catch (error) {
+        console.error('Error loading contacts:', error);
+        showNotification('Erro ao carregar contatos: ' + error.message, true);
+    }
+}
+
+function displayContacts(contacts, month) {
     const contactsList = document.getElementById('contacts-list');
     contactsList.innerHTML = '';
 
     if (!contacts || contacts.length === 0) {
-        contactsList.innerHTML = '<p class="no-contacts" style="text-align: center; padding: 2rem; color: #666;">Nenhum contato encontrado.</p>';
+        contactsList.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <p>Nenhum contato encontrado</p>
+            </div>`;
         return;
     }
 
-    contacts.forEach(contact => {
-        const contactElement = createContactElement(contact);
-        contactsList.appendChild(contactElement);
+    // Filter contacts by month if specified
+    const filteredContacts = month > 0 ? contacts.filter(contact => {
+        const contactDate = new Date(contact.createdAt);
+        return contactDate.getMonth() + 1 === parseInt(month);
+    }) : contacts;
+
+    filteredContacts.forEach(contact => {
+        const card = createContactCard(contact);
+        contactsList.appendChild(card);
     });
 }
 
-// Função para criar contato
-async function createContact(event) {
-    event.preventDefault();
-    
-    // Verificar autenticação
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showNotification('❌ Você precisa estar autenticado para adicionar contatos', true);
-        return;
-    }
-    
-    try {
-        const name = document.getElementById('name').value;
-        const phone = document.getElementById('phone').value.replace(/\D/g, ''); // Remove tudo que não é número
-        const birthday = document.getElementById('birthday').value;
-
-        const response = await fetch('/api/contacts', {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ name, phone, birthday })
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                showNotification('❌ Não autorizado. Faça login novamente.', true);
-                window.location.href = '/login.html';
-                return;
-            }
-            throw new Error('Erro ao criar contato');
-        }
-
-        const data = await response.json();
-        if (data.success) {
-            showNotification('✅ Contato criado com sucesso!');
-            document.getElementById('contact-form').reset();
-            hideAddContactForm();
-            await loadContacts(); // Recarregar a lista de contatos
-        } else {
-            throw new Error(data.message || 'Erro ao criar contato');
-        }
-    } catch (error) {
-        console.error('Erro ao criar contato:', error);
-        showNotification('❌ ' + error.message, true);
-    }
-}
-
-// Função para criar o elemento de contato
-function createContactElement(contact) {
-    const contactElement = document.createElement('div');
-    contactElement.className = 'contact-card';
-
-    const createdAt = new Date(contact.createdAt);
-    const formattedDate = createdAt.toLocaleDateString('pt-BR') + ' ' + 
-                         createdAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
-    const birthdayDisplay = contact.birthday ? 
-        `<p><i class="fas fa-birthday-cake"></i> ${new Date(contact.birthday).toLocaleDateString('pt-BR')}</p>` : '';
-
-    // Determine message status with new class
-    const messageStatus = contact.receivedMessage ? 'sent' : 'not-sent';
-    const messageIcon = contact.receivedMessage ? 'fa-check-circle' : 'fa-times-circle';
-    const messageText = contact.receivedMessage ? 'Mensagem Enviada' : 'Mensagem Não Enviada';
-
-    contactElement.innerHTML = `
+function createContactCard(contact) {
+    const card = document.createElement('div');
+    card.className = 'contact-card';
+    card.innerHTML = `
         <div class="contact-info">
             <h3>${contact.name}</h3>
             <p><i class="fas fa-phone"></i> ${contact.phone}</p>
-            ${birthdayDisplay}
-            <div class="message-status-indicator ${messageStatus}">
-                <i class="fas ${messageIcon}"></i> ${messageText}
-            </div>
+            ${contact.birthday ? `<p><i class="fas fa-birthday-cake"></i> ${new Date(contact.birthday).toLocaleDateString()}</p>` : ''}
             <div class="contact-metadata">
-                <span>
-                    <i class="fas fa-user"></i> ${contact.owner || 'N/A'}
-                </span>
-                <span>
-                    <i class="fas fa-calendar"></i> ${formattedDate}
+                <span><i class="fas fa-calendar"></i> Adicionado em: ${new Date(contact.createdAt).toLocaleDateString()}</span>
+                <span class="message-status ${contact.receivedMessage ? 'status-sent' : 'status-pending'}">
+                    <i class="fas ${contact.receivedMessage ? 'fa-check-circle' : 'fa-clock'}"></i>
+                    ${contact.receivedMessage ? 'Mensagem Enviada' : 'Mensagem Pendente'}
                 </span>
             </div>
         </div>
         <div class="button-container">
-            <button onclick="toggleActionMenu(this)" class="main-action-button">
+            <button class="main-action-button" onclick="toggleActions(this)">
                 <i class="fas fa-ellipsis-v"></i> Ações
             </button>
             <div class="action-menu">
-                <button onclick="sendWhatsAppMessage('${contact.phone}', '${contact.name}', '${contact._id}')" 
-                        class="action-button send-button">
-                    <i class="fab fa-whatsapp"></i> Enviar Mensagem
+                <button class="action-button send-button" onclick="sendMessage('${contact._id}')">
+                    <i class="fas fa-paper-plane"></i> Enviar Mensagem
                 </button>
-                <button onclick="editContact('${contact._id}')" class="action-button edit-button">
+                <button class="action-button reminder-btn" onclick="sendReminder('${contact._id}')">
+                    <i class="fas fa-bell"></i> Enviar Lembrete
+                </button>
+                <button class="action-button edit-button" onclick="editContact('${contact._id}')">
                     <i class="fas fa-edit"></i> Editar
                 </button>
-                <button onclick="makeMember('${contact._id}')" class="action-button make-member-btn">
-                    <i class="fas fa-user-plus"></i> Tornar Membro
-                </button>
-                <button onclick="deleteContact('${contact._id}')" class="action-button delete-button">
+                <button class="action-button delete-button" onclick="deleteContact('${contact._id}')">
                     <i class="fas fa-trash"></i> Excluir
-                </button>
-                <button onclick="sendServiceReminder('${contact.phone}', '${contact.name}', '${contact._id}')" 
-                        class="action-button reminder-btn">
-                    <i class="fas fa-church"></i> Enviar Msg Lembrete
-                </button>
-                <button onclick="markAsNotSent('${contact._id}')" class="action-button not-messaged-button">
-                    <i class="fas fa-times-circle"></i> Marcar como Não Enviada
                 </button>
             </div>
         </div>
     `;
-
-    return contactElement;
+    return card;
 }
 
-// Função para enviar mensagem via WhatsApp
-async function sendWhatsAppMessage(phone, name, contactId) {
-    // Verificar autenticação
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showNotification('❌ Você precisa estar autenticado para enviar mensagens', true);
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/send-whatsapp', {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ phone, name, contactId })
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                showNotification('❌ Não autorizado. Faça login novamente.', true);
-                window.location.href = '/login.html';
-                return;
-            }
-            throw new Error('Erro ao enviar mensagem');
-        }
-
-        const data = await response.json();
-        showNotification('✅ Mensagem enviada com sucesso!');
-        await loadContacts(); // Atualiza a lista de contatos
-    } catch (error) {
-        console.error('Erro ao enviar mensagem:', error);
-        showNotification('❌ Erro ao enviar mensagem', true);
-    }
-}
-
-// Add bulk action functions
-async function sendBulkMessages() {
-    // Verificar autenticação
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showNotification('❌ Você precisa estar autenticado para enviar mensagens em massa', true);
-        return;
-    }
-    
-    if (!confirm('Deseja enviar mensagens para todos os contatos que ainda não receberam?')) {
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/send-bulk-messages', {
-            method: 'POST',
-            headers: getAuthHeaders()
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                showNotification('❌ Não autorizado. Faça login novamente.', true);
-                window.location.href = '/login.html';
-                return;
-            }
-            throw new Error('Erro ao enviar mensagens em massa');
-        }
-
-        const data = await response.json();
-        if (data.success) {
-            showNotification('✅ Mensagens enviadas com sucesso!');
-            await loadContacts();
-        } else {
-            throw new Error(data.message);
-        }
-    } catch (error) {
-        console.error('Erro:', error);
-        showNotification('❌ ' + error.message, true);
-    }
-}
-
-// Add markAllMessaged and markAllNotMessaged functions
-async function markAllMessaged() {
-    // Verificar autenticação
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showNotification('❌ Você precisa estar autenticado para atualizar status', true);
-        return;
-    }
-    
-    if (!confirm('Deseja marcar todos os contatos como "mensagem enviada"?')) {
-        return;
-    }
-    await updateAllMessageStatus(true);
-}
-
-async function markAllNotMessaged() {
-    // Verificar autenticação
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showNotification('❌ Você precisa estar autenticado para atualizar status', true);
-        return;
-    }
-    
-    if (!confirm('Deseja marcar todos os contatos como "mensagem não enviada"?')) {
-        return;
-    }
-    await updateAllMessageStatus(false);
-}
-
-async function updateAllMessageStatus(status) {
-    try {
-        const response = await fetch('/api/contacts/update-all-status', {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ receivedMessage: status })
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                showNotification('❌ Não autorizado. Faça login novamente.', true);
-                window.location.href = '/login.html';
-                return;
-            }
-            throw new Error('Erro ao atualizar status');
-        }
-
-        const data = await response.json();
-        showNotification('✅ ' + data.message);
-        await loadContacts();
-    } catch (error) {
-        console.error('Erro:', error);
-        showNotification('❌ ' + error.message, true);
-    }
-}
-
-// Função para atualizar o status da mensagem
-async function toggleMessageStatus(contactId, newStatus) {
-    // Verificar autenticação
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showNotification('❌ Você precisa estar autenticado para atualizar status', true);
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/api/contacts/${contactId}/message-status`, {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ receivedMessage: newStatus })
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                showNotification('❌ Não autorizado. Faça login novamente.', true);
-                window.location.href = '/login.html';
-                return;
-            }
-            throw new Error('Erro ao atualizar status da mensagem');
-        }
-
-        const data = await response.json();
-        showNotification('✅ Status da mensagem atualizado com sucesso!');
-        await loadContacts(); // Atualiza a lista de contatos
-    } catch (error) {
-        console.error('Erro ao atualizar status da mensagem:', error);
-        showNotification('❌ Erro ao atualizar status da mensagem', true);
-    }
-}
-
-// Função para controlar o menu de ações
-function toggleActionMenu(button) {
-    const actionMenu = button.nextElementSibling;
-    const allMenus = document.querySelectorAll('.action-menu');
-    
-    // Fecha outros menus
+function toggleActions(button) {
+    // Close all other open menus first
+    const allMenus = document.querySelectorAll('.action-menu.show');
     allMenus.forEach(menu => {
-        if (menu !== actionMenu && menu.classList.contains('show')) {
+        if (menu !== button.nextElementSibling) {
             menu.classList.remove('show');
         }
     });
-    
-    // Calcula posição dinamicamente
-    const buttonRect = button.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    
-    // Verifica espaço vertical
-    if ((buttonRect.bottom + 250) > viewportHeight) {
-        actionMenu.style.top = 'auto';
-        actionMenu.style.bottom = '100%';
-    } else {
-        actionMenu.style.top = '100%';
-        actionMenu.style.bottom = 'auto';
-    }
-    
-    actionMenu.classList.toggle('show');
+
+    const menu = button.nextElementSibling;
+    menu.classList.toggle('show');
 }
 
 // Close menus when clicking outside
 document.addEventListener('click', (e) => {
-    // Only close if the click is outside any button container
     if (!e.target.closest('.button-container')) {
-        document.querySelectorAll('.action-menu').forEach(menu => {
+        document.querySelectorAll('.action-menu.show').forEach(menu => {
             menu.classList.remove('show');
         });
     }
 });
 
-// Also close menus when pressing Escape key
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        document.querySelectorAll('.action-menu').forEach(menu => {
-            menu.classList.remove('show');
-        });
-    }
-});
-
-// Função para carregar contatos do mês
-async function handleMonthFilter() {
+// Action functions
+async function sendMessage(contactId) {
     try {
-        const monthSelect = document.getElementById('month-select');
-        const selectedMonth = monthSelect.value;
-        const monthResult = document.getElementById('month-result');
-        
-        // Oculta a mensagem se for "Todos os meses"
-        if (selectedMonth === "0") {
-            monthResult.style.display = 'none';
-            const response = await fetch('/api/contacts/all', {
-                headers: getAuthHeaders()
-            });
-            if (!response.ok) throw new Error('Erro ao carregar contatos');
-            const data = await response.json();
-            if (data.success) {
-                displayContacts(data.contacts);
+        showNotification('Enviando mensagem...', false);
+        const response = await fetch(`/api/contacts/${contactId}/send-welcome`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
-            return;
-        }
-
-        // Mostra a mensagem apenas quando um mês específico é selecionado
-        const monthName = monthNames[parseInt(selectedMonth) - 1];
-        monthResult.style.display = 'block';
-        document.getElementById('selected-month').textContent = monthName;
-        
-        const response = await fetch(`/api/contacts/month/${selectedMonth}`, {
-            headers: getAuthHeaders()
         });
 
-        if (!response.ok) throw new Error('Erro ao filtrar contatos');
-
+        if (!response.ok) throw new Error('Erro ao enviar mensagem');
+        
         const data = await response.json();
-        if (!data.success) throw new Error('Erro ao carregar dados dos contatos filtrados');
-
-        displayContacts(data.contacts);
-        showNotification(`✅ Mostrando contatos de ${monthName}`);
-
-    } catch (error) {
-        console.error('Erro ao filtrar contatos:', error);
-        showNotification('❌ ' + error.message, true);
-    }
-}
-
-// Atualiza o cabeçalho do mês
-function updateMonthHeading(month) {
-    const monthNames = [
-        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-    ];
-    
-    const heading = document.querySelector('.month-result h3');
-    if (heading) {
-        const selectedMonth = document.getElementById('selected-month');
-        if (selectedMonth) {
-            selectedMonth.textContent = monthNames[month - 1];
+        if (data.success) {
+            showNotification('✅ Mensagem enviada com sucesso!');
+            await loadContacts(); // Recarrega os contatos
         } else {
-            heading.textContent = `Contatos de ${monthNames[month - 1]}`;
+            throw new Error(data.message || 'Erro ao enviar mensagem');
         }
-    }
-}
-
-// Function to mark message as not sent
-async function markAsNotSent(contactId) {
-    // Verificar autenticação
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showNotification('❌ Você precisa estar autenticado para atualizar status', true);
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/api/contacts/${contactId}/message-status`, {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ receivedMessage: false })
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                showNotification('❌ Não autorizado. Faça login novamente.', true);
-                window.location.href = '/login.html';
-                return;
-            }
-            throw new Error('Erro ao marcar mensagem como não enviada');
-        }
-
-        await loadContacts(); // Recarrega a lista de contatos
-        showNotification('✅ Mensagem marcada como não enviada');
     } catch (error) {
-        console.error('Erro ao marcar mensagem como não enviada:', error);
+        console.error('Error:', error);
         showNotification('❌ ' + error.message, true);
     }
 }
 
-// Function to edit contact
 async function editContact(contactId) {
-    // Verificar autenticação
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showNotification('❌ Você precisa estar autenticado para editar contatos', true);
-        return;
-    }
-    
     try {
-        console.log('Editando contato:', contactId);
-        const response = await fetch(`/api/contacts/${contactId}`, {
-            method: 'GET',
-            headers: getAuthHeaders()
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                showNotification('❌ Não autorizado. Faça login novamente.', true);
-                window.location.href = '/login.html';
-                return;
-            }
-            throw new Error('Erro ao carregar dados do contato');
-        }
-
+        const response = await fetch(`/api/contacts/${contactId}`);
+        if (!response.ok) throw new Error('Erro ao carregar contato');
+        
         const contact = await response.json();
-        console.log('Dados do contato:', contact);
-
-        if (!contact) {
-            throw new Error('Contato não encontrado');
-        }
-
+        
         // Preenche o formulário de edição
-        document.getElementById('edit-contact-id').value = contactId;
-        document.getElementById('edit-name').value = contact.name || '';
-        document.getElementById('edit-phone').value = contact.phone || '';
+        document.getElementById('edit-member-id').value = contactId;
+        document.getElementById('edit-name').value = contact.name;
+        document.getElementById('edit-phone').value = contact.phone;
         if (contact.birthday) {
-            const birthday = new Date(contact.birthday);
-            document.getElementById('edit-birthday').value = birthday.toISOString().split('T')[0];
-        } else {
-            document.getElementById('edit-birthday').value = '';
+            document.getElementById('edit-birthday').value = contact.birthday.split('T')[0];
         }
-
-        // Mostra o modal de edição
-        const modal = document.getElementById('edit-modal');
-        if (!modal) {
-            throw new Error('Modal de edição não encontrado');
-        }
-        modal.style.display = 'flex';
+        
+        // Mostra o modal
+        document.getElementById('edit-member-modal').style.display = 'flex';
     } catch (error) {
-        console.error('Erro ao editar contato:', error);
-        showNotification('❌ ' + error.message, true);
+        console.error('Error:', error);
+        showNotification('❌ Erro ao carregar dados do contato', true);
     }
 }
 
-// Function to update contact
-async function updateContact(event) {
-    event.preventDefault();
-    
-    // Verificar autenticação
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showNotification('❌ Você precisa estar autenticado para atualizar contatos', true);
-        return;
-    }
-    
-    const contactId = document.getElementById('edit-contact-id').value;
-    const formData = {
-        name: document.getElementById('edit-name').value,
-        phone: document.getElementById('edit-phone').value,
-        birthday: document.getElementById('edit-birthday').value
-    };
-
-    try {
-        const response = await fetch(`/api/contacts/${contactId}`, {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(formData)
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                showNotification('❌ Não autorizado. Faça login novamente.', true);
-                window.location.href = '/login.html';
-                return;
-            }
-            throw new Error('Erro ao atualizar contato');
-        }
-
-        showNotification('✅ Contato atualizado com sucesso');
-        document.getElementById('edit-modal').style.display = 'none';
-        await loadContacts(); // Recarrega a lista de contatos
-    } catch (error) {
-        console.error('Erro:', error);
-        showNotification('❌ ' + error.message, true);
-    }
-}
-
-// Adicione estas funções que estavam faltando
 async function makeMember(contactId) {
-    // Verificar autenticação
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showNotification('❌ Você precisa estar autenticado para tornar um contato membro', true);
-        return;
-    }
-    
     try {
         const response = await fetch(`/api/contacts/${contactId}/make-member`, {
             method: 'POST',
-            headers: getAuthHeaders()
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
         });
 
-        if (!response.ok) {
-            if (response.status === 401) {
-                showNotification('❌ Não autorizado. Faça login novamente.', true);
-                window.location.href = '/login.html';
-                return;
-            }
-            throw new Error('Erro ao tornar membro');
-        }
-
-        showNotification('✅ Contato transformado em membro com sucesso!');
+        if (!response.ok) throw new Error('Erro ao tornar membro');
+        
         await loadContacts();
+        showNotification('✅ Contato transformado em membro com sucesso!');
     } catch (error) {
-        console.error('Erro:', error);
-        showNotification('❌ ' + error.message, true);
+        console.error('Error:', error);
+        showNotification('❌ Erro ao tornar membro: ' + error.message, true);
     }
 }
 
-async function sendServiceReminder(phone, name, contactId) {
-    // Verificar autenticação
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showNotification('❌ Você precisa estar autenticado para enviar lembretes', true);
-        return;
-    }
+async function deleteContact(contactId) {
+    if (!confirm('Tem certeza que deseja excluir este contato?')) return;
     
     try {
-        const response = await fetch('/api/send-reminder', {
+        const response = await fetch(`/api/contacts/${contactId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) throw new Error('Erro ao excluir contato');
+        
+        await loadContacts();
+        showNotification('✅ Contato excluído com sucesso!');
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('❌ Erro ao excluir contato: ' + error.message, true);
+    }
+}
+
+async function sendReminder(contactId) {
+    try {
+        const response = await fetch(`/api/contacts/${contactId}/send-reminder`, {
             method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ phone, name, contactId })
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
         });
 
         if (!response.ok) {
-            if (response.status === 401) {
-                showNotification('❌ Não autorizado. Faça login novamente.', true);
-                window.location.href = '/login.html';
-                return;
-            }
             throw new Error('Erro ao enviar lembrete');
         }
 
-        const data = await response.json();
-        if (data.success) {
+        const result = await response.json();
+        if (result.success) {
             showNotification('✅ Lembrete enviado com sucesso!');
-            await loadContacts();
+            await loadContacts(); // Recarrega a lista para atualizar status
         } else {
-            throw new Error(data.message);
+            throw new Error(result.message || 'Erro ao enviar lembrete');
         }
     } catch (error) {
-        console.error('Erro ao enviar lembrete:', error);
+        console.error('Error:', error);
         showNotification('❌ ' + error.message, true);
     }
 }
 
-// Add new function to handle contact addition
-async function addContact(event) {
-    event.preventDefault();
-
-    // Verificar autenticação
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showNotification('❌ Você precisa estar autenticado para adicionar contatos', true);
-        return;
-    }
-
-    const name = document.getElementById('name').value;
-    const phone = document.getElementById('phone').value;
-    const birthday = document.getElementById('birthday').value;
-
+async function markAsNotSent(contactId) {
     try {
-        const response = await fetch('/api/contacts', {
+        const response = await fetch(`/api/contacts/${contactId}/mark-not-sent`, {
             method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ name, phone, birthday })
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
         });
 
         if (!response.ok) {
-            if (response.status === 401) {
-                showNotification('❌ Não autorizado. Faça login novamente.', true);
-                window.location.href = '/login.html';
-                return;
-            }
-            throw new Error('Erro ao adicionar contato');
+            throw new Error('Erro ao marcar como não enviada');
         }
 
         const data = await response.json();
-        showNotification('✅ Contato adicionado com sucesso!');
-        document.getElementById('contact-form').reset();
-        hideAddContactForm();
-        await loadContacts(); // Recarrega a lista de contatos
+        await loadContacts();
+        showNotification('✅ Mensagem marcada como não enviada');
     } catch (error) {
-        console.error('Erro ao adicionar contato:', error);
-        showNotification('❌ Erro ao adicionar contato. Tente novamente.', true);
+        console.error('Error:', error);
+        showNotification('❌ Erro ao marcar como não enviada: ' + error.message, true);
     }
-}
-
-// Função para exibir notificações no canto superior direito
-function showNotification(message, isError = false) {
-    const notification = document.createElement('div');
-    notification.className = `notification ${isError ? 'error' : 'success'}`;
-    notification.textContent = message;
-
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-        notification.classList.add('show');
-    }, 10);
-
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-// Funções para mostrar/esconder o formulário de adicionar contato
-function showAddContactForm() {
-    // Verificar autenticação
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showNotification('❌ Você precisa estar autenticado para adicionar contatos', true);
-        return;
-    }
-    
-    const modal = document.getElementById('add-contact-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-}
-
-function hideAddContactForm() {
-    const modal = document.getElementById('add-contact-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        const form = document.getElementById('contact-form');
-        if (form) form.reset();
-    }
-}
-
-// Função para formatar número de telefone
-function formatPhoneNumber(input) {
-    let value = input.value.replace(/\D/g, '');
-    
-    if (value.length === 0) {
-        input.value = '(';
-        return;
-    }
-    
-    if (value.length <= 2) {
-        input.value = `(${value}`;
-        return;
-    }
-    
-    if (value.length <= 7) {
-        input.value = `(${value.slice(0,2)}) ${value.slice(2)}`;
-        return;
-    }
-    
-    if (value.length <= 11) {
-        input.value = `(${value.slice(0,2)}) ${value.slice(2,7)}-${value.slice(7)}`;
-        return;
-    }
-    
-    input.value = `(${value.slice(0,2)}) ${value.slice(2,7)}-${value.slice(7,11)}`;
-}
-
-// Close modal when clicking outside
-window.onclick = function(event) {
-    const modal = document.getElementById('add-contact-modal');
-    if (event.target === modal) {
-        hideAddContactForm();
-    }
-}
-
-// Função de logout
-function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    localStorage.removeItem('role');
-    window.location.href = 'login.html';
-}
-
-function showConfirmDialog(message) {
-    return new Promise((resolve) => {
-        const confirmed = window.confirm(message);
-        resolve(confirmed);
-    });
 }
 
 async function executeBulkAction() {
     const action = document.getElementById('bulk-action').value;
-    if (!action) return;
+    if (!action) {
+        showNotification('❌ Selecione uma ação', true);
+        return;
+    }
 
     try {
-        const confirmed = await showConfirmDialog('Tem certeza que deseja executar esta ação em massa?');
-        if (!confirmed) return;
+        showNotification('Executando ação...', false);
+        
+        const endpoint = {
+            'send-all-pending': '/api/contacts/bulk/send-pending',
+            'send-all-reminders': '/api/contacts/bulk/send-reminders',
+            'mark-all-sent': '/api/contacts/bulk/mark-all-sent',
+            'mark-all-not-sent': '/api/contacts/bulk/mark-all-not-sent'
+        }[action];
 
-        showLoading();
-        const response = await fetch(`/api/contacts/bulk/${action}`, {
+        if (!endpoint) {
+            throw new Error('Ação inválida');
+        }
+
+        const response = await fetch(endpoint, {
             method: 'POST',
-            headers: getAuthHeaders()
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
         });
 
-        if (!response.ok) throw new Error('Falha ao executar ação');
+        if (!response.ok) throw new Error('Erro ao executar ação');
 
         const data = await response.json();
-        showNotification(data.message || 'Ação executada com sucesso!');
+        showNotification('✅ ' + data.message);
         await loadContacts(); // Recarrega a lista
     } catch (error) {
-        console.error('Erro:', error);
+        console.error('Error:', error);
         showNotification('❌ ' + error.message, true);
-    } finally {
-        hideLoading();
-        document.getElementById('bulk-action').value = ''; // Reset select
     }
 }
 
-// Configurações Globais
-const monthNames = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 
-    'Maio', 'Junho', 'Julho', 'Agosto',
-    'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-];
-
-// Export functions that need to be accessible globally
-window.handleMonthFilter = handleMonthFilter;
-window.showAddContactForm = showAddContactForm;
-window.hideAddContactForm = hideAddContactForm;
-window.createContact = createContact;
-window.editContact = editContact;
-window.deleteContact = deleteContact;
-window.updateMember = updateMember;
-window.closeModal = closeModal;
-window.sendWhatsAppMessage = sendWhatsAppMessage;
-window.makeMember = makeMember;
-window.markAsNotSent = markAsNotSent;
-window.sendServiceReminder = sendServiceReminder;
-window.executeBulkAction = executeBulkAction;
-window.toggleActionMenu = toggleActionMenu;
-window.formatPhoneNumber = formatPhoneNumber;
-window.logout = logout;
+// Mostrar/ocultar ações em massa para admin
+document.addEventListener('DOMContentLoaded', () => {
+    const role = localStorage.getItem('role');
+    const bulkActions = document.querySelector('.bulk-actions');
+    if (role === 'admin' && bulkActions) {
+        bulkActions.style.display = 'block';
+    }
+});

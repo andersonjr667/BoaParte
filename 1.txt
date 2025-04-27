@@ -1,4 +1,4 @@
 git status
 git add .  
-git commit -m "Versao 1.5.2"
+git commit -m "Versao 1.6"
 git push origin main
