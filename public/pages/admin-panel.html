@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo</title>
+    <link rel="stylesheet" href="/styles/admin-panel.css">
+    <link rel="stylesheet" href="/styles/dashboard.css">
+    <link rel="stylesheet" href="/styles/hamburger.css">
+    <link rel="icon" href="/images/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+        <ul class="nav-menu">
+            <li><a href="/pages/dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="/pages/members.html"><i class="fas fa-users"></i> Membros</a></li>
+            <li><a href="/pages/absent-members.html"><i class="fas fa-user-clock"></i> Ausentes</a></li>
+            <li class="admin-only"><a href="/pages/users.html"><i class="fas fa-user-cog"></i> Usuários</a></li>
+            <li class="admin-only"><a href="/pages/admin-panel.html" class="active"><i class="fas fa-tools"></i> Admin</a></li>
+            <li class="admin-only"><a href="/pages/whatsapp-config.html"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sair</button>
+        </div>
+    </nav>
+
+    <!-- Menu Overlay for Mobile -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <!-- Main Content -->
+    <main class="content">
+        <!-- Header Section -->
+        <header class="content-header">
+            <div class="header-left">
+                <button class="hamburger sidebar-toggle" id="sidebarToggle" aria-label="Toggle Menu">
+                    <div class="hamburger-box">
+                        <span class="hamburger-bar bar1"></span>
+                        <span class="hamburger-bar bar2"></span>
+                        <span class="hamburger-bar bar3"></span>
+                    </div>
+                </button>
+                <h1><i class="fas fa-tools"></i> Admin Panel - Boa Parte</h1>
+            </div>
+            <div class="header-right">
+                <button id="refreshAllBtn" class="btn-refresh" title="Atualizar todos os dados">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <div class="user-info">
+                    <span class="user-name-display">
+                        <i class="fas fa-user"></i>
+                        <span id="userName">Carregando...</span>
+                        <img id="profilePic" src="/images/Fotos_Perfil/anderson.png" alt="Foto de perfil" style="display:none;width:32px;height:32px;border-radius:50%;margin-left:8px;object-fit:cover;vertical-align:middle;">
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Overview Section -->
+        <section class="dashboard-overview">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-line"></i> Visão Geral do Sistema</h2>
+                <div class="section-actions">
+                    <span class="last-update" id="lastUpdate">Última atualização: --</span>
+                </div>
+            </div>
+            
+            <!-- Statistics and Chart Layout -->
+            <div class="stats-chart-layout">
+                <!-- Left Side - Statistics -->
+                <div class="stats-section">
+                    <div class="stats-grid">
+                        <div class="stat-card primary">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Membros</h3>
+                                <p id="totalMembers">--</p>
+                                <span class="stat-label">Total cadastrados</span>
+                            </div>
+                        </div>
+                        <div class="stat-card success">
+                            <div class="stat-icon">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Ativos</h3>
+                                <p id="activeMembers">--</p>
+                                <span class="stat-label">Membros ativos</span>
+                            </div>
+                        </div>
+                        <div class="stat-card warning">
+                            <div class="stat-icon">
+                                <i class="fas fa-user-clock"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Faltantes</h3>
+                                <p id="totalAbsent">--</p>
+                                <span class="stat-label">Ausências registradas</span>
+                            </div>
+                        </div>
+                        <div class="stat-card info">
+                            <div class="stat-icon">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Visitantes</h3>
+                                <p id="totalVisitors">--</p>
+                                <span class="stat-label">Contatos cadastrados</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Stats Row -->
+                    <div class="stats-grid secondary">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-user-cog"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Usuários</h3>
+                                <p id="totalUsers">--</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-user-times"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Inativos</h3>
+                                <p id="inactiveMembers">--</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-paper-plane"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Mensagens</h3>
+                                <p id="messagesSent">--</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Presenças Hoje</h3>
+                                <p id="todayPresent">--</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side - Chart -->
+                <div class="chart-section">
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-area"></i> Gráfico de Atividades</h3>
+                            <div class="chart-controls">
+                                <button class="btn-small" id="chartRefreshBtn" title="Atualizar gráfico">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="adminChart" height="180"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Management Tools Section -->
+        <section class="management-tools">
+            <div class="section-header">
+                <h2><i class="fas fa-cogs"></i> Ferramentas de Gestão</h2>
+            </div>
+
+            <div class="tools-grid">
+                <!-- Mass Messaging Tool -->
+                <div class="card tool-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-bullhorn"></i> Envio de Mensagens em Massa</h3>
+                        <div class="tool-status" id="messagingStatus">
+                            <span class="status-indicator ready"></span>
+                            <span>Pronto</span>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-content">
+                        <div class="message-type-selector">
+                            <label>Tipo de mensagem:</label>
+                            <div class="button-group">
+                                <button id="sendBulkReminderBtn" class="btn btn-primary active" type="button">
+                                    <i class="fas fa-bell"></i> Lembrete
+                                </button>
+                                <button id="sendBulkDayMessageBtn" class="btn" type="button">
+                                    <i class="fas fa-calendar-day"></i> Mensagem do Dia
+                                </button>
+                                <button id="sendBulkWelcomeBtn" class="btn" type="button">
+                                    <i class="fas fa-handshake"></i> Boas-vindas
+                                </button>
+                                <button id="sendBulkGRBtn" class="btn" type="button">
+                                    <i class="fas fa-praying-hands"></i> GR Sacerdotes
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="recipient-settings">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="recipientType">Destinatários:</label>
+                                    <select id="recipientType">
+                                        <option value="contacts">Contatos</option>
+                                        <option value="members">Membros</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="messageTemplateSelect">Mensagem pronta:</label>
+                                    <select id="messageTemplateSelect">
+                                        <option value="">Selecione uma mensagem...</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="recipient-selection">
+                            <div class="selection-header">
+                                <label for="bulkRecipients">Selecionar destinatários:</label>
+                                <div class="selection-controls">
+                                    <button id="selectAllBtn" class="btn-small" type="button">
+                                        <i class="fas fa-check-double"></i> Todos
+                                    </button>
+                                    <button id="clearSelectionBtn" class="btn-small" type="button">
+                                        <i class="fas fa-times"></i> Limpar
+                                    </button>
+                                </div>
+                            </div>
+                            <select id="bulkRecipients" multiple size="6">
+                                <!-- Opções serão carregadas via JS -->
+                            </select>
+                            <div class="selection-info">
+                                <span class="help-text">
+                                    <i class="fas fa-info-circle"></i>
+                                    Segure Ctrl/Cmd para seleção múltipla
+                                </span>
+                                <span id="selectedCount" class="count-badge">0 selecionados</span>
+                            </div>
+                        </div>
+
+                        <div class="tool-actions">
+                            <button id="executeBulkActionBtn" class="btn btn-primary" type="button">
+                                <i class="fas fa-paper-plane"></i> Executar Envio
+                            </button>
+                        </div>
+
+                        <div id="massMessageStatus" class="status-message"></div>
+                    </div>
+                </div>
+
+                <!-- Member Control Tool -->
+                <div class="card tool-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-users-cog"></i> Controle de Membros</h3>
+                        <button class="btn-small" id="refreshMembersBtn" title="Atualizar dados dos membros">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="tool-content">
+                        <div id="birthdayTodayMsg" class="birthday-alert" style="display:none;">
+                            <!-- Mensagem de aniversário será inserida via JS -->
+                        </div>
+
+                        <div class="member-stats-layout">
+                            <div class="member-info">
+                                <div class="info-item">
+                                    <div class="info-item-left">
+                                        <div class="info-item-icon">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                        <div class="info-item-content">
+                                            <span class="info-item-label">Total de Membros</span>
+                                        </div>
+                                    </div>
+                                    <div class="info-value" id="totalMembersCard">
+                                        --
+                                        <span class="info-trend stable">
+                                            <i class="fas fa-minus"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="info-item success">
+                                    <div class="info-item-left">
+                                        <div class="info-item-icon">
+                                            <i class="fas fa-user-check"></i>
+                                        </div>
+                                        <div class="info-item-content">
+                                            <span class="info-item-label">Membros Ativos</span>
+                                        </div>
+                                    </div>
+                                    <div class="info-value" id="activeMembersCard">
+                                        --
+                                        <span class="info-trend up">
+                                            <i class="fas fa-arrow-up"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="info-item danger">
+                                    <div class="info-item-left">
+                                        <div class="info-item-icon">
+                                            <i class="fas fa-user-times"></i>
+                                        </div>
+                                        <div class="info-item-content">
+                                            <span class="info-item-label">Membros Inativos</span>
+                                        </div>
+                                    </div>
+                                    <div class="info-value" id="inactiveMembersCard">
+                                        --
+                                        <span class="info-trend down">
+                                            <i class="fas fa-arrow-down"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="info-item info">
+                                    <div class="info-item-left">
+                                        <div class="info-item-icon">
+                                            <i class="fas fa-birthday-cake"></i>
+                                        </div>
+                                        <div class="info-item-content">
+                                            <span class="info-item-label">Próximo Aniversário</span>
+                                        </div>
+                                    </div>
+                                    <div class="info-value" id="nextBirthday" style="font-size: 0.9rem; font-weight: 600;">
+                                        --
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="member-chart">
+                                <div class="chart-title">Distribuição de Membros</div>
+                                <div class="chart-wrapper">
+                                    <canvas id="memberPieChart" width="160" height="160"></canvas>
+                                    <div class="chart-center-info">
+                                        <div class="chart-center-number" id="totalMembersChart">--</div>
+                                        <div class="chart-center-label">Total</div>
+                                    </div>
+                                </div>
+                                <div class="chart-legend">
+                                    <div class="legend-item">
+                                        <div style="display: flex; align-items: center;">
+                                            <div class="legend-color active"></div>
+                                            <span class="legend-label">Ativos</span>
+                                        </div>
+                                        <span class="legend-value" id="activeLegend">--</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div style="display: flex; align-items: center;">
+                                            <div class="legend-color inactive"></div>
+                                            <span class="legend-label">Inativos</span>
+                                        </div>
+                                        <span class="legend-value" id="inactiveLegend">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Data Analysis Section -->
+        <section class="data-analysis">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-bar"></i> Análise de Dados</h2>
+            </div>
+
+            <div class="analysis-grid">
+                <!-- Absence Control -->
+                <div class="card analysis-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-user-times"></i> Controle de Faltas</h3>
+                        <div class="card-controls">
+                            <select id="absentMonthFilter">
+                                <!-- Opções carregadas via JS -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-user"></i> Nome</th>
+                                    <th><i class="fas fa-phone"></i> Telefone</th>
+                                    <th><i class="fas fa-exclamation-triangle"></i> Total de Faltas</th>
+                                    <th><i class="fas fa-calendar"></i> Última Falta</th>
+                                </tr>
+                            </thead>
+                            <tbody id="absentRankingTable">
+                                <tr><td colspan="4" class="loading">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- System Monitoring Section -->
+        <section class="system-monitoring">
+            <div class="section-header">
+                <h2><i class="fas fa-server"></i> Monitoramento do Sistema</h2>
+            </div>
+
+            <div class="card monitoring-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-list-alt"></i> Logs do Sistema</h3>
+                    <div class="logs-toolbar">
+                        <button id="refreshLogsBtn" class="btn-small" title="Atualizar logs">
+                            <i class="fas fa-sync-alt"></i> Atualizar
+                        </button>
+                        <button id="clearLogsBtn" class="btn-small btn-danger" title="Limpar logs">
+                            <i class="fas fa-trash"></i> Limpar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="logs-container" id="systemLogs">
+                    <!-- Logs serão carregados aqui -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>Carregando...</span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Lista fixa de aniversariantes para lógica do próximo aniversariante
+        const aniversariantes = [
+            { nome: 'Davi', data: '08/01' },
+            { nome: 'Paulo', data: '09/01' },
+            { nome: 'Laura Milani', data: '09/01' },
+            { nome: 'Andersonjr', data: '10/01' },
+            { nome: 'Talita', data: '12/01' },
+            { nome: 'Elias', data: '24/01' },
+            { nome: 'Sarah', data: '28/02' },
+            { nome: 'Mariana D.', data: '02/03' },
+            { nome: 'Mariana T.', data: '05/03' },
+            { nome: 'Sabrina', data: '08/03' },
+            { nome: 'Pedro Lucas', data: '14/03' },
+            { nome: 'João 🎸', data: '26/03' },
+            { nome: 'Luan', data: '27/03' },
+            { nome: 'Maria F.', data: '29/03' },
+            { nome: 'Alysson', data: '29/03' },
+            { nome: 'Vander', data: '10/04' },
+            { nome: 'Isaque', data: '12/04' },
+            { nome: 'Roberta', data: '12/04' },
+            { nome: 'Thaís', data: '15/04' },
+            { nome: 'Laura Antunes', data: '01/05' },
+            { nome: 'Arthur 🫒', data: '22/05' },
+            { nome: 'Ana', data: '23/05' },
+            { nome: 'Larissa', data: '27/05' },
+            { nome: 'Esterzinha', data: '02/06' },
+            { nome: 'Manu Mendonça', data: '23/06' },
+            { nome: 'Alyne', data: '24/06' },
+            { nome: 'Anderson martins', data: '27/06' },
+            { nome: 'Richard', data: '29/06' },
+            { nome: 'Andreza Wingester Freitas', data: '11/07' },
+            { nome: 'Emanuelly Melo', data: '12/07' },
+            { nome: 'Luiza', data: '22/07' },
+            { nome: 'Ingryd', data: '31/07' },
+            { nome: 'Gabi J.', data: '08/08' },
+            { nome: 'Wendel', data: '23/08' },
+            { nome: 'Mateus B.', data: '24/08' },
+            { nome: 'Bianca', data: '01/09' },
+            { nome: 'Heitor', data: '01/09' },
+            { nome: 'Valquíria', data: '03/09' },
+            { nome: 'Debora Melo', data: '09/09' },
+            { nome: 'Arthur 🤓', data: '09/09' },
+            { nome: 'Luizão o Chuvas', data: '17/09' },
+            { nome: 'Matheuszin', data: '23/09' },
+            { nome: 'Mari C.', data: '19/10' },
+            { nome: 'Kaique', data: '20/10' },
+            { nome: 'Thiago', data: '06/11' },
+            { nome: 'Vivi', data: '13/11' },
+            { nome: 'Laurinha', data: '16/12' },
+            { nome: 'Thayná', data: '30/12' },
+            { nome: 'Pedro Lucas', data: '14/03' },
+            { nome: 'Laura Milani', data: '09/01' }
+        ];
+
+        function checkAdminSidebar() {
+            let user = null;
+            try {
+                user = JSON.parse(localStorage.getItem('user'));
+            } catch {}
+            if (!user || user.role !== 'admin') {
+                window.location.href = 'login.html';
+                return false;
+            }
+            // Atualiza nome do usuário no header
+            const userNameEl = document.getElementById('userName');
+            if (userNameEl && user.username) {
+                userNameEl.textContent = user.username;
+            }
+            // Exibe links de admin na sidebar se for admin
+            document.querySelectorAll('.admin-only').forEach(el => {
+                if (user.role === 'admin') {
+                    if (el.tagName === 'LI') {
+                        el.style.display = 'list-item';
+                    } else if (el.tagName === 'A') {
+                        el.style.display = 'inline-block';
+                    } else {
+                        el.style.display = 'flex';
+                    }
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+            return true;
+        }
+
+        // Função para mostrar/ocultar loading
+        function showLoading(show = true) {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.style.display = show ? 'flex' : 'none';
+            }
+        }
+
+        // Função para atualizar timestamp da última atualização
+        function updateLastUpdateTime() {
+            const lastUpdateEl = document.getElementById('lastUpdate');
+            if (lastUpdateEl) {
+                const now = new Date();
+                lastUpdateEl.textContent = `Última atualização: ${now.toLocaleTimeString('pt-BR')}`;
+            }
+        }
+
+        // Função para atualizar todos os dados
+        async function refreshAllData() {
+            showLoading(true);
+            try {
+                await Promise.all([
+                    fetchAndRenderStats(),
+                    fetchAndRenderMemberControl(),
+                    fetchAndRenderAbsenceRanking(),
+                    fetchAndRenderLogs()
+                ]);
+                updateLastUpdateTime();
+                showToast('Todos os dados foram atualizados com sucesso!', 'success');
+            } catch (error) {
+                showToast('Erro ao atualizar alguns dados', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Só executa lógica de admin se não estiver na página de registro
+            if (window.location.pathname.endsWith('register.html')) return;
+
+            // Adicionar no início do DOMContentLoaded
+            console.log('Iniciando carregamento da página admin...');
+
+            // Verificar se todos os elementos existem
+            const requiredElements = [
+                'totalMembers', 'totalUsers', 'totalAbsent', 'totalVisitors',
+                'activeMembers', 'inactiveMembers', 'messagesSent', 'todayPresent',
+                'totalMembersCard', 'activeMembersCard', 'inactiveMembersCard'
+            ];
+
+            requiredElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) {
+                    console.error(`Elemento não encontrado: ${id}`);
+                } else {
+                    console.log(`Elemento encontrado: ${id}`);
+                }
+            });
+            // Checa aniversariante do dia
+            try {
+                const today = new Date();
+                const todayStr = (today.getDate().toString().padStart(2, '0')) + '/' + ((today.getMonth()+1).toString().padStart(2, '0'));
+                const aniversariantesHoje = aniversariantes.filter(a => a.data === todayStr);
+                const el = document.getElementById('birthdayTodayMsg');
+                if (el) {
+                    if (aniversariantesHoje.length > 0) {
+                        let nomes = aniversariantesHoje.map(a => a.nome);
+                        let nomesStr = '';
+                        if (nomes.length === 1) {
+                            nomesStr = `<b>${nomes[0]}</b>`;
+                        } else if (nomes.length === 2) {
+                            nomesStr = `<b>${nomes[0]}</b> e <b>${nomes[1]}</b>`;
+                        } else {
+                            nomesStr = nomes.slice(0, -1).map(n => `<b>${n}</b>`).join(', ') + ' e <b>' + nomes[nomes.length - 1] + '</b>';
+                        }
+                        const msg = `<i class=\"fas fa-birthday-cake\"></i> Hoje é aniversário de ${nomesStr}! <span aria-label=\"Festa\" title=\"Festa\">🎉</span>`;
+                        el.innerHTML = msg;
+                        el.style.display = '';
+                    } else {
+                        el.style.display = 'none';
+                    }
+                }
+            } catch {}
+
+            if (!checkAdminSidebar()) return;
+
+            // Event listeners para botões de atualização
+            document.getElementById('refreshAllBtn')?.addEventListener('click', refreshAllData);
+            document.getElementById('chartRefreshBtn')?.addEventListener('click', fetchAndRenderStats);
+            document.getElementById('refreshMembersBtn')?.addEventListener('click', fetchAndRenderMemberControl);
+
+            // Sidebar toggle para mobile
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.sidebar');
+            const menuOverlay = document.getElementById('menuOverlay');
+            
+            if (sidebarToggle && sidebar && menuOverlay) {
+                sidebarToggle.onclick = function() {
+                    sidebar.classList.toggle('open');
+                    menuOverlay.classList.toggle('active');
+                    document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+                };
+                menuOverlay.onclick = function() {
+                    sidebar.classList.remove('open');
+                    menuOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                };
+            }
+
+            // Botão de logout
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.onclick = function() {
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                };
+            }
+
+            // Exibe foto de perfil para usuários específicos
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                const pic = document.getElementById('profilePic');
+                if (user && pic) {
+                    if (user.username === 'Anderson' || user.name === 'Anderson') {
+                        pic.src = '/images/Fotos_Perfil/anderson.png';
+                        pic.style.display = '';
+                    } else if (user.username === 'Luiz Felipe' || user.name === 'Luiz Felipe') {
+                        pic.src = '/images/Fotos_Perfil/luiz.jpg';
+                        pic.style.display = '';
+                    } else if (user.username === 'Paulo Emanuel N' || user.name === 'Paulo Emanuel N') {
+                        pic.src = '/images/Fotos_Perfil/paulo.jpg';
+                        pic.style.display = '';
+                    }
+                }
+            } catch {}
+
+            // Carrega dados iniciais
+            refreshAllData();
+
+            // Atualização automática a cada 5 minutos
+            setInterval(() => {
+                fetchAndRenderStats();
+                updateLastUpdateTime();
+            }, 5 * 60 * 1000);
+        });
+
+        // Função para mostrar toast
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icon = type === 'success' ? 'check-circle' : 
+                        type === 'error' ? 'exclamation-circle' : 
+                        type === 'warning' ? 'exclamation-triangle' : 'info-circle';
+            
+            toast.innerHTML = `
+                <i class="fas fa-${icon}"></i>
+                <span>${message}</span>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Remove toast após 5 segundos
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        // Resto das funções existentes (fetchAndRenderStats, etc.)
+        // [Mantém todas as funções JavaScript existentes do arquivo original]
+        
+        // Card Controle de Membros
+        async function fetchAndRenderMemberControl() {
+    try {
+        const res = await fetch('/db/members.json');
+        if (!res.ok) throw new Error('Erro ao buscar membros');
+        const members = await res.json();
+        if (!Array.isArray(members) || !members.length) throw new Error('Nenhum membro encontrado');
+        
+        const total = members.length;
+        const ativos = members.filter(m => m.status === 'ativo').length;
+        const inativos = members.filter(m => m.status === 'inativo').length;
+        
+        // Atualiza os valores nos cards - removendo as tags HTML extras
+        const totalEl = document.getElementById('totalMembersCard');
+        const ativosEl = document.getElementById('activeMembersCard');
+        const inativosEl = document.getElementById('inactiveMembersCard');
+        
+        if (totalEl) {
+            totalEl.innerHTML = `${total} <span class="info-trend stable"><i class="fas fa-minus"></i></span>`;
+        }
+        if (ativosEl) {
+            ativosEl.innerHTML = `${ativos} <span class="info-trend up"><i class="fas fa-arrow-up"></i></span>`;
+        }
+        if (inativosEl) {
+            inativosEl.innerHTML = `${inativos} <span class="info-trend ${inativos > 0 ? 'down' : 'stable'}"><i class="fas fa-arrow-${inativos > 0 ? 'down' : 'minus'}"></i></span>`;
+        }
+        
+        // Atualiza valores da legenda
+        const activeLegendEl = document.getElementById('activeLegend');
+        const inactiveLegendEl = document.getElementById('inactiveLegend');
+        const totalChartEl = document.getElementById('totalMembersChart');
+        
+        if (activeLegendEl) activeLegendEl.textContent = ativos;
+        if (inactiveLegendEl) inactiveLegendEl.textContent = inativos;
+        if (totalChartEl) totalChartEl.textContent = total;
+
+        // Gráfico pizza melhorado
+        if (window._memberPieChart) window._memberPieChart.destroy();
+        const canvas = document.getElementById('memberPieChart');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            window._memberPieChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Ativos', 'Inativos'],
+                    datasets: [{
+                        data: [ativos, inativos],
+                        backgroundColor: ['#28a745', '#dc3545'],
+                        borderColor: '#fff',
+                        borderWidth: 3,
+                        hoverBorderWidth: 4,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: '#fff',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: ${context.parsed} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+
+        // Próximo aniversariante usando a lista fixa
+        const today = new Date();
+        let next = null;
+        let minDiff = Infinity;
+        aniversariantes.forEach(a => {
+            const [day, month] = a.data.split('/').map(Number);
+            let nextBirthday = new Date(today.getFullYear(), month - 1, day);
+            if (nextBirthday < today) nextBirthday.setFullYear(today.getFullYear() + 1);
+            const diff = nextBirthday - today;
+            if (diff >= 0 && diff < minDiff) {
+                minDiff = diff;
+                next = a;
+            }
+        });
+        
+        const nextBirthdayEl = document.getElementById('nextBirthday');
+        if (nextBirthdayEl) {
+            if (next) {
+                const daysUntil = Math.ceil(minDiff / (1000 * 60 * 60 * 24));
+                nextBirthdayEl.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                        <span style="font-size: 0.9rem; font-weight: 600;">${next.nome}</span>
+                        <span style="font-size: 0.7rem; color: #666;">${next.data} (${daysUntil} dias)</span>
+                    </div>
+                `;
+            } else {
+                nextBirthdayEl.textContent = '--';
+            }
+        }
+        
+    } catch (err) {
+        console.error('Erro ao carregar controle de membros:', err);
+        
+        // Define valores padrão em caso de erro
+        const elements = [
+            'totalMembersCard', 'activeMembersCard', 'inactiveMembersCard', 
+            'nextBirthday', 'activeLegend', 'inactiveLegend', 'totalMembersChart'
+        ];
+        
+        elements.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '--';
+        });
+        
+        const canvas = document.getElementById('memberPieChart');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    }
+}
+
+        // Estatísticas Gerais
+        async function fetchAndRenderStats() {
+            try {
+                const [contactsRes, usersRes, absentsRes, membersRes] = await Promise.all([
+                    fetch('/db/contacts.json'),
+                    fetch('/db/users.json'), 
+                    fetch('/db/absentmembers.json'),
+                    fetch('/db/members.json')
+                ]);
+
+                if (!contactsRes.ok) throw new Error('Falha ao carregar contatos');
+                if (!usersRes.ok) throw new Error('Falha ao carregar usuários');
+                if (!absentsRes.ok) throw new Error('Falha ao carregar ausentes');
+                if (!membersRes.ok) throw new Error('Falha ao carregar membros');
+
+                const [contacts, users, absents, members] = await Promise.all([
+                    contactsRes.json(),
+                    usersRes.json(),
+                    absentsRes.json(),
+                    membersRes.json()
+                ]);
+
+                // Atualiza estatísticas
+                document.getElementById('totalMembers').textContent = 
+                    Array.isArray(members) ? members.filter(m => m && (m.name || m._id)).length : '--';
+        
+                document.getElementById('totalUsers').textContent = 
+                    Array.isArray(users) ? users.filter(u => u && (u.username || u._id)).length : '--';
+        
+                document.getElementById('totalAbsent').textContent = 
+                    Array.isArray(absents) ? absents.filter(a => a && (a.memberId || a._id)).length : '--';
+
+                document.getElementById('totalVisitors').textContent = 
+                    Array.isArray(contacts) ? contacts.filter(c => c && (c.name || c._id)).length : '--';
+
+                document.getElementById('activeMembers').textContent = 
+                    Array.isArray(members) ? members.filter(m => m && m.status === 'ativo').length : '--';
+        
+                document.getElementById('inactiveMembers').textContent = 
+                    Array.isArray(members) ? members.filter(m => m && m.status === 'inativo').length : '--';
+
+                document.getElementById('messagesSent').textContent = 
+                    Array.isArray(contacts) ? contacts.filter(c => c && c.receivedMessage).length : '--';
+
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('todayPresent').textContent = 
+                    Array.isArray(members) ? members.filter(m => m && m.lastAttendance === today).length : '--';
+
+                if (Array.isArray(contacts) && contacts.length > 0) {
+                    renderAdminChart(contacts);
+                } else {
+                    const chartContainer = document.querySelector('.chart-container');
+                    if (chartContainer) {
+                        chartContainer.innerHTML = '<div style="color:#9e2d4a;text-align:center;padding:2em;">Sem dados suficientes para exibir o gráfico</div>';
+                    }
+                }
+
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+                showToast(`Erro ao carregar dados: ${error.message}`, 'error');
+        
+                // Define valores padrão em caso de erro
+                const statElements = [
+                    'totalMembers', 'totalUsers', 'totalAbsent', 'totalVisitors',
+                    'activeMembers', 'inactiveMembers', 'messagesSent', 'todayPresent'
+                ];
+        
+                statElements.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = '--';
+                });
+        
+                const chartContainer = document.querySelector('.chart-container');
+                if (chartContainer) {
+                    chartContainer.innerHTML = `<div style="color:#9e2d4a;text-align:center;padding:2em;">Erro ao carregar dados: ${error.message}</div>`;
+                }
+            }
+        }
+
+        // Gráfico de Atividades
+        function renderAdminChart(contacts) {
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js não está carregado');
+                const chartContainer = document.querySelector('.chart-container');
+                chartContainer.innerHTML = '<div style="color:#9e2d4a;text-align:center;padding:2em;">Erro ao carregar o gráfico: Chart.js não está disponível.</div>';
+                return;
+            }
+
+            const chartContainer = document.querySelector('.chart-container');
+            let canvas = document.getElementById('adminChart');
+
+            if (!canvas) {
+                canvas = document.createElement('canvas');
+                canvas.id = 'adminChart';
+                canvas.height = 180;
+                chartContainer.innerHTML = '';
+                chartContainer.appendChild(canvas);
+            }
+
+            if (!Array.isArray(contacts) || contacts.length === 0) {
+                chartContainer.innerHTML = '<div style="color:#9e2d4a;text-align:center;padding:2em;">Sem dados suficientes para exibir o gráfico</div>';
+                return;
+            }
+
+            canvas.style.display = '';
+
+            if (chartContainer && chartContainer.querySelector('div')) {
+                chartContainer.innerHTML = '';
+                chartContainer.appendChild(canvas);
+            }
+
+            const ctx = canvas.getContext('2d');
+
+            const months = [];
+            const now = new Date();
+            for (let i = 5; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                months.push(d.toLocaleString('pt-BR', { month: 'long' }));
+            }
+
+            const contactsByMonth = months.map((label, idx) => {
+                const month = new Date(now.getFullYear(), now.getMonth() - (5 - idx), 1).getMonth();
+                const year = new Date(now.getFullYear(), now.getMonth() - (5 - idx), 1).getFullYear();
+                return contacts.filter(c => {
+                    if (!c || !c.createdAt) return false;
+                    const d = new Date(c.createdAt);
+                    return d.getMonth() === month && d.getFullYear() === year;
+                }).length;
+            });
+
+            if (window._adminChart) window._adminChart.destroy();
+            window._adminChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Contatos adicionados',
+                            data: contactsByMonth,
+                            borderColor: '#9e2d4a',
+                            backgroundColor: 'rgba(158,45,74,0.15)',
+                            fill: true,
+                            tension: 0.3,
+                            pointBackgroundColor: '#9e2d4a',
+                            pointBorderColor: '#9e2d4a',
+                            pointRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, precision: 0 },
+                        x: {
+                            ticks: {
+                                callback: function(val, index) {
+                                    return months[index].charAt(0).toUpperCase() + months[index].slice(1);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Função para buscar logs do sistema
+        async function fetchAndRenderLogs() {
+            try {
+                const response = await fetch('/db/logs.json');
+                if (!response.ok) throw new Error('Erro ao buscar logs.json');
+                const logs = await response.json();
+                renderLogs(Array.isArray(logs) ? logs : []);
+            } catch (error) {
+                document.getElementById('systemLogs').innerHTML = '<div class="log-entry">Nenhum log encontrado</div>';
+            }
+        }
+
+        // Função para renderizar logs
+        function renderLogs(logs) {
+            const logsContainer = document.getElementById('systemLogs');
+            if (!logs || logs.length === 0) {
+                logsContainer.innerHTML = '<div class="log-entry">Nenhum log encontrado</div>';
+                return;
+            }
+            logsContainer.innerHTML = logs.map(log => `
+                <div class="log-entry ${log.level || 'info'}">
+                    <span class="log-timestamp">${log.createdAt ? new Date(log.createdAt).toLocaleString() : ''}</span>
+                    <span class="log-level">${log.level || 'info'}</span>
+                    <span class="log-message">${log.action || ''} - ${log.description || ''}</span>
+                </div>
+            `).join('');
+        }
+
+        // Botão de atualizar logs
+        document.getElementById('refreshLogsBtn').onclick = fetchAndRenderLogs;
+
+        // Carrega e renderiza o ranking de faltas
+        async function fetchAndRenderAbsenceRanking() {
+            try {
+                const res = await fetch('/db/absentmembers.json');
+                if (!res.ok) throw new Error('Erro ao buscar ausentes');
+                const absentsData = await res.json();
+
+                const monthFilter = document.getElementById('absentMonthFilter');
+                let selectedMonth = '';
+                if (monthFilter) selectedMonth = monthFilter.value;
+
+                const memberAbsences = {};
+                absentsData.forEach(entry => {
+                    if (selectedMonth) {
+                        const [y, m] = entry.date.split('-');
+                        if (`${y}-${m}` !== selectedMonth) return;
+                    }
+                    (entry.absents || []).forEach(absent => {
+                        const key = absent.name + '|' + (absent.phone || '');
+                        if (!memberAbsences[key]) {
+                            memberAbsences[key] = { name: absent.name, phone: absent.phone || '', count: 0, last: entry.date };
+                        }
+                        memberAbsences[key].count++;
+                        if (!memberAbsences[key].last || entry.date > memberAbsences[key].last) {
+                            memberAbsences[key].last = entry.date;
+                        }
+                    });
+                });
+
+                const ranking = Object.values(memberAbsences).sort((a, b) => b.count - a.count || (b.last || '').localeCompare(a.last || ''));
+                const tbody = document.getElementById('absentRankingTable');
+
+                if (!ranking.length) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="no-data">Nenhuma falta registrada</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = ranking.map((m, idx) => `
+                    <tr class="absent-details-row" data-name="${encodeURIComponent(m.name)}" data-phone="${m.phone}">
+                        <td class="member-name">${m.name}</td>
+                        <td class="member-phone">${m.phone}</td>
+                        <td class="absence-count">${m.count}</td>
+                        <td class="last-absence">${m.last ? new Date(m.last).toLocaleDateString('pt-BR') : '-'}</td>
+                    </tr>
+                `).join('');
+
+                // Adiciona evento de clique para abrir detalhes
+                Array.from(tbody.querySelectorAll('.absent-details-row')).forEach(tr => {
+                    tr.addEventListener('click', function() {
+                        const name = decodeURIComponent(this.getAttribute('data-name'));
+                        const phone = this.getAttribute('data-phone');
+                        if (window.showAbsentDetails) window.showAbsentDetails(name, phone);
+                    });
+                });
+            } catch (err) {
+                const tbody = document.getElementById('absentRankingTable');
+                tbody.innerHTML = '<tr><td colspan="4" class="error">Erro ao carregar ranking de faltas</td></tr>';
+            }
+        }
+
+        // Botão de limpar logs
+        document.getElementById('clearLogsBtn').onclick = function() {
+            document.getElementById('systemLogs').innerHTML = '<div class="log-entry">Nenhum log encontrado</div>';
+        };
+    </script>
+
+    <!-- Preenche filtro de mês -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const monthFilter = document.getElementById('absentMonthFilter');
+            if (!monthFilter) return;
+
+            try {
+                const res = await fetch('/db/absentmembers.json');
+                if (!res.ok) return;
+                const absentsData = await res.json();
+
+                const months = Array.from(new Set(absentsData.map(e => e.date.slice(0,7)))).sort().reverse();
+                monthFilter.innerHTML = months.map(m => {
+                    const [y, mo] = m.split('-');
+                    const date = new Date(y, mo-1);
+                    const label = date.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+                    return `<option value="${m}">${label.charAt(0).toUpperCase()+label.slice(1)}</option>`;
+                }).join('');
+
+                const now = new Date();
+                const current = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+                if (months.includes(current)) monthFilter.value = current;
+
+                monthFilter.addEventListener('change', fetchAndRenderAbsenceRanking);
+                fetchAndRenderAbsenceRanking();
+            } catch (error) {
+                console.error('Erro ao carregar filtro de meses:', error);
+            }
+        });
+    </script>
+
+    <script src="/js/init.js"></script>
+    <script src="/js/admin-panel.js"></script>
+    <script src="/js/absent-details-modal.js"></script>
+    <script src="/js/maintenance.js"></script>
+    <script src="/js/hamburger.js"></script>
+</body>
+</html>

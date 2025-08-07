@@ -1,138 +1,223 @@
-# BoaParte - Sistema de Autenticação
+# 💒 Sistema de Gerenciamento de Membros da Igreja
 
-Sistema de autenticação moderno e seguro com interface intuitiva.
+Sistema web robusto para administração de membros, controle de presença, notificações automáticas via WhatsApp e geração de relatórios, com foco em segurança, automação e facilidade de uso.
+
+---
+
+## 📚 Sumário
+
+- [Visão Geral](#visão-geral)
+- [Funcionalidades](#funcionalidades)
+- [Tecnologias](#tecnologias)
+- [Instalação e Configuração](#instalação-e-configuração)
+- [Integração WhatsApp](#integração-whatsapp)
+- [Agendamento de Notificações](#agendamento-de-notificações)
+- [Segurança](#segurança)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Exemplos de Uso](#exemplos-de-uso)
+- [Boas Práticas](#boas-práticas)
+- [Contato e Suporte](#contato-e-suporte)
+- [Licença](#licença)
+
+---
+
+## ✨ Visão Geral
+
+Este sistema foi desenvolvido para facilitar o gerenciamento de membros de igrejas, permitindo:
+- Cadastro, atualização e exclusão de membros
+- Controle de presenças e ausências
+- Justificativas de faltas
+- Notificações automáticas via WhatsApp
+- Painel administrativo com estatísticas e exportação de dados
+
+---
 
 ## 🚀 Funcionalidades
 
-- Login seguro com JWT
-- Registro de usuários com código de convite
-- Interface moderna e responsiva
-- Validação em tempo real
-- Feedback visual para todas as ações
-- Sistema de notificações
-- Proteção contra tokens inválidos
+- Autenticação segura (admin e usuário comum)
+- CRUD de membros
+- Controle de presença e ausências
+- Justificativas de faltas
+- Notificações automáticas via WhatsApp
+- Dashboard com gráficos e estatísticas
+- Exportação de dados (CSV/Excel)
+- Painel administrativo
+- Logs de notificações e auditoria
+
+---
 
 ## 🛠️ Tecnologias
 
-- Frontend:
-  - HTML5
-  - CSS3 (com animações e design responsivo)
-  - JavaScript (Vanilla)
-  - FontAwesome para ícones
+- Node.js 18+
+- MongoDB 6+
+- Express.js
+- JWT (JSON Web Token)
+- bcrypt
+- Socket.io (para QR Code do WhatsApp)
+- Integração com WhatsApp (biblioteca específica)
+- HTML, CSS, JavaScript (Frontend)
 
-- Backend:
-  - Node.js
-  - Express.js
-  - MongoDB (com Mongoose)
-  - JWT para autenticação
-  - Bcrypt para hash de senhas
+---
 
-## 📋 Pré-requisitos
+## ⚙️ Instalação e Configuração
 
-- Node.js (v14 ou superior)
-- MongoDB Atlas (ou MongoDB local)
-- NPM ou Yarn
+1. **Clone o repositório:**
+   ```bash
+   git clone [url-do-repositorio]
+   cd [nome-da-pasta]
+   ```
 
-## 🔧 Instalação
+2. **Instale as dependências:**
+   ```bash
+   npm install
+   ```
 
-1. Clone o repositório:
-```bash
-git clone https://github.com/seu-usuario/boaparte.git
-cd boaparte
+3. **Configure as variáveis de ambiente:**
+   Crie um arquivo `.env` na raiz do projeto:
+   ```env
+   MONGO_URI=sua-uri-do-mongodb
+   JWT_SECRET=seu-segredo-jwt
+   PORT=3000
+   ```
+
+4. **Inicialize o banco de dados e crie o admin padrão:**
+   ```bash
+   npm run init-db
+   ```
+   - Admin padrão:
+     - Email: `admin@church.com`
+     - Senha: `admin123`
+   > **Troque a senha do admin após o primeiro login!**
+
+5. **Execute o sistema:**
+   - Ambiente de desenvolvimento:
+     ```bash
+     npm run dev
+     ```
+   - Ambiente de produção:
+     ```bash
+     npm start
+     ```
+
+---
+
+## 📱 Integração WhatsApp
+
+- Ao iniciar o servidor, um QR Code será exibido no terminal.
+- Escaneie com o WhatsApp do número responsável pelo envio das notificações.
+- Aguarde a confirmação de conexão.
+- O sistema mantém a sessão ativa para envio automático de mensagens.
+
+---
+
+## ⏰ Agendamento de Notificações
+
+- Notificações automáticas enviadas aos domingos às 20h.
+- Membros ausentes por 2 ou mais semanas consecutivas são notificados.
+- Todas as tentativas de notificação são registradas para auditoria.
+
+---
+
+## 🔒 Segurança
+
+- Autenticação via JWT
+- Senhas criptografadas com bcrypt
+- Proteção contra CSRF e XSS
+- Validação de dados em todas as rotas
+- Logs de acesso e operações sensíveis
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+├── models/          # Modelos do MongoDB
+├── public/          # Arquivos estáticos (JS, CSS, HTML)
+│   ├── js/
+│   ├── styles/
+│   └── pages/
+├── routes/          # Rotas da API
+├── utils/           # Funções utilitárias
+├── logs/            # Logs do sistema
+└── README.md
 ```
 
-2. Instale as dependências:
+---
+
+## 📝 Exemplos de Uso
+
+- **Cadastrar membro:**  
+  Acesse o painel administrativo e clique em "Novo Membro".
+- **Registrar presença:**  
+  Selecione o membro e marque a presença na data desejada.
+- **Enviar justificativa:**  
+  Informe o motivo da ausência pelo painel ou via WhatsApp.
+- **Exportar dados:**  
+  Utilize o botão "Exportar" no dashboard para gerar relatórios.
+
+---
+
+## 💡 Boas Práticas
+
+- Troque a senha do admin após o primeiro acesso.
+- Mantenha o WhatsApp conectado para garantir o envio das notificações.
+- Faça backup regular do banco de dados.
+- Atualize as dependências do projeto periodicamente.
+
+---
+
+## 📬 Contato e Suporte
+
+Dúvidas, sugestões ou suporte técnico:  
+**Email:** [seu-email]
+
+---
+
+## 🏷️ Licença
+
+Este projeto está sob a licença MIT. Sinta-se livre para usar, modificar e contribuir!
+
+---
+
+# Boa Parte - Sistema de Gerenciamento
+
+## Setup do Projeto
+
+1. Instale as dependências:
 ```bash
 npm install
 ```
 
-3. Configure as variáveis de ambiente:
-- MONGODB_URI
-- JWT_SECRET
-- REGISTRATION_CODE
+2. Configure as variáveis de ambiente:
+- Copie `.env.example` para `.env`
+- Ajuste as variáveis conforme necessário
 
-4. Inicie o servidor:
+3. Inicie o servidor:
 ```bash
 npm start
 ```
 
-## 🔐 Segurança
+## Deploy no Render
 
-- Senhas hasheadas com bcrypt
-- Tokens JWT com expiração
-- Validação de dados no servidor
-- Proteção contra tokens inválidos
-- Código de registro necessário
+Para fazer deploy no Render.com:
 
-## 📱 Responsividade
+1. Faça push do seu repositório para o GitHub.
+2. No Render, crie um novo "Web Service" e conecte ao seu repositório.
+3. Configure:
+   - **Build Command:** `npm install`
+   - **Start Command:** `npm start`
+   - **Environment Variables:**
+     - `NODE_ENV=production`
+     - `PORT=3000`
+     - `MONGO_URI=...` (sua string do MongoDB Atlas)
+     - `JWT_SECRET=...` (sua chave secreta)
+     - `SESSION_SECRET=...` (outra chave secreta)
+     - `FRONTEND_URL=https://seusite.onrender.com` (ajuste para a URL do seu serviço)
+     - Outras variáveis conforme `.env.example`
 
-O sistema é totalmente responsivo e funciona em:
-- Desktops
-- Tablets
-- Smartphones
+4. Após o deploy, acesse a URL fornecida pelo Render.
+5. Se necessário, rode `npm audit fix --force` localmente para corrigir vulnerabilidades e faça novo push.
 
-## 🎨 Design
-
-- Tema verde moderno
-- Animações suaves
-- Feedback visual
-- Notificações elegantes
-- Interface intuitiva
-
-## 🤝 Contribuindo
-
-1. Faça um Fork do projeto
-2. Crie uma Branch para sua Feature (`git checkout -b feature/AmazingFeature`)
-3. Faça o Commit das suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Faça o Push para a Branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
-## Módulo WhatsApp
-
-Este projeto inclui um módulo para envio de mensagens via WhatsApp usando a biblioteca Baileys. O módulo permite:
-
-- Autenticação via QR Code
-- Armazenamento automático de credenciais
-- Reconexão automática em caso de desconexão
-- Envio de mensagens de texto
-
-### Como usar o módulo WhatsApp
-
-1. Primeiro, certifique-se de que todas as dependências estão instaladas:
-```bash
-npm install
-```
-
-2. Para testar o envio de mensagens, use o arquivo de exemplo:
-```bash
-node example-whatsapp.js
-```
-
-3. Quando executar pela primeira vez, um QR Code será exibido no terminal. Escaneie-o com seu WhatsApp para autenticar.
-
-4. Para enviar mensagens em seu próprio código:
-```javascript
-const WhatsAppClient = require('./whatsapp');
-
-async function sendMessage() {
-    const whatsapp = new WhatsAppClient();
-    await whatsapp.initialize();
-    
-    // Aguarde a conexão ser estabelecida
-    // O número deve estar no formato internacional sem o '+'
-    await whatsapp.sendMessage('5511999999999', 'Sua mensagem aqui');
-}
-```
-
-### Notas importantes
-
-- As credenciais são salvas automaticamente na pasta `whatsapp-auth`
-- O número de telefone deve estar no formato internacional sem o '+' (exemplo: 5511999999999)
-- A reconexão automática tentará reconectar até 5 vezes em caso de desconexão
-- Não é necessário escanear o QR Code novamente após a primeira autenticação
-
-# 1
+> **Dica:**
+> - O arquivo `.env.example` lista todas as variáveis obrigatórias.
+> - O diretório `tokens/` está no `.gitignore` e não será enviado ao Render (a sessão do WhatsApp será criada do zero no deploy).

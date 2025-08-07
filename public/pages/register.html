@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Sistema de Gerenciamento</title>
+    <link rel="stylesheet" href="/styles/styles.css">
+    <link rel="stylesheet" href="/styles/register.css">
+    <link rel="icon" href="/images/logo.png">
+</head>
+<body>
+
+
+    <div class="register-layout">
+        <div class="register-container">
+            <div class="register-card">
+                <h1>Criar Conta</h1>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="name">Usuário</label>
+                        <input type="text" id="name" name="name" required placeholder="Seu nome de usuário">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" name="email" required placeholder="seu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Senha</label>
+                        <input type="password" id="password" name="password" required placeholder="Crie uma senha">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirmar Senha</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Repita a senha">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerCode">Código de Registro</label>
+                        <input type="text" id="registerCode" name="registerCode" required placeholder="Digite o código fornecido pela liderança">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Registrar</button>
+                    </div>
+                </form>
+                <div class="register-footer">
+                    <p>Já tem uma conta? <a href="/pages/login.html">Entrar</a></p>
+                </div>
+            </div>
+        </div>
+        <aside class="register-instructions">
+            <h2>Como se registrar</h2>
+            <ol>
+                <li>Preencha seu nome completo.</li>
+                <li>Informe um e-mail válido.</li>
+                <li>Crie uma senha segura e confirme-a.</li>
+                <li>Clique em <b>Registrar</b> para criar sua conta.</li>
+                <li>Após o registro, faça login normalmente.</li>
+            </ol>
+            <p class="register-tip"><i class="fas fa-info-circle"></i> Use um e-mail válido para recuperar sua senha futuramente.</p>
+        </aside>
+    </div>
+    <!-- Sidebar (hidden on register, but markup for consistency) -->
+    <nav class="sidebar closed"></nav>
+    <div id="errorToast" class="toast toast-error"></div>
+    <script src="/js/init.js"></script>
+    <script src="/js/register.js"></script>
+    <script src="/js/maintenance.js"></script>
+    <script>
+    // Protege contra redirecionamento indevido para login.html
+    document.addEventListener('DOMContentLoaded', function() {
+        // Remove qualquer redirecionamento automático para login.html causado por scripts globais
+        if (window.location.pathname.endsWith('register.html')) {
+            // Remove qualquer hash ou query que possa causar reload
+            if (window.location.hash || window.location.search) {
+                history.replaceState(null, '', window.location.pathname);
+            }
+        }
+    });
+    </script>
+</body>
+</html>

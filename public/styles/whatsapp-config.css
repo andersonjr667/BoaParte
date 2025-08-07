@@ -1,0 +1,349 @@
+/* Import common styles */
+@import url('dashboard.css');
+
+/* WhatsApp Config Styles */
+.whatsapp-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background-color);
+    padding: 20px;
+}
+
+.whatsapp-card {
+    background: white;
+    padding: 32px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    margin: 32px auto;
+}
+
+.whatsapp-card h1 {
+    color: var(--text-color);
+    margin-bottom: 30px;
+}
+
+.status-container {
+    margin-bottom: 30px;
+}
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+.status-indicator.connected {
+    background: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #dc3545;
+}
+
+.status-indicator.connected .status-dot {
+    background: #28a745;
+}
+
+.qr-container {
+    background: #f8f9fa;
+    padding: 24px;
+    border-radius: 8px;
+    margin: 24px 0;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#qrCanvas {
+    display: none;
+    max-width: 100%;
+    height: auto;
+}
+
+.loading-text {
+    color: var(--text-color);
+    font-style: italic;
+}
+
+.instructions {
+    text-align: left;
+    margin: 30px 0;
+    padding: 20px;
+    background: var(--color1);
+    border-radius: 8px;
+}
+
+.instructions h3 {
+    color: var(--text-color);
+    margin-bottom: 15px;
+}
+
+.instructions ol {
+    color: var(--text-color);
+    padding-left: 20px;
+}
+
+.instructions li {
+    margin-bottom: 10px;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.actions button, .btn-secondary, .btn-danger {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.actions button:disabled, .btn-secondary:disabled, .btn-danger:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e0e0e0;
+    border-top: 4px solid #25d366;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.qr-fade-in {
+    animation: qrFadeIn 0.7s ease;
+}
+@keyframes qrFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.error-message {
+    color: #dc3545;
+    background: #fff0f0;
+    border: 1px solid #dc3545;
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin: 16px 0 0 0;
+    font-size: 1rem;
+    display: block;
+}
+
+.status-indicator.error {
+    background: #fff0f0;
+    border-color: #dc3545;
+}
+
+.status-indicator.error .status-dot {
+    background: #dc3545 !important;
+}
+
+.visually-hidden {
+    position: absolute !important;
+    height: 1px; width: 1px;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
+    white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+    .whatsapp-card {
+        padding: 12px;
+        max-width: 98vw;
+    }
+    .qr-container {
+        padding: 10px;
+        min-height: 180px;
+    }
+    .instructions {
+        padding: 10px;
+        font-size: 0.98rem;
+    }
+    .actions button {
+        font-size: 1rem;
+        padding: 10px 12px;
+    }
+}
+
+/* SIDEBAR E MENU HAMBÚRGUER - PADRÃO users.html */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 250px;
+  height: 100vh;
+  background: #21000f;
+  padding-top: 120px;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.15);
+  z-index: 900;
+  transition: transform 0.3s;
+}
+.logo-container {
+  text-align: center;
+  padding: 10px;
+  background: #21000f;
+  border-bottom: 1px solid #450b1e;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+}
+.logo {
+  max-width: 80px;
+  height: auto;
+  border-radius: 8px;
+  background: #fff;
+  padding: 5px;
+}
+.sidebar-toggle {
+  display: none;
+}
+.menu-overlay {
+  display: none;
+}
+@media (max-width: 900px) {
+  .sidebar {
+    width: 220px;
+    left: -220px;
+    transition: left 0.3s;
+  }
+  .sidebar.active {
+    left: 0;
+    z-index: 1002;
+  }
+  .menu-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.25);
+    z-index: 1001;
+  }
+  .menu-overlay.active {
+    display: block;
+  }
+  .sidebar-toggle {
+    display: inline-flex;
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    z-index: 1100;
+    background: #fff;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    color: #9e2d4a;
+    cursor: pointer;
+  }
+  .logo-container {
+    margin-left: 60px;
+  }
+  .content {
+    margin-left: 0 !important;
+    padding: 16px 4vw 32px 4vw;
+  }
+  .sidebar-toggle.hamburger, .hamburger {
+    display: inline-flex;
+  }
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 44px;
+  height: 44px;
+  background: #fff;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  cursor: pointer;
+  z-index: 1100;
+  transition: background 0.2s;
+  position: relative;
+}
+.hamburger-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 28px;
+  height: 28px;
+  position: relative;
+}
+.hamburger-bar {
+  display: block;
+  width: 28px;
+  height: 4px;
+  margin: 3px 0;
+  border-radius: 2px;
+  background: var(--color6);
+  transition: all 0.3s cubic-bezier(.4,2,.6,1), background 0.2s;
+}
+.hamburger.open .bar1 {
+  transform: translateY(7px) rotate(45deg);
+}
+.hamburger.open .bar2 {
+  opacity: 0;
+}
+.hamburger.open .bar3 {
+  transform: translateY(-7px) rotate(-45deg);
+}
+.hamburger:not(.open) .bar1 {
+  transform: none;
+}
+.hamburger:not(.open) .bar2 {
+  opacity: 1;
+}
+.hamburger:not(.open) .bar3 {
+  transform: none;
+}
+.hamburger:focus {
+  outline: 2px solid var(--color6);
+}

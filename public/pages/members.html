@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Membros - Sistema de Gerenciamento</title>
+    <link rel="stylesheet" href="/styles/members.css">
+    <link rel="stylesheet" href="/styles/hamburger.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="icon" href="/images/logo.png">
+    <script src="/js/init.js"></script>
+    <style>
+        .member-details-card {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .member-card {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .member-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .member-details-content {
+            position: relative;
+        }
+
+        .close-details {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .member-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .member-avatar {
+            font-size: 48px;
+            margin-right: 15px;
+            color: #666;
+        }
+
+        .member-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .info-item i {
+            margin-right: 10px;
+            color: var(--color3);
+            width: 20px;
+        }
+
+        .member-actions {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .edit-member-btn {
+            padding: 8px 16px;
+            background: var(--color3);
+            color: var(--color2);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .edit-member-btn:hover {
+            background: var(--color4);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: var(--color2);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .checkbox-group label:hover {
+            background: var(--color1);
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--color3);
+        }
+    </style>
+</head>
+
+    <button class="hamburger-menu" aria-label="Abrir menu">
+      <div class="hamburger-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </button>
+<body>
+
+    <nav class="sidebar">
+        <ul class="nav-menu">
+            <li><a href="/pages/dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="/pages/members.html" class="active"><i class="fas fa-users"></i> Membros</a></li>
+            <li><a href="/pages/absent-members.html"><i class="fas fa-user-clock"></i> Ausentes</a></li>
+            <li class="admin-only"><a href="/pages/users.html"><i class="fas fa-user-cog"></i> Usuários</a></li>
+            <li class="admin-only"><a href="/pages/admin-panel.html"><i class="fas fa-tools"></i> Admin</a></li>
+            <li class="admin-only"><a href="/pages/whatsapp-config.html"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sair</button>
+        </div>
+    </nav>
+
+    <!-- Member Details Card -->
+    <div id="memberDetailsCard" class="member-details-card" style="display: none;">
+        <div class="member-details-content">
+            <button class="close-details">&times;</button>
+            <div class="member-header">
+                <div class="member-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h2 id="detailsMemberName">Nome do Membro</h2>
+            </div>
+            <div class="member-info-grid">
+                <div class="info-item">
+                    <i class="fas fa-phone"></i>
+                    <span id="detailsPhone">Telefone</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-birthday-cake"></i>
+                    <span id="detailsBirthDate">Data de Nascimento</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-user-shield"></i>
+                    <span id="detailsStatus">Status</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-user-graduate"></i>
+                    <span id="detailsDiscipleBy">Discipulador</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-venus-mars"></i>
+                    <span id="detailsGender">Gênero</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-church"></i>
+                    <span id="detailsMinistries">Ministérios</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-calendar-check"></i>
+                    <span id="detailsCreatedAt">Data de Cadastro</span>
+                </div>
+            </div>
+            <div class="member-actions">
+                <button class="edit-member-btn"><i class="fas fa-edit"></i> Editar</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="content">
+        <header class="content-header">
+            <h1>Membros - Boa Parte</h1>
+            <div class="user-info">
+                <span class="user-name-display">
+                    <i class="fas fa-user"></i>
+                    <span id="userName">Carregando...</span>
+                    <img id="profilePic" src="/images/Fotos_Perfil/anderson.png" alt="Foto de perfil" style="display:none;width:32px;height:32px;border-radius:50%;margin-left:8px;object-fit:cover;vertical-align:middle;">
+                </span>
+            </div>
+            <div class="header-actions">
+                <button id="addMemberBtn" class="primary-button">
+                    <i class="fas fa-plus"></i> Novo Membro
+                </button>
+                <button id="exportBtn" class="secondary-button">
+                    <i class="fas fa-download"></i> Exportar
+                </button>
+            </div>
+        </header>
+
+        <div class="search-filters">
+            <div class="search-bar">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" placeholder="Buscar membros...">
+            </div>
+            <div class="filters">
+                <select id="statusFilter">
+                    <option value="">Todos os Status</option>
+                    <option value="ativo">Ativo</option>
+                    <option value="inativo">Inativo</option>
+                    <option value="visitante">Visitante</option>
+                </select>
+                <select id="attendanceFilter">
+                    <option value="">Todas as Presenças</option>
+                    <option value="present">Presentes hoje</option>
+                    <option value="absent">Ausentes hoje</option>
+                    <option value="inactive">Inativos (2+ semanas)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="members-container">
+            <div class="members-grid">
+                <!-- Members will be loaded here -->
+            </div>
+
+            </table>
+        </div>
+
+        <!-- Modal for adding/editing members -->
+        <div id="memberModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="modalTitle">Novo Membro</h2>
+                <form id="memberForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Nome</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Telefone</label>
+                            <input type="tel" id="phone" name="phone" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email">
+                        </div>
+                        <div class="form-group">
+                            <label for="birthDate">Data de Nascimento</label>
+                            <input type="date" id="birthDate" name="birthDate">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status" name="status" required>
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo</option>
+                                <option value="visitante">Visitante</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="discipleBy">Discipulador</label>
+<select id="discipleBy" name="discipleBy">
+    <option value="">Selecione um discipulador</option>
+    <option value="none">Não tem ainda</option>
+    
+    <!-- Usuários com roles definidas -->
+    <option value="67b25735991707f4588cf3b2">Anderson (admin)</option>
+    <option value="67b31cb21b0feadd8dac3ab0">Luiza M (user)</option>
+    <option value="67bbaa4fc1f10356a42c32c6">Ana Luiza (user)</option>
+    <option value="67bbb2fe4b5ac4ebf8ad79a9">Gabrielle JĂˇcome (user)</option>
+    <option value="67bc32ec5f577975b171ac89">Arthur (user)</option>
+    <option value="67ce04f4961c6e31919c80cc">Thais Garcia (user)</option>
+    <option value="67d02ca930b544b1765539f4">Alysson Carvalho (user)</option>
+    <option value="67dc61469c396371f7876bda">Mari Cordeiro (user)</option>
+    <option value="67e209b55e58924af515f7fe">admin (user)</option>
+    
+    <!-- Usuários sem role definida -->
+    <option value="67b31b931b0feadd8dac3aa3">thaynadias48@gmail.com</option>
+    <option value="67b31f031b0feadd8dac3ab9">Luan</option>
+    <option value="67b321362d384ca3330bf161">Victoria Roberta</option>
+    <option value="67b3241d7d26f301f26fea18">Ingryd Rocha</option>
+    <option value="67b34760f6d231f6b6752d5f">VALQUIRIA VIEIRA</option>
+    <option value="67b35480fad2aa76149f9feb">Emanuelly melo</option>
+    <option value="67b354cafad2aa76149f9ff1">Emanuelly melo (duplicado)</option>
+    <option value="67b372e7052a6ccd5640ac3b">willgetter</option>
+    <option value="67b3c0d8d994fc0e60dfb037">Bianca</option>
+    <option value="67b3c154d994fc0e60dfb047">Mariana T</option>
+    <option value="67b51b99c9297f49e2204e66">Pr. Thiago Vieira</option>
+    <option value="67b8eec16160336cc95eec04">Paulo Emanuel N</option>
+</select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Endereço</label>
+                        <input type="text" id="address" name="address">
+                    </div>
+                    <div class="form-group">
+                        <label>Ministérios</label>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="ministry-louvor">
+                                Louvor
+                            </label>
+                            <label>
+                                <input type="checkbox" name="ministry-danca">
+                                Dança
+                            </label>
+                            <label>
+                                <input type="checkbox" name="ministry-midia">
+                                Mídia
+                            </label>
+                            <label>
+                                <input type="checkbox" name="ministry-intercessao">
+                                Intercessão
+                            </label>
+                            <label>
+                                <input type="checkbox" name="ministry-boaparte">
+                                Boa Parte
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Preferências de Notificação</label>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="whatsapp" checked>
+                                WhatsApp
+                            </label>
+                            <label>
+                                <input type="checkbox" name="email">
+                                Email
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                        <button type="button" class="btn btn-secondary close-modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Statistics Modal -->
+        <div id="statsModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div class="stats-content">
+                    <!-- Stats will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add these scripts before your other scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/members.js"></script>
+    <script src="/js/maintenance.js"></script>
+    <script src="/js/hamburger.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Exibe foto de perfil para Anderson ou Luiz Felipe
+    try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        var pic = document.getElementById('profilePic');
+        if (user && pic) {
+            if (user.username === 'Anderson' || user.name === 'Anderson') {
+                pic.src = '../images/Fotos_Perfil/anderson.png';
+                pic.style.display = '';
+            } else if (user.username === 'Luiz Felipe' || user.name === 'Luiz Felipe') {
+                pic.src = '../images/Fotos_Perfil/luiz.jpg';
+                pic.style.display = '';
+            } else if (user.username === 'Paulo Emanuel N' || user.name === 'Paulo Emanuel N') {
+                pic.src = '../images/Fotos_Perfil/paulo.jpg';
+                pic.style.display = '';
+            }
+        }
+    } catch {}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuários do Sistema</title>
+    <link rel="stylesheet" href="/styles/dashboard.css">
+    <link rel="stylesheet" href="/styles/users.css">
+    <link rel="stylesheet" href="/styles/hamburger.css">
+    <link rel="icon" href="/images/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+      .user-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 18px;
+        border-bottom: 1px solid #eee;
+        font-size: 1.08rem;
+      }
+      .user-name {
+        flex: 1;
+        font-weight: 500;
+      }
+      .user-role {
+        color: #888;
+        margin-right: 10px;
+      }
+      .icon-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 50%;
+        transition: background 0.15s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .icon-btn:hover {
+        background: #f3e6eb;
+      }
+      .icon-btn .material-icons {
+        font-size: 22px;
+        color: #9e2d4a;
+      }
+      .btn-delete .material-icons {
+        color: #c0392b;
+      }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <ul class="nav-menu">
+            <li><a href="/pages/dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="/pages/members.html"><i class="fas fa-users"></i> Membros</a></li>
+            <li><a href="/pages/absent-members.html"><i class="fas fa-user-clock"></i> Ausentes</a></li>
+            <li class="admin-only"><a href="/pages/users.html" class="active"><i class="fas fa-user-cog"></i> Usuários</a></li>
+            <li class="admin-only"><a href="/pages/admin-panel.html"><i class="fas fa-tools"></i> Admin</a></li>
+            <li class="admin-only"><a href="/pages/whatsapp-config.html"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sair</button>
+        </div>
+    </nav>
+    <main class="content">
+    <header class="content-header">
+        <h1>Users - Boa Parte</h1>
+        <div class="user-info">
+            <span class="user-name-display">
+                <i class="fas fa-user"></i>
+                <span id="userName">Carregando...</span>
+                <img id="profilePic" src="/images/Fotos_Perfil/anderson.png" alt="Foto de perfil" style="display:none;width:32px;height:32px;border-radius:50%;margin-left:8px;object-fit:cover;vertical-align:middle;">
+            </span>
+        </div>
+    </header>
+    <div class="users-stats-cards">
+        <div class="users-card total-users">
+            <div class="users-card-title"><i class="fas fa-users"></i> Total de Usuários</div>
+            <div class="users-card-value" id="totalUsers">0</div>
+        </div>
+        <div class="users-card total-admins">
+            <div class="users-card-title"><i class="fas fa-user-shield"></i> Total de Admins</div>
+            <div class="users-card-value" id="totalAdmins">0</div>
+        </div>
+        <div class="users-card total-normal-users">
+            <div class="users-card-title"><i class="fas fa-user"></i> Total de Usuarios/Users</div>
+            <div class="users-card-value" id="totalNormalUsers">0</div>
+        </div>
+    </div>
+    <div class="users-container">
+        <div class="table-responsive">
+            <table id="usersTable">
+                <thead>
+                    <tr>
+                        <th>Nome de Usuário</th>
+                        <th>Função</th>
+                        <th>Criado em</th>
+                        <th>ID</th>
+                        <th class="admin-only">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Conteúdo dinâmico -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+    <script>
+        // Exibe foto de perfil para Anderson, Luiz Felipe ou Paulo Emanuel N
+    document.addEventListener('DOMContentLoaded', function() {
+        // Exibe foto de perfil para Anderson, Luiz Felipe ou Paulo Emanuel N
+        try {
+            const user = JSON.parse(localStorage.getItem('user'));
+            var pic = document.getElementById('profilePic');
+            if (user && pic) {
+                if (user.username === 'Anderson' || user.name === 'Anderson') {
+                    pic.src = '/images/Fotos_Perfil/anderson.png';
+                    pic.style.display = '';
+                } else if (user.username === 'Luiz Felipe' || user.name === 'Luiz Felipe') {
+                    pic.src = '/images/Fotos_Perfil/luiz.jpg';
+                    pic.style.display = '';
+                } else if (user.username === 'Paulo Emanuel N' || user.name === 'Paulo Emanuel N') {
+                    pic.src = '/images/Fotos_Perfil/paulo.jpg';
+                    pic.style.display = '';
+                }
+            }
+        } catch {}
+    });
+    </script>
+<!-- Removido script embutido duplicado para evitar conflito com users.js -->
+<script src="/js/init.js"></script>
+<script src="/js/users.js"></script>
+<script src="/js/maintenance.js"></script>
+<script src="/js/hamburger.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membros Ausentes - Sistema de Gerenciamento</title>    
+    <link rel="stylesheet" href="/styles/styles.css">
+    <link rel="stylesheet" href="/styles/absent-members.css">
+    <link rel="stylesheet" href="/styles/hamburger.css">
+    <link rel="icon" href="/images/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Luxon CDN para data de Brasília -->
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+</head>
+<body>
+
+
+    <button class="hamburger-menu" aria-label="Abrir menu">
+      <div class="hamburger-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </button>
+
+    <nav class="sidebar" id="sidebar">
+        <ul class="nav-menu">
+            <li><a href="/pages/dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="/pages/members.html"><i class="fas fa-users"></i> Membros</a></li>
+            <li><a href="/pages/absent-members.html" class="active"><i class="fas fa-user-clock"></i> Ausentes</a></li>
+            <li class="admin-only"><a href="/pages/users.html"><i class="fas fa-user-cog"></i> Usuários</a></li>
+            <li class="admin-only"><a href="/pages/admin-panel.html"><i class="fas fa-tools"></i> Admin</a></li>
+            <li class="admin-only"><a href="/pages/whatsapp-config.html"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sair</button>
+        </div>
+    </nav>
+    <main class="content">
+        <header class="content-header">
+            <h1>Membros Ausentes - Boa Parte</h1>
+            <div class="user-info">
+                <span class="user-name-display">
+                    <i class="fas fa-user"></i>
+                    <span id="userName">Carregando...</span>
+                    <img id="profilePic" src="/images/Fotos_Perfil/anderson.png" alt="Foto de perfil" style="display:none;width:32px;height:32px;border-radius:50%;margin-left:8px;object-fit:cover;vertical-align:middle;">
+                </span>
+            </div>
+        </header>
+
+        <div class="filters" style="margin-bottom: 24px;">
+            <select id="periodFilter">
+                <option value="30">Últimos 30 dias</option>
+                <option value="60">Últimos 60 dias</option>
+                <option value="90">Últimos 90 dias</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="Buscar ausentes...">
+        </div>
+
+        <div class="absent-table" style="background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(80,40,40,0.08); padding: 0 0 18px 0;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Últimas Faltas</th>
+                        <th>Telefone</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="absentList">
+                    <!-- Absent members will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="absent-list-container" style="margin-top: 36px; background: #f9f6f2; border-radius: 12px; box-shadow: 0 2px 8px rgba(80,40,40,0.06); padding: 18px 12px 18px 12px; max-width: 1200px; margin-left: auto; margin-right: auto;">
+            <div class="quick-list-header" style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-bottom: 10px; width: 100%; max-width: 1200px;">
+                <h2 style="font-size: 1.25em; color: #7c3a1e; font-weight: 700; margin: 0; text-align: left; flex: 1;">Lista de Chamada Rápida</h2>
+                <div style="display: flex; gap: 0; align-items: center;">
+                    <button id="saveAbsentBtn" class="primary-button" title="Salvar Chamada" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 1.45em; padding: 0; border-radius: 10px; margin-right: 8px;">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button id="sendMsgBtn" class="primary-button" title="Enviar mensagem para ausentes" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 1.45em; padding: 0; border-radius: 10px;">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+            <ul id="quickAbsentList" class="quick-absent-list" aria-label="Lista de chamada rápida" style="width: 100%; max-width: 1200px;"></ul>
+            <div id="saveFeedback" class="save-feedback" role="status" aria-live="polite" style="display:none;"></div>
+        </div>
+    </main>
+</div>    <script src="/socket.io/socket.io.js"></script>
+<script src="/js/init.js"></script>
+<script src="/js/absent-members.js"></script>
+<script src="/js/maintenance.js"></script>
+<script src="/js/hamburger.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            window.location.href = '/pages/login.html';
+        });
+
+    const members = [
+        { name: "Anderson Jr (Juninho)", phone: "+55 31 97153-3882" },
+        { name: "Alyne", phone: "+55 31 99325-9908" },
+        { name: "Alysson", phone: "+55 31 98435-3383" },
+        { name: "Ana Luiza", phone: "+55 31 98740-1274" },
+        { name: "André", phone: "+55 31 98781-2303" },
+        { name: "Arthur 🫒", phone: "+55 31 98683-2164" },
+        { name: "Arthur 🤓", phone: "+55 31 98774-8972" },
+        { name: "Bianca Vargas", phone: "+55 31 97595-3540" },
+        { name: "Davi", phone: "+55 31 99561-1124" },
+        { name: "Débora", phone: "+55 31 99234-4897" },
+        { name: "Dudah", phone: "+55 31 99535-9296" },
+        { name: "Elias", phone: "+55 31 99750-6403" },
+        { name: "Ester Tigre", phone: "+55 31 98267-0832" },
+        { name: "Gabi Deps (Amiga Larissa)", phone: "+55 31 97116-4949" },
+        { name: "Gabi.", phone: "+55 31 98525-2076" },
+        { name: "Heitor", phone: "+55 31 98023-0446" },
+        { name: "Ian", phone: "+55 31 98934-6041" },
+        { name: "Ingryd Rocha", phone: "+55 31 98886-8991" },
+        { name: "Isaac Takahashi", phone: "+55 31 97165-2421" },
+        { name: "João Paulo (Irmão Luiz)", phone: "+55 31 98938-3386" },
+        { name: "João Pedro (Primo Mari)", phone: "+55 31 99157-8504" },
+        { name: "Julia", phone: "+55 31 99838-8190" },
+        { name: "Kaique", phone: "+55 31 99393-5510" },
+        { name: "Larissa", phone: "+55 31 99503-3990" },
+        { name: "Laura", phone: "+55 31 98425-8629" },
+        { name: "Laura(Luan)", phone: "+55 31 99762-1357" },
+        { name: "Lu", phone: "+55 31 99393-9752" },
+        { name: "Luan", phone: "+55 31 99979-2892" },
+        { name: "Luiz (Irmão João)", phone: "+55 31 98546-4249" },
+        { name: "Luiz Rodrigues", phone: "+55 31 99529-7164" },
+        { name: "Manu Melo", phone: "+55 31 98944-6562" },
+        { name: "Mari (Amiga Roberta)", phone: "+55 31 97174-7001" },
+        { name: "Mari C", phone: "+55 31 99301-4289" },
+        { name: "Mari T", phone: "+55 31 98395-1289" },
+        { name: "Maria", phone: "+55 31 97266-0695" },
+        { name: "Mariana Andrade (Amiga Maria e Tata)", phone: "+55 31 97316-6612" },
+        { name: "Mateus(líder)", phone: "+55 33 98888-2030" },
+        { name: "Matheuzinn", phone: "+55 31 99129-9240" },
+        { name: "Nicolas", phone: "+55 31 98570-2117" },
+        { name: "Paulo", phone: "+55 31 97193-8925" },
+        { name: "Pedro", phone: "+55 31 99260-1919" },
+        { name: "Rafique", phone: "+55 31 98200-3128" },
+        { name: "Richard", phone: "+55 31 99995-4812" },
+        { name: "Roberta", phone: "+55 31 98958-0017" },
+        { name: "Sabrina", phone: "+55 31 99556-0774" },
+        { name: "Talita", phone: "+55 31 98706-3884" },
+        { name: "Thais", phone: "+55 31 99774-1862" },
+        { name: "Thayná", phone: "+55 33 99942-4001" },
+        { name: "Pr.Thiago", phone: "+55 31 98724-5639" },
+        { name: "Valquiria", phone: "+55 31 98739-7393" },
+        { name: "Vivi", phone: "+55 31 98911-8778" }
+    ];
+
+        const quickAbsentList = document.getElementById('quickAbsentList');
+        const absentState = {};
+        // Sempre usa a data de Brasília (UTC-3) como chave
+        let currentDateKey = window.luxon.DateTime.now().setZone('America/Sao_Paulo').toISODate();
+
+        // Carrega chamada salva para a data selecionada
+        function loadAbsentForDate(dateKey) {
+            const saved = JSON.parse(localStorage.getItem('absentList_' + dateKey) || '[]');
+            members.forEach((member, idx) => {
+                absentState[idx] = saved.includes(member.name);
+            });
+            // Atualiza UI
+            Array.from(quickAbsentList.children).forEach((li, idx) => {
+                li.classList.toggle('absent', absentState[idx]);
+            });
+        }
+
+        // Gera chave de data (yyyy-mm-dd)
+        // Função para obter a data de Brasília (UTC-3) no formato yyyy-mm-dd
+        function getCurrentDateKey() {
+            return window.luxon.DateTime.now().setZone('America/Sao_Paulo').toISODate();
+        }
+
+        // Feedback visual ao salvar chamada
+        function showSaveFeedback(msg, success = true) {
+            const feedback = document.getElementById('saveFeedback');
+            feedback.textContent = msg;
+            feedback.style.display = 'block';
+            feedback.className = 'save-feedback ' + (success ? 'success' : 'error');
+            setTimeout(() => { feedback.style.display = 'none'; }, 2200);
+        }
+
+        // Salva chamada dos ausentes do dia
+        function saveAbsentList() {
+            // Corrige: Salva corretamente os ausentes marcados e envia para o backend
+            const absentNames = [];
+            const absents = [];
+            members.forEach((member, idx) => {
+                if (absentState[idx]) {
+                    absentNames.push(member.name);
+                    absents.push({ name: member.name, phone: member.phone });
+                }
+            });
+            localStorage.setItem('absentList_' + currentDateKey, JSON.stringify(absentNames));
+            // Usa currentDateKey (data de Brasília) para salvar no backend
+            fetch('/api/members/absent-list', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date: currentDateKey, absents })
+            })
+            .then(res => {
+                if (res.ok) {
+                    showSaveFeedback('Chamada salva com sucesso!');
+                } else {
+                    showSaveFeedback('Erro ao salvar chamada no sistema!', false);
+                }
+            })
+            .catch(() => {
+                showSaveFeedback('Erro ao salvar chamada no sistema!', false);
+            });
+        }
+
+        // Função para enviar mensagem automática para todos os ausentes
+        async function sendMessageToAllAbsents() {
+            const absentNames = [];
+            const absentPhones = [];
+            members.forEach((member, idx) => {
+                if (absentState[idx]) {
+                    absentNames.push(member.name);
+                    absentPhones.push(member.phone);
+                }
+            });
+            if (absentPhones.length === 0) {
+                showSaveFeedback('Nenhum ausente selecionado!', false);
+                return;
+            }
+            // Chama endpoint backend para enviar mensagem (ajuste a rota conforme seu backend)
+            try {
+                const res = await fetch('/api/send-absent-messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phones: absentPhones, names: absentNames })
+                });
+                if (res.ok) {
+                    showSaveFeedback('Mensagens enviadas com sucesso!');
+                } else {
+                    showSaveFeedback('Erro ao enviar mensagens!', false);
+                }
+            } catch {
+                showSaveFeedback('Erro ao enviar mensagens!', false);
+            }
+        }
+
+        document.getElementById('saveAbsentBtn').onclick = saveAbsentList;
+
+        document.getElementById('sendMsgBtn').onclick = sendMessageToAllAbsents;
+
+        // Atualiza chamada ao trocar o filtro de período (simula datas)
+        document.getElementById('periodFilter').addEventListener('change', function() {
+            // Para 30 dias, usa hoje; para 60, ontem; para 90, anteontem, sempre em Brasília
+            const days = parseInt(this.value, 10) || 0;
+            let dt = window.luxon.DateTime.now().setZone('America/Sao_Paulo');
+            if (days === 60) {
+                dt = dt.minus({ days: 1 });
+            } else if (days === 90) {
+                dt = dt.minus({ days: 2 });
+            }
+            currentDateKey = dt.toISODate();
+            renderQuickAbsentList();
+        });
+
+        // Acessibilidade: permite navegação por teclado
+        quickAbsentList.addEventListener('keydown', function(e) {
+            if (e.target.tagName === 'LI' && (e.key === ' ' || e.key === 'Enter')) {
+                e.preventDefault();
+                e.target.click();
+            }
+        });
+
+        // Renderiza lista
+        function renderQuickAbsentList() {
+            quickAbsentList.innerHTML = '';
+            members.forEach((member, idx) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span class="quick-name">${member.name}</span><span class="quick-phone">${member.phone}</span>`;
+                li.style.cursor = 'pointer';
+                li.setAttribute('tabindex', '0');
+                li.setAttribute('role', 'button');
+                li.setAttribute('aria-pressed', absentState[idx] ? 'true' : 'false');
+                li.onclick = function() {
+                    absentState[idx] = !absentState[idx];
+                    li.classList.toggle('absent', absentState[idx]);
+                    li.setAttribute('aria-pressed', absentState[idx] ? 'true' : 'false');
+                };
+                quickAbsentList.appendChild(li);
+            });
+            loadAbsentForDate(currentDateKey);
+        }
+
+        // Inicialização
+        renderQuickAbsentList();
+
+        // Exibe foto de perfil para Anderson ou Luiz Felipe
+    try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        var pic = document.getElementById('profilePic');
+        if (user && pic) {
+            if (user.username === 'Anderson' || user.name === 'Anderson') {
+                pic.src = '/images/Fotos_Perfil/anderson.png';
+                pic.style.display = '';
+            } else if (user.username === 'Luiz Felipe' || user.name === 'Luiz Felipe') {
+                pic.src = '/images/Fotos_Perfil/luiz.jpg';
+                pic.style.display = '';
+            } else if (user.username === 'Paulo Emanuel N' || user.name === 'Paulo Emanuel N') {
+                pic.src = '/images/Fotos_Perfil/paulo.jpg';
+                pic.style.display = '';
+            }
+        }
+    } catch {}
+    });
+</script>
+<style>
+.quick-absent-list {
+    list-style: none;
+    padding: 0;
+    margin: 24px 0 32px 0;
+    display: block;
+    width: 100%;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.quick-absent-list li {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(80, 40, 40, 0.08), 0 1.5px 4px rgba(80,40,40,0.04);
+    padding: 20px 18px 14px 18px;
+    font-size: 1.13rem;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 60px;
+    margin-bottom: 18px;
+    text-align: center;
+    transition: color 0.18s, background 0.18s, box-shadow 0.18s, border 0.18s;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+.quick-absent-list li:hover {
+    background: #f9f6f2;
+    box-shadow: 0 4px 18px rgba(80,40,40,0.13);
+    border: 2px solid #b48a78;
+}
+.quick-absent-list li.absent {
+    color: #c0392b;
+    font-weight: bold;
+    border: 2px solid #c0392b;
+    background: #fff0f0;
+    box-shadow: 0 2px 12px rgba(192,57,43,0.10);
+}
+.quick-absent-list .quick-name {
+    font-size: 1.16em;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: block;
+    color: #3a2323;
+    letter-spacing: 0.01em;
+}
+.quick-absent-list .quick-phone {
+    font-size: 0.97em;
+    color: #888;
+    font-weight: 400;
+    display: block;
+    margin-bottom: 0;
+    letter-spacing: 0.01em;
+}
+.save-feedback {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 1.08em;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 10px 18px;
+    background: #f5f5f5;
+    color: #2d6a4f;
+    box-shadow: 0 2px 8px rgba(60,60,60,0.07);
+    transition: opacity 0.2s;
+    min-width: 180px;
+    max-width: 90vw;
+    margin-left: auto;
+    margin-right: auto;
+}
+.save-feedback.success {
+    background: #eafaf1;
+    color: #2d6a4f;
+    border: 1.5px solid #2d6a4f;
+}
+.save-feedback.error {
+    background: #fff0f0;
+    color: #c0392b;
+    border: 1.5px solid #c0392b;
+}
+.absent-list-container h2 {
+    font-size: 1.35em;
+    font-weight: 700;
+    color: #7c3a1e;
+    margin: 32px 0 10px 0;
+    letter-spacing: 0.01em;
+    text-align: left;
+    padding-left: 8px;
+    border-left: 4px solid #b48a78;
+    background: #f9f6f2;
+    border-radius: 6px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+.primary-button {
+    background: var(--primary-color, #7c3a1e);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 24px;
+    font-size: 1.08em;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(80,40,40,0.08);
+    transition: background 0.18s, box-shadow 0.18s;
+    cursor: pointer;
+}
+.primary-button:hover, .primary-button:focus {
+    background: #a05a2c;
+    box-shadow: 0 4px 16px rgba(80,40,40,0.13);
+}
+@media (max-width: 700px) {
+    .quick-absent-list {
+        max-width: 98vw;
+        margin: 18px 0 24px 0;
+    }
+    .quick-absent-list li {
+        font-size: 1em;
+        padding: 12px 4px 8px 4px;
+        min-height: 48px;
+    }
+    .absent-list-container h2 {
+        font-size: 1.1em;
+        margin: 18px 0 8px 0;
+        padding-left: 2px;
+    }
+}
+    </style>
+</body>
+</html>
+

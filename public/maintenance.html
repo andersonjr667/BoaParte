@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Manutenção | Boa Parte</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/styles/colors.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="/images/logo.png">
+  <style>
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background: linear-gradient(135deg, #9e2d4a 0%, #450b1e 100%);
+      color: #9e2d4a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .maintenance-container {
+      background: rgba(255,255,255,0.95);
+      border-radius: 18px;
+      box-shadow: 0 6px 32px 0 #9e2d4a22;
+      padding: 2.5rem 2.5rem 2rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 2;
+      max-width: 95vw;
+    }
+    .maintenance-container img {
+      width: 80px;
+      margin-bottom: 1.2rem;
+      filter: drop-shadow(0 2px 8px #9e2d4a33);
+    }
+    h1 {
+      font-size: 2.1rem;
+      font-weight: 700;
+      margin-bottom: 0.7em;
+      color: #9e2d4a;
+      text-align: center;
+    }
+    p {
+      font-size: 1.15rem;
+      margin-bottom: 0.7em;
+      text-align: center;
+    }
+    .blessing {
+      font-size: 1.5rem;
+      margin-top: 0.5em;
+      color: #450b1e;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .spinner {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #9e2d4a;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      animation: spin 1.2s linear infinite;
+      margin: 1.2rem auto 0.7rem auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .decor-circle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.13;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .circle1 {
+      width: 320px; height: 320px; background: #dd4e72; left: -120px; top: -100px; }
+    .circle2 {
+      width: 180px; height: 180px; background: #96435f; right: -60px; bottom: -60px; }
+    .circle3 {
+      width: 90px; height: 90px; background: #c5b89f; left: 10vw; bottom: 10vh; }
+    @media (max-width: 600px) {
+      .maintenance-container { padding: 1.2rem 0.5rem; }
+      h1 { font-size: 1.3rem; }
+      .blessing { font-size: 1.1rem; }
+      .circle1 { width: 180px; height: 180px; left: -60px; top: -60px; }
+      .circle2 { width: 90px; height: 90px; right: -30px; bottom: -30px; }
+      .circle3 { width: 50px; height: 50px; left: 5vw; bottom: 5vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="decor-circle circle1"></div>
+  <div class="decor-circle circle2"></div>
+  <div class="decor-circle circle3"></div>
+  <div class="maintenance-container">
+    <img src="/images/image.png" alt="Logo Boa Parte" onerror="this.style.display='none'">
+    <div class="spinner"></div>
+    <h1>Estamos em manutenção no momento</h1>
+    <p>Estamos trabalhando para melhorar sua experiência.<br>Voltamos já já!</p>
+    <div class="blessing">Deus te abençoe! 🙏</div>
+  </div>
+  <!-- Hamburger menu button (hidden on maintenance, but markup for consistency) -->
+  <button class="hamburger" aria-label="Abrir menu lateral" tabindex="0" style="display:none;">
+    <span class="hamburger-box">
+      <span class="hamburger-bar bar1"></span>
+      <span class="hamburger-bar bar2"></span>
+      <span class="hamburger-bar bar3"></span>
+    </span>
+  </button>
+  <div class="menu-overlay" style="display:none;"></div>
+</body>
+</html>

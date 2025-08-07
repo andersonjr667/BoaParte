@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Página não encontrada | Boa Parte</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/styles/colors.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="/images/logo.png">
+  <script src="/js/maintenance.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background: linear-gradient(135deg, #9e2d4a 0%, #450b1e 100%);
+      color: #9e2d4a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .notfound-container {
+      background: rgba(255,255,255,0.97);
+      border-radius: 18px;
+      box-shadow: 0 6px 32px 0 #9e2d4a22;
+      padding: 2.5rem 2.5rem 2rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 2;
+      max-width: 95vw;
+    }
+    .notfound-container img {
+      width: 80px;
+      margin-bottom: 1.2rem;
+      filter: drop-shadow(0 2px 8px #9e2d4a33);
+    }
+    h1 {
+      font-size: 3.2rem;
+      font-weight: 700;
+      margin-bottom: 0.3em;
+      color: #9e2d4a;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+    .code {
+      font-size: 5rem;
+      font-weight: 700;
+      color: #fff;
+      background: #9e2d4a;
+      border-radius: 50%;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.7em;
+      box-shadow: 0 2px 16px #9e2d4a33;
+      border: 6px solid #fff0f3;
+    }
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 1.2em;
+      text-align: center;
+    }
+    a {
+      color: #fff;
+      background: #9e2d4a;
+      padding: 0.7em 2.2em;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: background 0.2s;
+      box-shadow: 0 2px 8px #9e2d4a22;
+    }
+    a:hover {
+      background: #450b1e;
+    }
+    .decor-circle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.13;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .circle1 {
+      width: 480px; height: 480px; background: #9e2d4a; left: -180px; top: -160px; }
+    .circle2 {
+      width: 180px; height: 180px; background: #450b1e; right: -60px; bottom: -60px; }
+    .circle3 {
+      width: 90px; height: 90px; background: #c5b89f; left: 10vw; bottom: 10vh; }
+    @media (max-width: 600px) {
+      .notfound-container { padding: 1.2rem 0.5rem; }
+      h1 { font-size: 1.5rem; }
+      .code { font-size: 2.5rem; width: 70px; height: 70px; }
+      .circle1 { width: 260px; height: 260px; left: -90px; top: -90px; }
+      .circle2 { width: 90px; height: 90px; right: -30px; bottom: -30px; }
+      .circle3 { width: 50px; height: 50px; left: 5vw; bottom: 5vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="decor-circle circle1"></div>
+  <div class="decor-circle circle2"></div>
+  <div class="decor-circle circle3"></div>
+  <div class="notfound-container">
+    <img src="/images/image.png" alt="Logo Boa Parte" onerror="this.style.display='none'">
+    <div class="code">404</div>
+    <h1>Página não encontrada</h1>
+    <p>Ops! O endereço que você tentou acessar não existe ou foi removido.<br>Verifique o link ou volte para a página inicial.</p>
+    <a href="/">Voltar para o início</a>
+  </div>
+  <!-- Hamburger menu button (hidden on 404, but markup for consistency) -->
+  <button class="hamburger" aria-label="Abrir menu lateral" tabindex="0" style="display:none;">
+    <span class="hamburger-box">
+      <span class="hamburger-bar bar1"></span>
+      <span class="hamburger-bar bar2"></span>
+      <span class="hamburger-bar bar3"></span>
+    </span>
+  </button>
+  <div class="menu-overlay" style="display:none;"></div>
+</body>
+</html>

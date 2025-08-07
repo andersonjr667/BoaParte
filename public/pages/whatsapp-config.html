@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuração do WhatsApp</title>    <link rel="stylesheet" href="/styles/styles.css">
+    <link rel="stylesheet" href="/styles/whatsapp-config.css">
+    <link rel="stylesheet" href="/styles/hamburger.css">
+    <link rel="icon" href="/images/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+
+    <nav class="sidebar">
+        <ul class="nav-menu">
+            <li><a href="/pages/dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="/pages/members.html"><i class="fas fa-users"></i> Membros</a></li>
+            <li><a href="/pages/absent-members.html"><i class="fas fa-user-clock"></i> Ausentes</a></li>
+            <li class="admin-only"><a href="/pages/users.html"><i class="fas fa-user-cog"></i> Usuários</a></li>
+            <li class="admin-only"><a href="/pages/admin-panel.html"><i class="fas fa-tools"></i> Admin</a></li>
+            <li class="admin-only"><a href="/pages/whatsapp-config.html" class="active"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sair</button>
+        </div>
+    </nav>
+    <main class="content" aria-label="Configuração do WhatsApp">
+        <header class="content-header">
+            <h1>Whatsapp-Config - Boa Parte</h1>
+            <div class="user-info">
+                <span class="user-name-display">
+                    <i class="fas fa-user" aria-hidden="true"></i>
+                    <span id="userName">Carregando...</span>
+                    <img id="profilePic" src="/images/Fotos_Perfil/anderson.png" alt="Foto de perfil" style="display:none;width:32px;height:32px;border-radius:50%;margin-left:8px;object-fit:cover;vertical-align:middle;">
+                </span>
+            </div>
+        </header>
+        <!-- STATUS DE CONEXÃO - DESTAQUE NO TOPO -->
+        <div id="wa-status" style="margin: 18px 0 18px 0; padding: 10px 18px; background: #f7f7f7; border-radius: 8px; display: flex; align-items: center; box-shadow: 0 1px 4px #0001; max-width: 350px;">
+          <span id="wa-status-indicator" style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#ccc;margin-right:10px;transition:background 0.3s;"></span>
+          <span id="wa-status-text" style="font-weight:600;">Status: Desconhecido</span>
+        </div>
+        <div class="whatsapp-card" role="region" aria-labelledby="whatsappConfigTitle">
+            <div class="status-container">
+                <div class="status-indicator" id="connectionStatus" tabindex="0" aria-live="polite" aria-atomic="true">
+                    <span class="status-dot" aria-hidden="true"></span>
+                    <span class="status-text">Desconectado</span>
+                    <span class="status-desc visually-hidden">Status: Desconectado</span>
+                </div>
+                <div class="status-help" style="margin-top:8px;font-size:0.95em;color:#666;">
+                    <i class="fas fa-info-circle"></i> Se o QR Code não aparecer ou sumir, clique em <b>Atualizar QR Code</b>.<br>
+                    Se o status não mudar para <b>Conectado</b> após escanear, atualize a página ou tente novamente.<br>
+                    Caso o WhatsApp desconecte, clique em <b>Atualizar QR Code</b> ou <b>Desconectar</b> e reconecte.
+                </div>
+            </div>
+            <div class="qr-container" id="qrContainer" aria-live="polite" aria-atomic="true">
+                <div id="qrLoadingSpinner" class="spinner" style="display:none;" aria-label="Carregando QR Code..."></div>
+                <div id="qrPlaceholder" class="loading-text">Aguardando QR Code...</div>
+            </div>
+            <div id="qrError" class="error-message" style="display:none;" role="alert"></div>
+            <div class="instructions">
+                <h3 id="whatsappConfigTitle">Como conectar:</h3>
+                <ol>
+                    <li>Abra o WhatsApp no seu celular</li>
+                    <li>Toque em Menu (⋮) ou Configurações</li>
+                    <li>Selecione WhatsApp Web/Desktop</li>
+                    <li>Aponte a câmera para o QR Code</li>
+                </ol>
+            </div>
+            <div class="actions">
+                <button id="refreshQrBtn" class="btn-secondary" disabled aria-label="Atualizar QR Code">
+                    <i class="fas fa-sync-alt" aria-hidden="true"></i> Atualizar QR Code
+                </button>
+                <button id="logoutWhatsAppBtn" class="btn-danger" disabled aria-label="Desconectar WhatsApp">
+                    <i class="fas fa-sign-out-alt" aria-hidden="true"></i> Desconectar WhatsApp
+                </button>
+            </div>
+        </div>
+    </main>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/init.js"></script>
+    <script src="/js/whatsapp-config.js"></script>
+    <script src="/js/maintenance.js"></script>
+    <script src="/js/hamburger.js"></script>
+    <script>
+        // Exibe foto de perfil para Anderson, Luiz Felipe ou Paulo Emanuel N
+    document.addEventListener('DOMContentLoaded', function() {
+        // Exibe foto de perfil para Anderson, Luiz Felipe ou Paulo Emanuel N
+        try {
+            const user = JSON.parse(localStorage.getItem('user'));
+            var pic = document.getElementById('profilePic');
+            if (user && pic) {
+                if (user.username === 'Anderson' || user.name === 'Anderson') {
+                    pic.src = '/images/Fotos_Perfil/anderson.png';
+                    pic.style.display = '';
+                } else if (user.username === 'Luiz Felipe' || user.name === 'Luiz Felipe') {
+                    pic.src = '/images/Fotos_Perfil/luiz.jpg';
+                    pic.style.display = '';
+                } else if (user.username === 'Paulo Emanuel N' || user.name === 'Paulo Emanuel N') {
+                    pic.src = '/images/Fotos_Perfil/paulo.jpg';
+                    pic.style.display = '';
+                }
+            }
+        } catch {}
+    });
+    </script>
+</body>
+</html>
+

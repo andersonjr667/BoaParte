@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Boa Parte</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/colors.css">
+    <link rel="stylesheet" href="/styles/login.css">
+    <!-- Fallbacks para caminhos relativos -->
+    <link rel="stylesheet" href="../styles/colors.css" onerror="this.remove()">
+    <link rel="stylesheet" href="../styles/login.css" onerror="this.remove()">
+    <link rel="icon" href="/images/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="animated-circles">
+        <div class="circle circle1"></div>
+        <div class="circle circle2"></div>
+        <div class="circle circle3"></div>
+        <div class="circle circle4"></div>
+        <div class="circle circle5"></div>
+        <div class="circle circle6"></div>
+    </div>
+    <div class="login-container">
+        <div class="logo-container">
+            <img src="/images/image.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+        </div>
+        <h1 class="login-title">Bem-vindo ao <span style="color:#c94f7c">Boa Parte</span></h1>
+        <form id="loginForm" autocomplete="off">
+            <div id="serverError" class="server-error-message"></div>
+            <div class="form-group">
+                <label for="username">Usuário ou E-mail</label>
+                <div class="input-icon-group">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" id="username" name="username" required placeholder="Digite seu usuário ou e-mail" autocomplete="username">
+                </div>
+            </div>
+            <div class="form-group password-group">
+                <label for="password">Senha</label>
+                <div class="input-icon-group">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" id="password" name="password" required placeholder="Digite sua senha" autocomplete="current-password">
+                    <i class="fas fa-eye password-toggle" id="togglePassword" tabindex="0" aria-label="Mostrar/ocultar senha"></i>
+                </div>
+            </div>
+            <div id="errorToast" class="error-message"></div>
+            <div class="login-actions">
+                <button type="submit" class="btn-primary">Entrar</button>
+            </div>
+        </form>
+        <div class="login-footer">
+            <span>Não tem uma conta? <a href="/pages/register.html">Registre-se</a></span>
+        </div>
+    </div>
+    <script src="/js/login.js"></script>
+    <script src="/js/maintenance.js"></script>
+    <!-- Fallbacks para caminhos relativos -->
+    <script src="../js/login.js"></script>
+    <script src="../js/maintenance.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Alternar visibilidade da senha
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.type === 'password' ? 'text' : 'password';
+                passwordInput.type = type;
+                togglePassword.classList.toggle('fa-eye-slash', type === 'text');
+            });
+        }
+        // Esqueceu a senha (exemplo de ação)
+        const forgotLink = document.getElementById('forgotPasswordLink');
+        if (forgotLink) {
+            forgotLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Entre em contato com o administrador para redefinir sua senha.');
+            });
+        }
+        // Animação extra: logo bounce ao focar no input
+        const logo = document.querySelector('.logo');
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                if (logo) logo.style.animation = 'logoPulse 0.7s cubic-bezier(.68,-0.55,.27,1.55)';
+            });
+            input.addEventListener('blur', () => {
+                if (logo) logo.style.animation = '';
+            });
+        });
+    });
+    </script>
+</body>
+</html>

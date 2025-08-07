@@ -1,564 +1,237 @@
-:root {
-    --primary-color: #2e7d32;
-    --primary-hover: #66bb6a;
-    --light-green: rgba(46, 125, 50, 0.2);
-    --danger-color: #f44336;
-    --text-light: #f9f9f9;
-}
-
-/* Reset básico */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
 }
 
 body {
+    font-family: 'Poppins', 'Inter', sans-serif;
+    background: linear-gradient(135deg, #9e2d4a 0%, #450b1e 100%);
     min-height: 100vh;
-    background-color: #4CAF50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-container {
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(158, 45, 74, 0.15);
+    padding: 40px 32px;
+    width: 100%;
+    max-width: 420px;
+    margin: 20px;
+    position: relative;
+    z-index: 10;
+    animation: containerFadeIn 0.8s ease-out both;
+}
+
+@keyframes containerFadeIn {
+    0% { opacity: 0; transform: translateY(20px) scale(0.98); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.logo-container {
     display: flex;
     justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    position: relative;
+    margin-bottom: 24px;
 }
 
-body::before,
-body::after {
-    content: '';
-    position: fixed;
-    border-radius: 50%;
-    z-index: 0;
-    animation: float 6s ease-in-out infinite;
-}
-
-body::before {
-    width: 300px;
-    height: 300px;
-    background-color: rgba(76, 175, 80, 0.4);
-    top: -100px;
-    right: -50px;
-}
-
-body::after {
-    width: 400px;
-    height: 400px;
-    background-color: rgba(76, 175, 80, 0.3);
-    bottom: -150px;
-    left: -100px;
-    animation-delay: 3s;
-}
-
-/* Card de login */
-.login-container {
-    width: 100%;
-    max-width: 500px;
-    position: relative;
-    z-index: 1;
-    padding: 20px;
-}
-
-.login-box {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 24px;
-    padding: 40px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    text-align: center;
-}
-
-/* Imagem de topo com novas animações */
 .logo {
-    width: 100px;
-    margin-bottom: 20px;
-    position: relative;
-    transform-origin: center;
-    animation: 
-        logoDance 0.8s ease-in-out,
-        logoBlink 1s ease-in-out 0.8s,
-        logoJump 1s ease-in-out 1.8s,
-        logoSpin 0.8s ease-in-out 2.8s,
-        logoZoom 0.6s ease-in-out 3.6s;
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
 }
 
-/* Hover effect mantido */
-.logo:hover {
-    animation: logoSpin 0.8s ease-in-out;
-}
-
-/* Animações simplificadas */
-@keyframes logoDance {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-10px) rotate(-5deg); }
-    50% { transform: translateX(10px) rotate(5deg); }
-    75% { transform: translateX(-10px) rotate(-5deg); }
-}
-
-@keyframes logoBlink {
-    0%, 100% { opacity: 1; }
-    25% { opacity: 0.4; }
-    50% { opacity: 1; }
-    75% { opacity: 0.4; }
-}
-
-@keyframes logoJump {
-    0%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-20px); }
-    60% { transform: translateY(-20px); }
-    80% { transform: translateY(-10px); }
-}
-
-@keyframes logoSpin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes logoZoom {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.3); }
-    100% { transform: scale(1); }
-}
-
-/* Título */
-h1 {
+.login-title {
+    font-size: 1.8rem;
+    font-weight: 700;
     color: #333;
-    font-size: 24px;
-    font-weight: 600;
-    margin-bottom: 10px;
+    margin-bottom: 28px;
+    text-align: center;
+    line-height: 1.3;
 }
 
-.subtitle {
-    color: #666;
-    margin-bottom: 30px;
-}
-
-/* Inputs */
 .form-group {
     margin-bottom: 20px;
     position: relative;
+    animation: fadeInUp 0.6s ease-out both;
 }
 
-.input-container {
+@keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(15px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.input-icon-group {
     position: relative;
-    width: 100%;
 }
 
-.input-container i {
+.input-icon {
     position: absolute;
-    left: 15px;
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
-    color: #666;
-    font-size: 1.2rem;
+    color: #c94f7c;
+    font-size: 1rem;
 }
 
-.input-container input {
+.input-icon-group input {
     width: 100%;
-    padding: 15px 15px 15px 45px;
-    border: 2px solid #e0e0e0;
+    padding: 14px 16px 14px 40px;
+    border: 1px solid #ddd;
     border-radius: 12px;
-    font-size: 1.1rem;
-    height: 55px;
-    transition: all 0.3s;
-    background: white;
-}
-
-.input-container input:focus {
-    border-color: var(--primary-color);
-    outline: none;
-    box-shadow: 0 0 0 3px var(--light-green);
-}
-
-.toggle-password {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #666;
-    cursor: pointer;
-    padding: 0;
-    font-size: 1.2rem;
-}
-
-.toggle-password:hover {
-    color: var(--primary-color);
-}
-
-/* Botão */
-.login-btn {
-    width: 100%;
-    background-color: var(--primary-color);
-    color: white;
-    padding: 15px;
-    height: 55px;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 1.1rem;
-    font-weight: 500;
+    font-size: 1rem;
+    background: #fff;
     transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
 }
 
-.login-btn:hover {
-    background-color: var(--primary-hover);
-    transform: translateY(-2px);
+.input-icon-group input:focus {
+    border-color: #c94f7c;
+    box-shadow: 0 0 0 3px rgba(201, 79, 124, 0.2);
+    outline: none;
 }
 
-.login-btn:active {
-    transform: translateY(0);
+.password-group .input-icon-group input {
+    padding-right: 40px;
 }
 
-.login-btn.loading i {
-    animation: spin 1s linear infinite;
+.password-toggle {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #c94f7c;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: color 0.2s;
 }
 
-.notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px 25px;
-    border-radius: 12px;
+.password-toggle:hover {
+    color: #9e2d4a;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(to right, #c94f7c, #9e2d4a);
     color: white;
-    z-index: 1000;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(to right, #9e2d4a, #c94f7c);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(158, 45, 74, 0.2);
+}
+
+.login-footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.login-footer a {
+    color: #c94f7c;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.login-footer a:hover {
+    color: #9e2d4a;
+    text-decoration: underline;
+}
+
+.error-message, .server-error-message {
+    background: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+    text-align: center;
     display: none;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    animation: slideIn 0.3s ease;
 }
 
-.notification.success {
-    background-color: var(--primary-color);
+.error-message.show, .server-error-message.show {
+    display: block;
+    animation: fadeInUp 0.4s ease-out;
 }
 
-.notification.error {
-    background-color: var(--danger-color);
+.animated-circles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
 }
 
-/* Animações */
+.circle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 179, 198, 0.3) 0%, rgba(255, 179, 198, 0.1) 70%);
+    animation: float 15s infinite linear;
+}
+
+.circle1 { width: 300px; height: 300px; top: -50px; left: -50px; animation-delay: 0s; }
+.circle2 { width: 200px; height: 200px; bottom: -30px; right: -30px; animation-delay: 3s; }
+.circle3 { width: 150px; height: 150px; top: 30%; left: 10%; animation-delay: 6s; }
+.circle4 { width: 180px; height: 180px; bottom: 20%; right: 15%; animation-delay: 2s; }
+.circle5 { width: 120px; height: 120px; top: 60%; left: 20%; animation-delay: 4s; }
+.circle6 { width: 100px; height: 100px; top: 20%; right: 20%; animation-delay: 5s; }
+
 @keyframes float {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-20px) rotate(10deg); }
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(10px, 10px) rotate(5deg); }
+    50% { transform: translate(20px, -10px) rotate(0deg); }
+    75% { transform: translate(10px, -20px) rotate(-5deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
 }
 
-@keyframes spin {
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-/* Responsivo */
 @media (max-width: 480px) {
     .login-container {
-        padding: 15px;
-    }
-
-    .login-box {
         padding: 30px 20px;
+        margin: 15px;
     }
-
-    h1 {
-        font-size: 20px;
+    
+    .login-title {
+        font-size: 1.5rem;
     }
-
-    .input-container input {
-        height: 50px;
-        font-size: 1rem;
-        padding: 12px 12px 12px 40px;
+    
+    .input-icon-group input {
+        padding: 12px 14px 12px 36px;
+        font-size: 0.95rem;
     }
-
-    .login-btn {
-        height: 50px;
-        font-size: 1rem;
-    }
-}
-
-/* Decorative elements */
-body::before,
-body::after {
-    content: '';
-    position: fixed;
-    border-radius: 50%;
-    z-index: -1;
-}
-
-body::before {
-    width: 300px;
-    height: 300px;
-    background: rgba(255, 255, 255, 0.2);
-    top: -100px;
-    right: -50px;
-    animation: float 15s infinite;
-}
-
-body::after {
-    width: 400px;
-    height: 400px;
-    background: rgba(255, 255, 255, 0.15);
-    bottom: -150px;
-    left: -100px;
-    animation: float 20s infinite reverse;
-}
-
-.decorative-circle {
-    position: fixed;
-    border-radius: 50%;
-    z-index: -1;
-    pointer-events: none;
-}
-
-.circle-1 {
-    width: 200px;
-    height: 200px;
-    background: rgba(76, 175, 80, 0.08);
-    top: 20%;
-    right: 10%;
-    animation: float 18s infinite 1s;
-}
-
-.circle-2 {
-    width: 150px;
-    height: 150px;
-    background: rgba(76, 175, 80, 0.12);
-    bottom: 15%;
-    right: 20%;
-    animation: float 25s infinite 2s;
-}
-
-.circle-3 {
-    width: 250px;
-    height: 250px;
-    background: rgba(76, 175, 80, 0.1);
-    top: 40%;
-    left: 5%;
-    animation: circleFloat 22s infinite 3s;
-}
-
-/* Círculos decorativos e animações */
-.login-container::before,
-.login-container::after {
-    content: '';
-    position: fixed;
-    border-radius: 50%;
-    z-index: -1;
-}
-
-.login-container::before {
-    width: 300px;
-    height: 300px;
-    background: rgba(76, 175, 80, 0.1);
-    top: -100px;
-    right: -50px;
-    animation: circleFloat 15s infinite;
-}
-
-.login-container::after {
-    width: 400px;
-    height: 400px;
-    background: rgba(76, 175, 80, 0.15);
-    bottom: -150px;
-    left: -100px;
-    animation: circleFloat 20s infinite reverse;
-}
-
-/* Círculos adicionais */
-.circle-1, .circle-2, .circle-3 {
-    position: fixed;
-    border-radius: 50%;
-    z-index: -1;
-    pointer-events: none;
-}
-
-.circle-1 {
-    width: 200px;
-    height: 200px;
-    background: rgba(76, 175, 80, 0.08);
-    top: 20%;
-    right: 10%;
-    animation: circleFloat 18s infinite 1s;
-}
-
-.circle-2 {
-    width: 150px;
-    height: 150px;
-    background: rgba(76, 175, 80, 0.12);
-    bottom: 15%;
-    right: 20%;
-    animation: circleFloat 25s infinite 2s;
-}
-
-.circle-3 {
-    width: 250px;
-    height: 250px;
-    background: rgba(76, 175, 80, 0.1);
-    top: 40%;
-    left: 5%;
-    animation: circleFloat 22s infinite 3s;
-}
-
-/* Ajustes nos círculos decorativos */
-.circle {
-    position: fixed;
-    border-radius: 50%;
-    z-index: -1;
-    pointer-events: none;
-    animation: float 15s infinite;
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.circle-1 {
-    width: 300px;
-    height: 300px;
-    top: -100px;
-    right: -50px;
-    background: rgba(255, 255, 255, 0.2);
-    animation-duration: 20s;
-}
-
-.circle-2 {
-    width: 400px;
-    height: 400px;
-    bottom: -150px;
-    left: -100px;
-    background: rgba(255, 255, 255, 0.15);
-    animation-duration: 25s;
-    animation-delay: 1s;
-}
-
-.circle-3 {
-    width: 200px;
-    height: 200px;
-    top: 30%;
-    right: 20%;
-    background: rgba(255, 255, 255, 0.18);
-    animation-duration: 18s;
-    animation-delay: 2s;
-}
-
-.circle-4 {
-    width: 250px;
-    height: 250px;
-    bottom: 20%;
-    right: 30%;
-    background: rgba(255, 255, 255, 0.12);
-    animation-duration: 22s;
-    animation-delay: 3s;
-}
-
-/* Animações atualizadas */
-@keyframes logoFloat {
-    0% {
-        transform: rotate(0deg);
-    }
-    50% {
-        transform: rotate(30deg);
-    }
-    100% {
-        transform: rotate(0deg);
+    
+    .btn-primary {
+        padding: 12px;
     }
 }
 
-@keyframes circleFloat {
-    0%, 100% {
-        transform: translate(0, 0) rotate(0deg);
-    }
-    25% {
-        transform: translate(-20px, 20px) rotate(10deg);
-    }
-    50% {
-        transform: translate(10px, -15px) rotate(-10deg);
-    }
-    75% {
-        transform: translate(15px, 10px) rotate(5deg);
-    }
-}
-
-/* Atualização das animações da logo */
-.logo {
-    width: 100px;
-    margin-bottom: 20px;
-    position: relative;
-    transform-origin: center;
-    animation: 
-        logoShake 0.5s ease-in-out 0s 1,
-        logoBlink 1s ease-in-out 0.5s 2,
-        logoJump 1s ease-in-out 2.5s 1,
-        logoSpin 0.8s ease-in-out 3.5s 1,
-        logoZoom 0.6s ease-in-out 4.3s 1,
-        logoSequence 12s ease-in-out 5s infinite;
-}
-
-/* Novas animações da logo */
-@keyframes logoShake {
-    0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-5px) rotate(-5deg); }
-    40% { transform: translateX(5px) rotate(5deg); }
-    60% { transform: translateX(-5px) rotate(-5deg); }
-    80% { transform: translateX(5px) rotate(5deg); }
-}
-
-@keyframes logoBlink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-}
-
-@keyframes logoJump {
-    0%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-20px); }
-    60% { transform: translateY(-20px); }
-    80% { transform: translateY(-10px); }
-}
-
-@keyframes logoSpin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes logoZoom {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-}
-
-@keyframes logoSequence {
-    0%, 15% { transform: translateX(-10px); }
-    20%, 35% { transform: scale(1.1); }
-    40%, 55% { transform: translateY(-10px); }
-    60%, 75% { transform: rotate(10deg); }
-    80%, 95% { transform: scale(0.95); }
-    100% { transform: none; }
-}
-
-/* Adicionar hover effect */
-.logo:hover {
-    animation: 
-        logoShake 0.5s ease-in-out,
-        logoSpin 0.8s ease-in-out;
-}
-
-/* Estilo para a imagem no canto superior esquerdo */
-.top-left-logo {
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    width: 50px;
-    z-index: 1000;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
+@keyframes logoPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}   

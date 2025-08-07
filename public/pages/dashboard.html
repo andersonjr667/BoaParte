@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema de Gerenciamento</title>
+    <link rel="stylesheet" href="/styles/dashboard.css">
+    <link rel="stylesheet" href="/styles/hamburger.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="icon" href="/images/logo.png">
+</head>
+<body>
+
+    <nav class="sidebar">
+        <ul class="nav-menu">
+            <li><a href="/pages/dashboard.html" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="/pages/members.html"><i class="fas fa-users"></i> Membros</a></li>
+            <li><a href="/pages/absent-members.html"><i class="fas fa-user-clock"></i> Ausentes</a></li>
+            <li class="admin-only"><a href="/pages/users.html"><i class="fas fa-user-cog"></i> Usuários</a></li>
+            <li class="admin-only"><a href="/pages/admin-panel.html"><i class="fas fa-tools"></i> Admin</a></li>
+            <li class="admin-only"><a href="/pages/whatsapp-config.html"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sair</button>
+        </div>
+    </nav>
+
+    <main class="content">
+        <header class="content-header">
+            <h1>Dashboard - Boa Parte</h1>
+            <div class="user-info">
+                <span class="user-name-display">
+                    <i class="fas fa-user"></i>
+                    <span id="userName">Carregando...</span>
+                    <img id="profilePic" src="/images/Fotos_Perfil/anderson.png" alt="Foto de perfil" style="display:none;width:32px;height:32px;border-radius:50%;margin-left:8px;object-fit:cover;vertical-align:middle;">
+                </span>
+            </div>
+        </header>
+
+        <div class="error-container" id="errorContainer" style="display: none;">
+            <p class="error-message">Erro ao carregar dados. Por favor, faça login novamente.</p>
+        </div>
+
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="content-header" style="margin-bottom:12px; padding: 12px 18px; border-radius: 10px; box-shadow: 0 2px 8px #0001; background: linear-gradient(135deg, var(--primary-color) 0%, #450b1e 100%); color: var(--background-color); align-items: center; min-height:unset;">
+                    <h3 style="margin:0;font-size:1.15rem;font-weight:700;display:flex;align-items:center;gap:8px;"><i class="fas fa-address-book"></i> Total de Contatos</h3>
+                </div>
+                <p id="totalContacts">0</p>
+            </div>
+            <div class="card">
+                <div class="content-header" style="margin-bottom:12px; padding: 12px 18px; border-radius: 10px; box-shadow: 0 2px 8px #0001; background: linear-gradient(135deg, var(--primary-color) 0%, #450b1e 100%); color: var(--background-color); align-items: center; min-height:unset;">
+                    <h3 style="margin:0;font-size:1.15rem;font-weight:700;display:flex;align-items:center;gap:8px;"><i class="fas fa-calendar-check"></i> Contatos Hoje</h3>
+                </div>
+                <p id="todayAttendance">0</p>
+            </div>
+            <div class="card">
+                <div class="content-header" style="margin-bottom:12px; padding: 12px 18px; border-radius: 10px; box-shadow: 0 2px 8px #0001; background: linear-gradient(135deg, var(--primary-color) 0%, #450b1e 100%); color: var(--background-color); align-items: center; min-height:unset;">
+                    <h3 style="margin:0;font-size:1.15rem;font-weight:700;display:flex;align-items:center;gap:8px;"><i class="fas fa-user-plus"></i> Guia Boa Parte</h3>
+                </div>
+                <a href="/documents/guia_boaparte.pdf" download class="btn-primary" style="margin-top:12px;display:inline-block;"><i class="fas fa-download"></i> Baixar Guia</a>
+            </div>
+        </div>
+
+        <section class="quick-add-section">
+            <div class="content-header" style="margin-bottom:18px; padding: 14px 24px; border-radius: 12px; box-shadow: 0 2px 8px #0001; background: linear-gradient(135deg, var(--primary-color) 0%, #450b1e 100%); color: var(--background-color); align-items: center; min-height:unset;">
+                <h2 style="margin:0;font-size:1.18rem;font-weight:700;display:flex;align-items:center;gap:8px;"><i class="fas fa-plus-circle"></i> Adicionar Contato Rápido</h2>
+            </div>
+            <form class="quick-add-form" id="quickAddForm">
+                <div class="form-group">
+                    <label for="quickName">Nome</label>
+                    <input type="text" id="quickName" required>
+                </div>
+                <div class="form-group">
+                    <label for="quickPhone">Telefone</label>
+                    <input type="tel" id="quickPhone" required maxlength="16" pattern="\(\d{2}\) 9\d{4}-\d{4}" placeholder="(99) 9XXXX-XXXX">
+                </div>
+                <div class="form-group">
+                    <label for="quickBirthday">Data de Aniversário <small>(Opcional)</small></label>
+                    <input type="date" id="quickBirthday">
+                </div>
+                <div class="form-group">
+                    <button type="submit" id="quickAddContactBtn">
+                        <i class="fas fa-plus"></i> Adicionar
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <div class="recent-activity">
+            <div class="content-header" style="margin-bottom:18px; padding: 14px 24px; border-radius: 12px; box-shadow: 0 2px 8px #0001; background: linear-gradient(135deg, var(--primary-color) 0%, #450b1e 100%); color: var(--background-color); align-items: center; min-height:unset;">
+                <h2 style="margin:0;font-size:1.18rem;font-weight:700;display:flex;align-items:center;gap:8px;"><i class="fas fa-history"></i> Contatos</h2>
+            </div>
+            <div id="activityList" class="activity-list">
+                <div class="activity-header">
+                    <div class="activity-col">Nome</div>
+                    <div class="activity-col">Número</div>
+                    <div class="activity-col">Data de Adição</div>
+                    <div class="activity-col">Aniversário</div>
+                    <div class="activity-col">Status Mensagem</div>
+                    <div class="activity-col">Ações</div>
+                </div>
+                <!-- Activities will be inserted here -->
+                <div class="loading-message">Carregando contatos...</div>
+            </div>
+        </div>
+
+        <!-- Dropdown de Ações (movido para dentro do main) -->
+        <div id="actionDropdown" class="action-dropdown">
+            <div class="action-dropdown-content">
+                <button class="action-btn" data-action="message">
+                    <i class="fas fa-comment"></i> Enviar Mensagem
+                </button>
+                <button class="action-btn" data-action="reminder">
+                    <i class="fas fa-bell"></i> Enviar Lembrete
+                </button>
+                <button class="action-btn" data-action="edit">
+                    <i class="fas fa-edit"></i> Editar Contato
+                </button>
+                <button class="action-btn" data-action="delete">
+                    <i class="fas fa-trash"></i> Excluir
+                </button>
+                <button class="action-btn" data-action="convert">
+                    <i class="fas fa-user-plus"></i> Converter em Membro
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="/js/init.js"></script>
+    <script src="/js/dashboard.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/maintenance.js"></script>
+    <script src="/js/hamburger.js"></script>
+
+    <script>
+        // Exibe foto de perfil para Anderson, Luiz Felipe ou Paulo Emanuel N
+    document.addEventListener('DOMContentLoaded', function() {
+        // Exibe foto de perfil para Anderson, Luiz Felipe ou Paulo Emanuel N
+        try {
+            const user = JSON.parse(localStorage.getItem('user'));
+            var pic = document.getElementById('profilePic');
+            if (user && pic) {
+                if (user.username === 'Anderson' || user.name === 'Anderson') {
+                    pic.src = '/images/Fotos_Perfil/anderson.png';
+                    pic.style.display = '';
+                } else if (user.username === 'Luiz Felipe' || user.name === 'Luiz Felipe') {
+                    pic.src = '/images/Fotos_Perfil/luiz.jpg';
+                    pic.style.display = '';
+                } else if (user.username === 'Paulo Emanuel N' || user.name === 'Paulo Emanuel N') {
+                    pic.src = '/images/Fotos_Perfil/paulo.jpg';
+                    pic.style.display = '';
+                }
+            }
+        } catch {}
+    });
+    </script>
+
+</script>
+    <!-- Toast container deve estar dentro do body, antes do fechamento -->
+    <div class="toast-container" id="toastContainer" style="position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:2147483647;min-width:260px;max-width:90vw;pointer-events:none;"></div>
+    <script>
+    // Mensagem de feliz aniversário para o usuário logado
+    setTimeout(function() {
+        try {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user && user.birthday) {
+                const today = new Date();
+                const todayStr = today.getDate().toString().padStart(2, '0') + '/' + (today.getMonth() + 1).toString().padStart(2, '0');
+                // Remove espaços, normaliza e compara datas
+                const userBirthday = String(user.birthday).replace(/\s/g, '').replace(/-/g, '/');
+                console.log('DEBUG ANIVERSARIO:', {userBirthday, todayStr, user});
+                if (userBirthday === todayStr) {
+                    let nome = (user.username || user.name || 'Você').toString().trim();
+                    showToast(`🎂 <b>Feliz aniversário, ${nome}!</b> Que seu dia seja incrível! 🎉`, 'success');
+                }
+            }
+        } catch (e) { console.error('Erro ao verificar aniversário do usuário:', e); }
+    }, 300);
+    function showToast(message, type = 'error') {
+        const toastContainer = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = message;
+        toast.style.background = type === 'success' ? '#fffbe6' : '#ffeaea';
+        toast.style.color = type === 'success' ? '#b71c1c' : '#9e2d4a';
+        toast.style.border = type === 'success' ? '1.5px solid #ffe082' : '1.5px solid #ffbdbd';
+        toast.style.fontWeight = '600';
+        toast.style.fontSize = '1.08em';
+        toast.style.padding = '12px 20px';
+        toast.style.borderRadius = '8px';
+        toast.style.boxShadow = '0 2px 8px rgba(158,45,74,0.07)';
+        toast.style.marginBottom = '8px';
+        toast.style.textAlign = 'center';
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.remove(), 6000);
+    }
+    </script>
+</body>
+</html>

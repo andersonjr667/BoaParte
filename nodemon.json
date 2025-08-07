@@ -1,0 +1,11 @@
+{
+  "ignore": [
+    "church-system.json",
+    "db/*",
+    "session_version.json",
+    "tokens/",
+    "tokens/baileys-session/",
+    "tokens/baileys-session/**",
+    "ngrok.json"
+  ]
+}

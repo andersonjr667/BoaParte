@@ -1,0 +1,55 @@
+:root {
+  /* Color Palette */
+  --color1: #c5b89f;   /* Soft beige */
+  --color2: #feffd4;   /* Light cream */
+  --color3: #9e2d4a;   /* Deep rose */
+  --color4: #450b1e;   /* Dark burgundy */
+  --color5: #21000f;   /* Near black */
+  --color6: #EB9961;   /* Soft peach */
+  --color7: #000000;   /* Black */
+  --color8: #331436;   /* Dark purple */
+    
+  /* Functional Colors */
+  --background-color: var(--color2);
+  --text-color: var(--color4);
+  --primary-color: var(--color3);
+  --secondary-color: var(--color1);
+  --dark-accent: var(--color5);
+  --border-color: #e0d7c6;
+  
+  /* Component Colors */
+  --button-primary-bg: var(--color3);
+  --button-primary-text: var(--color2);
+  --button-secondary-bg: var(--color1);
+  --button-secondary-text: var(--color5);
+  
+  /* Navigation */
+  --nav-background: var(--color5);
+  --nav-text: var(--color2);
+  --nav-hover: var(--color4);
+  
+  /* Cards */
+  --card-background: white;
+  --card-border: var(--color1);
+  --card-shadow: 0 2px 4px rgba(33, 0, 15, 0.1);
+  
+  /* Status Colors */
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --info-color: #17a2b8;
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--color3) 0%, var(--color4) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--color1) 0%, #b3a68d 100%);
+  --gradient-background: linear-gradient(135deg, var(--color2) 0%, #f8f6f0 100%);
+  
+  /* Shadows */
+  --shadow-soft: 0 4px 20px rgba(33, 0, 15, 0.08);
+  --shadow-medium: 0 8px 32px rgba(33, 0, 15, 0.12);
+  --shadow-strong: 0 12px 40px rgba(33, 0, 15, 0.16);
+  
+  /* Transitions */
+  --transition-base: all 0.3s ease;
+  --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}

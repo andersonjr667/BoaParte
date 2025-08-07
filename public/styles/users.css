@@ -1,0 +1,388 @@
+/* users.css - Estilo para a página de usuários */
+.users-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(80,40,40,0.08);
+    padding: 32px 24px 24px 24px;
+}
+.users-title {
+    color: #7c1e1e;
+    font-size: 2em;
+    font-weight: 800;
+    margin-bottom: 24px;
+}
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.users-table th, .users-table td {
+    padding: 14px 12px;
+    text-align: left;
+}
+.users-table th {
+    background: #f9f6f2;
+    color: #7c1e1e;
+    font-weight: 700;
+}
+.users-table tr:nth-child(even) {
+    background: #f7f7f7;
+}
+.users-table tr:nth-child(odd) {
+    background: #fff;
+}
+.role-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 0.98em;
+    font-weight: 600;
+    color: #fff;
+}
+.role-admin { background: #2d6a4f; }
+.role-user { background: #7c3a1e; }
+/* Cards de totais */
+.users-stats-cards {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+.users-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    padding: 18px 32px;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: box-shadow 0.2s;
+}
+.users-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+.users-card-title {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 8px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.users-card-value {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #7e072b;
+}
+
+/* Tabela de usuários */
+#usersTable {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin-bottom: 32px;
+}
+#usersTable th, #usersTable td {
+    padding: 14px 18px;
+    text-align: left;
+}
+#usersTable th {
+    background: #f5f7fa;
+    color: #7e072b;
+    font-weight: 600;
+    font-size: 1rem;
+    border-bottom: 2px solid #eaeaea;
+}
+#usersTable tr:nth-child(even) {
+    background: #f9fafb;
+}
+#usersTable tr:hover {
+    background: #f1f7ff;
+}
+
+/* Estilos para botões de ação na tabela */
+.actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    transition: background 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover {
+    background: #f3e6eb;
+}
+
+.btn-role .material-icons {
+    font-size: 20px;
+    color: #9e2d4a;
+}
+
+.btn-delete .material-icons {
+    font-size: 20px;
+    color: #c0392b;
+}
+
+/* Ajuste responsivo para a coluna de ações */
+@media (max-width: 600px) {
+    .actions {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .icon-btn {
+        padding: 4px;
+    }
+}
+
+/* Responsividade para tabela de usuários */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+#usersTable {
+  min-width: 600px;
+  width: 100%;
+  border-collapse: collapse;
+}
+#usersTable th, #usersTable td {
+  padding: 10px 8px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+@media (max-width: 700px) {
+  #usersTable th, #usersTable td {
+    padding: 8px 4px;
+    font-size: 0.98em;
+  }
+  .users-stats-cards {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .user-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 1em;
+  }
+}
+@media (max-width: 500px) {
+  #usersTable {
+    min-width: 400px;
+  }
+  .content-header h1 {
+    font-size: 1.2em;
+  }
+}
+
+/* Melhorias para botões de ação */
+.icon-btn {
+  min-width: 36px;
+  min-height: 36px;
+}
+
+/* SIDEBAR E MENU HAMBÚRGUER - MODELO DASHBOARD */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 250px;
+  height: 100vh;
+  background: var(--color5);
+  padding-top: 120px;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.15);
+  z-index: 900;
+  transition: transform 0.3s;
+}
+.logo-container {
+  text-align: center;
+  padding: 10px;
+  background: var(--color5);
+  border-bottom: 1px solid var(--color4);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+}
+.logo {
+  max-width: 80px;
+  height: auto;
+  border-radius: 8px;
+  background: #fff;
+  padding: 5px;
+}
+.sidebar-toggle {
+  display: none;
+}
+.menu-overlay {
+  display: none;
+}
+@media (max-width: 900px) {
+  .sidebar {
+    width: 220px;
+    left: -220px;
+    transition: left 0.3s;
+  }
+  .sidebar.active {
+    left: 0;
+    z-index: 1002;
+  }
+  .menu-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.25);
+    z-index: 1001;
+  }
+  .menu-overlay.active {
+    display: block;
+  }
+  .sidebar-toggle {
+    display: inline-flex;
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    z-index: 1100;
+    background: #fff;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    color: #9e2d4a;
+    cursor: pointer;
+  }
+  .logo-container {
+    margin-left: 60px;
+  }
+  .content {
+    margin-left: 0 !important;
+    padding: 16px 4vw 32px 4vw;
+  }
+}
+@media (max-width: 700px) {
+  .users-stats-cards {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .user-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 1em;
+  }
+  .content-header h1 {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+  }
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #usersTable {
+    min-width: 420px;
+    font-size: 0.98em;
+  }
+}
+@media (max-width: 500px) {
+  .sidebar-toggle {
+    top: 8px;
+    left: 8px;
+    width: 38px;
+    height: 38px;
+    font-size: 1.1em;
+  }
+  .content-header h1 {
+    font-size: 1em;
+  }
+  .users-card-title {
+    font-size: 0.98em;
+  }
+}
+
+/* Estilo do botão do menu hambúrguer */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 44px;
+  height: 44px;
+  background: #fff;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  cursor: pointer;
+  z-index: 1100;
+  transition: background 0.2s;
+  position: relative;
+}
+.hamburger-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 28px;
+  height: 28px;
+  position: relative;
+}
+.hamburger-bar {
+  display: block;
+  width: 28px;
+  height: 4px;
+  margin: 3px 0;
+  border-radius: 2px;
+  background: var(--color6);
+  transition: all 0.3s cubic-bezier(.4,2,.6,1), background 0.2s;
+}
+.hamburger.open .bar1 {
+  transform: translateY(7px) rotate(45deg);
+}
+.hamburger.open .bar2 {
+  opacity: 0;
+}
+.hamburger.open .bar3 {
+  transform: translateY(-7px) rotate(-45deg);
+}
+.hamburger:not(.open) .bar1 {
+  transform: none;
+}
+.hamburger:not(.open) .bar2 {
+  opacity: 1;
+}
+.hamburger:not(.open) .bar3 {
+  transform: none;
+}
+.hamburger:focus {
+  outline: 2px solid var(--color6);
+}
+@media (max-width: 900px) {
+  .sidebar-toggle.hamburger, .hamburger {
+    display: inline-flex;
+  }
+}
