@@ -62,31 +62,74 @@ router.get('/absent', auth, async (req, res) => {
 // Create new member
 router.post('/', auth, async (req, res) => {
   try {
-    const member = new Member({
+    const membersPath = path.join(__dirname, '../db/members.json');
+    let members = [];
+    
+    // Create the directory if it doesn't exist
+    await fs.promises.mkdir(path.dirname(membersPath), { recursive: true });
+    
+    // Read existing members or create empty array
+    if (fs.existsSync(membersPath)) {
+      const data = await fs.promises.readFile(membersPath, 'utf8');
+      members = JSON.parse(data);
+    }
+
+    // Validate required fields
+    if (!req.body.name || !req.body.phone) {
+      return res.status(400).json({
+        message: 'Nome e telefone são obrigatórios'
+      });
+    }
+
+    // Check for duplicate phone
+    if (members.some(m => m.phone === req.body.phone)) {
+      return res.status(400).json({
+        message: 'Telefone já cadastrado'
+      });
+    }
+
+    // Create new member
+    const newMember = {
+      _id: crypto.randomUUID(), // Generate unique ID
       ...req.body,
-      createdBy: req.userData.userId
-    });
-    await member.save();
+      createdBy: req.userData.userId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      attendance: {
+        history: [],
+        consecutiveAbsences: 0
+      }
+    };
+
+    // Add to array
+    members.push(newMember);
+
+    // Sort by name
+    members.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
+
+    // Save to file
+    await fs.promises.writeFile(membersPath, JSON.stringify(members, null, 2));
 
     // Log the action
     await Log.logAction({
       type: 'create',
       action: 'create_member',
       username: req.userData.email,
-      description: `Novo membro criado: ${member.name}`,
+      description: `Novo membro criado: ${newMember.name}`,
       details: {
-        memberId: member._id,
-        name: member.name
+        memberId: newMember._id,
+        name: newMember.name
       },
       source: 'member'
     });
-    
-    const populatedMember = await Member.findById(member._id)
-      .populate('createdBy', 'name email');
 
-    res.status(201).json(populatedMember);
+    res.status(201).json(newMember);
   } catch (error) {
-    res.status(500).json({ message: 'Erro ao criar membro' });
+    console.error('Erro ao criar membro:', error);
+    res.status(500).json({
+      message: 'Erro ao criar membro',
+      error: error.message
+    });
   }
 });
 
@@ -190,20 +233,29 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(403).json({ message: 'Acesso negado' });
     }
 
-    const member = await Member.findByIdAndDelete(req.params.id);
-    if (!member) {
+    const membersPath = path.join(__dirname, '../db/members.json');
+    let members = [];
+    if (fs.existsSync(membersPath)) {
+      members = JSON.parse(fs.readFileSync(membersPath, 'utf8'));
+    }
+
+    const memberIndex = members.findIndex(m => m._id === req.params.id);
+    if (memberIndex === -1) {
       return res.status(404).json({ message: 'Membro não encontrado' });
     }
+    const [removedMember] = members.splice(memberIndex, 1);
+
+    await fs.promises.writeFile(membersPath, JSON.stringify(members, null, 2));
 
     // Log de exclusão de membro
     await Log.logAction({
       type: 'delete',
       action: 'delete_member',
       username: req.userData.email || req.userData.username,
-      description: `Membro removido: ${member.name}`,
+      description: `Membro removido: ${removedMember.name}`,
       details: {
-        memberId: member._id,
-        name: member.name
+        memberId: removedMember._id,
+        name: removedMember.name
       },
       source: 'member'
     });

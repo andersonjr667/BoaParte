@@ -419,6 +419,10 @@ const usersRoutes = require('./routes/users');
 app.use('/api/users', usersRoutes);
 // --- FIM: Rotas de usuários ---
 
+// --- INÍCIO: Rotas de exportação ---
+app.use('/api/export', require('./routes/export'));
+// --- FIM: Rotas de exportação ---
+
 // --- INÍCIO: Rotas de envio de mensagem WhatsApp (devem vir ANTES do static e 404) ---
 app.post('/api/contacts/:id/message', async (req, res) => {
     try {

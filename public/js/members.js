@@ -13,9 +13,56 @@ const modalTitle = document.getElementById('modalTitle');
 const memberForm = document.getElementById('memberForm');
 const searchInput = document.getElementById('searchInput');
 const statusFilter = document.getElementById('statusFilter');
+const exportBtn = document.getElementById('exportBtn');
 const attendanceFilter = document.getElementById('attendanceFilter');
 const memberDetailsCard = document.getElementById('memberDetailsCard');
 const closeDetailsBtn = document.querySelector('.close-details');
+
+// Export members to Excel
+if (exportBtn) {
+    exportBtn.addEventListener('click', async () => {
+        try {
+            // Show loading state
+            exportBtn.disabled = true;
+            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exportando...';
+
+            // Make request to export endpoint
+            const response = await fetch('/api/export/members', {
+                method: 'GET',
+                headers: window.getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao exportar membros');
+            }
+
+            // Convert response to blob
+            const blob = await response.blob();
+
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'membros.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            // Reset button state
+            exportBtn.disabled = false;
+            exportBtn.innerHTML = '<i class="fas fa-download"></i> Exportar';
+
+        } catch (error) {
+            console.error('Error exporting members:', error);
+            alert('Erro ao exportar membros. Por favor, tente novamente.');
+            
+            // Reset button state
+            exportBtn.disabled = false;
+            exportBtn.innerHTML = '<i class="fas fa-download"></i> Exportar';
+        }
+    });
+};
 
 // Load members
 async function loadMembers() {
@@ -83,34 +130,24 @@ async function getAttendanceStats(memberId) {
     }
 }
 
-// Export members to CSV
-function exportMembersToCSV() {
-    if (!members || members.length === 0) {
-        showToast('Nenhum membro para exportar', 'error');
-        return;
+
+// Export members to XLSX
+async function exportMembersToXLSX() {
+    try {
+        const response = await fetch('/api/members/export-xlsx', {
+            headers: window.getAuthHeaders()
+        });
+        if (!response.ok) throw new Error('Erro ao exportar XLSX');
+        const blob = await response.blob();
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'membros.xlsx';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (error) {
+        showToast('Erro ao exportar XLSX', 'error');
     }
-    const headers = ['Nome', 'Telefone', 'Email', 'Status', 'Discipulador', 'Data de Nascimento', 'Endereço', 'Data de Cadastro'];
-    const rows = members.map(m => [
-        m.name || '',
-        formatPhone(m.phone) || '',
-        m.email || '',
-        m.status || '',
-        m.discipleBy || '',
-        m.birthDate ? new Date(m.birthDate).toLocaleDateString() : '',
-        typeof m.address === 'object' && m.address !== null ? Object.values(m.address).filter(Boolean).join(', ') : (m.address || ''),
-        m.createdAt ? new Date(m.createdAt).toLocaleDateString() : ''
-    ]);
-    let csv = headers.join(';') + '\n';
-    rows.forEach(r => {
-        csv += r.map(field => '"' + String(field).replace(/"/g, '""') + '"').join(';') + '\n';
-    });
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'membros.csv';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
 }
 
 // Render members grid (corrigido: mais campos, address, discipulador, data de cadastro)
@@ -122,32 +159,31 @@ function renderMembers(membersToRender) {
         return;
     }
 
-    membersGrid.innerHTML = membersToRender.map(member => {
-        const address = typeof member.address === 'object' && member.address !== null
-            ? Object.values(member.address).filter(Boolean).join(', ')
-            : (member.address || '');
-        return `
-        <div class="member-card" data-member-id="${member._id}" data-status="${member.status || 'ativo'}">
-            <div class="member-header">
-                <h3 class="member-name">${member.name || ''}</h3>
-                <span class="member-status ${member.status || 'ativo'}">${member.status || 'ativo'}</span>
-            </div>
-            <div class="member-info">
-                <p><i class="fas fa-phone"></i> ${formatPhone(member.phone) || 'Não informado'}</p>
-                ${member.email ? `<p><i class='fas fa-envelope'></i> ${member.email}</p>` : ''}
-                ${address ? `<p><i class='fas fa-map-marker-alt'></i> ${address}</p>` : ''}
-                ${member.birthDate ? `<p><i class='fas fa-birthday-cake'></i> ${new Date(member.birthDate).toLocaleDateString()}</p>` : ''}
-                ${member.discipleBy ? `<p><i class='fas fa-user-graduate'></i> Discipulador: ${member.discipleBy}</p>` : ''}
-                ${member.createdAt ? `<p><i class='fas fa-calendar-plus'></i> Cadastro: ${new Date(member.createdAt).toLocaleDateString()}</p>` : ''}
-            </div>
-            <div class="member-actions">
-                <button class="btn-edit"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-delete"><i class="fas fa-trash"></i> Excluir</button>
-                <button class="btn-status"><i class="fas fa-exchange-alt"></i> ${member.status === 'inativo' ? 'Ativar' : 'Desativar'}</button>
-            </div>
-        </div>
-        `;
+    const html = membersToRender.map(member => {
+        const status = member.status || 'ativo';
+        const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+        const actionText = status === 'inativo' ? 'Ativar' : 'Desativar';
+        const formattedPhone = formatPhone(member.phone) || 'Não informado';
+        const registrationDate = member.createdAt ? 
+            '<p><i class="fas fa-calendar-plus"></i> Cadastro: ' + new Date(member.createdAt).toLocaleDateString() + '</p>' : '';
+        
+        return '<div class="member-card" data-member-id="' + member._id + '" data-status="' + status + '">' +
+               '<div class="member-header">' +
+               '<h3 class="member-name">' + (member.name || '') + '</h3>' +
+               '<span class="member-status ' + status + '">' + statusText + '</span>' +
+               '</div>' +
+               '<div class="member-info">' +
+               '<p><i class="fas fa-phone"></i> ' + formattedPhone + '</p>' +
+               registrationDate +
+               '</div>' +
+               '<div class="member-actions">' +
+               '<button class="btn-edit"><i class="fas fa-edit"></i> Editar</button>' +
+               '<button class="btn-delete"><i class="fas fa-trash"></i> Excluir</button>' +
+               '<button class="btn-status"><i class="fas fa-exchange-alt"></i> ' + actionText + '</button>' +
+               '</div>' +
+               '</div>';
     }).join('');
+    membersGrid.innerHTML = html;
 
     // Adiciona listeners após renderizar
     document.querySelectorAll('.member-card').forEach(card => {
@@ -158,7 +194,7 @@ function renderMembers(membersToRender) {
         card.addEventListener('click', async (e) => {
             if (!e.target.closest('.member-actions')) {
                 try {
-                    const response = await fetch(`/api/members/${id}`, {
+                    const response = await fetch('/api/members/' + id, {
                         headers: window.getAuthHeaders()
                     });
                     if (response.ok) {
@@ -186,9 +222,31 @@ function renderMembers(membersToRender) {
             confirmDeleteMember(id, card.querySelector('.member-name').textContent);
         });
         
-        if (btnStatus) btnStatus.addEventListener('click', (e) => {
+        if (btnStatus) btnStatus.addEventListener('click', async (e) => {
             e.stopPropagation();
-            toggleStatus(id, status);
+            try {
+                const newStatus = await toggleStatus(id, status);
+                if (newStatus && newStatus !== status) {
+                    // Atualizar o botão e o status após a mudança bem-sucedida
+                    card.setAttribute('data-status', newStatus);
+                    btnStatus.innerHTML = '<i class="fas fa-exchange-alt"></i> ' + (newStatus === 'inativo' ? 'Ativar' : 'Desativar');
+                    
+                    const statusElement = card.querySelector('.member-status');
+                    if (statusElement) {
+                        statusElement.textContent = newStatus;
+                        statusElement.className = 'member-status ' + newStatus;
+                    }
+                    
+                    // Atualiza a lista local
+                    const memberIndex = members.findIndex(m => m._id === id);
+                    if (memberIndex !== -1) {
+                        members[memberIndex].status = newStatus;
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao alterar status:', error);
+                showToast('Erro ao alterar status do membro', 'error');
+            }
         });
     });
 }
@@ -243,6 +301,24 @@ async function handleFormSubmit(e) {
     };
     
     try {
+        // Sanitiza e valida os dados antes de enviar
+        const sanitizedData = {
+            ...formData,
+            phone: formData.phone.replace(/\D/g, ''), // Remove não-números
+            email: formData.email.trim(), // Remove espaços
+            name: formData.name.trim(), // Remove espaços
+            // Certifica que birthDate está no formato correto ou é vazio
+            birthDate: formData.birthDate ? new Date(formData.birthDate).toISOString().split('T')[0] : '',
+            // Garante que ministries tem todas as propriedades necessárias
+            ministries: {
+                louvor: Boolean(formData.ministries.louvor),
+                danca: Boolean(formData.ministries.danca),
+                midia: Boolean(formData.ministries.midia),
+                intercessao: Boolean(formData.ministries.intercessao),
+                boaparte: Boolean(formData.ministries.boaparte)
+            }
+        };
+
         let response;
         if (currentMemberId) {
             // Edição - usa PUT request
@@ -250,9 +326,9 @@ async function handleFormSubmit(e) {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    ...window.getAuthHeaders()
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(sanitizedData)
             });
         } else {
             // Criação - usa POST request
@@ -260,17 +336,24 @@ async function handleFormSubmit(e) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    ...window.getAuthHeaders()
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(sanitizedData)
             });
         }
 
-        if (!response.ok) throw new Error('Erro ao salvar membro');
+        // Log para debug
+        console.log('Dados enviados:', sanitizedData);
+        console.log('Resposta do servidor:', await response.clone().text());
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Erro ao salvar membro');
+        }
         
         await loadMembers();
         modal.style.display = 'none';
-        showToast('Membro salvo com sucesso');
+        showToast(currentMemberId ? 'Membro atualizado com sucesso' : 'Membro criado com sucesso');
     } catch (error) {
         showToast('Erro ao salvar membro', 'error');
     }
@@ -387,7 +470,7 @@ function initializeMemberDetailsListeners() {
             if (memberCard && !e.target.closest('.card-actions')) {
                 const memberId = memberCard.dataset.memberId;
                 try {
-                    const response = await fetch(`/api/members/${memberId}`, {
+                    const response = await fetch('/api/members/' + memberId, {
                         headers: window.getAuthHeaders()
                     });
                     if (response.ok) {
@@ -406,6 +489,17 @@ function initializeMemberDetailsListeners() {
 document.addEventListener('DOMContentLoaded', () => {
     loadMembers();
     initializeDetailsCard();
+    
+    // Add event delegation for delete buttons
+    membersGrid.addEventListener('click', async (e) => {
+        const deleteBtn = e.target.closest('.btn-delete');
+        if (deleteBtn) {
+            const memberCard = deleteBtn.closest('.member-card');
+            const memberId = memberCard.getAttribute('data-member-id');
+            const memberName = memberCard.querySelector('.member-name').textContent;
+            await confirmDeleteMember(memberId, memberName);
+        }
+    });
     
     // Add form submission handler
     const memberForm = document.getElementById('memberForm');
@@ -432,8 +526,11 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const response = await fetch(`/api/members/${currentMemberId}`, {
-                    method: 'PUT',
+                const url = currentMemberId ? `/api/members/${currentMemberId}` : '/api/members';
+                const method = currentMemberId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
                     headers: {
                         'Content-Type': 'application/json',
                         ...window.getAuthHeaders()
@@ -441,14 +538,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify(formData)
                 });
 
-                if (!response.ok) throw new Error('Erro ao atualizar membro');
+                if (!response.ok) throw new Error(currentMemberId ? 'Erro ao atualizar membro' : 'Erro ao criar membro');
                 
                 await loadMembers();
                 modal.style.display = 'none';
-                showToast('Membro atualizado com sucesso');
+                showToast(currentMemberId ? 'Membro atualizado com sucesso' : 'Membro criado com sucesso');
+                
+                // Reset form if it was a new member
+                if (!currentMemberId) {
+                    memberForm.reset();
+                }
             } catch (error) {
-                console.error('Erro ao atualizar membro:', error);
-                showToast('Erro ao atualizar membro', 'error');
+                console.error('Erro ao salvar membro:', error);
+                showToast(currentMemberId ? 'Erro ao atualizar membro' : 'Erro ao criar membro', 'error');
             }
         });
     }
@@ -601,7 +703,7 @@ function editMember(memberId) {
     if (member.ministries) {
         const ministries = ['louvor', 'danca', 'midia', 'intercessao', 'boaparte'];
         ministries.forEach(ministry => {
-            const checkbox = document.querySelector(`input[name="ministry-${ministry}"]`);
+            const checkbox = document.querySelector('input[name="ministry-' + ministry + '"]');
             if (checkbox) {
                 checkbox.checked = member.ministries[ministry] || false;
             }
@@ -612,43 +714,139 @@ function editMember(memberId) {
 }
 
 // Delete member
-function confirmDeleteMember(id, name) {
-    if (confirm(`Deseja realmente excluir o membro "${name}"?`)) {
-        deleteMember(id);
+async function confirmDeleteMember(id, name) {
+    try {
+        const shouldDelete = confirm('Deseja realmente excluir o membro "' + name + '"?');
+        if (shouldDelete) {
+            await deleteMember(id);
+            // Atualiza a lista após exclusão bem-sucedida
+            await loadMembers();
+        }
+    } catch (error) {
+        console.error('Erro na confirmação de exclusão:', error);
+        showToast('Não foi possível excluir o membro. ' + (error.message || 'Tente novamente.'), 'error');
     }
 }
 
 async function deleteMember(id) {
     try {
-        const response = await fetch(`/api/members/${id}`, {
+        // Usa a função getAuthHeaders que já está configurada
+        const headers = {
+            ...window.getAuthHeaders(),
+            'Content-Type': 'application/json'
+        };
+
+        console.log('Tentando excluir membro com ID:', id);
+        console.log('Headers:', headers);
+
+        const response = await fetch('/api/members/' + id, {
             method: 'DELETE',
-            headers: window.getAuthHeaders()
+            headers: headers
         });
-        if (!response.ok) throw new Error('Erro ao excluir membro');
-        await loadMembers();
+
+        if (response.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/pages/login.html';
+            return;
+        }
+
+        // Tentar obter mensagem de erro detalhada do servidor
+        if (!response.ok) {
+            let errorMessage = 'Erro ao excluir membro';
+            try {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorMessage;
+                } else {
+                    const errorText = await response.text();
+                    errorMessage = errorText || errorMessage;
+                }
+            } catch (e) {
+                console.error('Erro ao processar resposta do servidor:', e);
+            }
+            throw new Error(errorMessage);
+        }
+
+        // Atualizar a lista local
+        members = members.filter(m => m._id !== id);
+        filterAndRenderMembers();
+        
         showToast('Membro excluído com sucesso');
+        
+        // Log da ação bem-sucedida
+        if (window.logAction) {
+            await window.logAction('delete_member', `Membro ID ${id} excluído com sucesso`);
+        }
     } catch (error) {
-        showDetailedError(error, 'deleteMember');
+        console.error('Erro ao excluir membro:', error);
+        showToast(error.message || 'Erro ao excluir membro', 'error');
+        
+        // Log do erro
+        if (window.logAction) {
+            await window.logAction('error', `Erro ao excluir membro: ${error.message}`, 'error');
+        }
+        
+        throw error;
     }
 }
 
 // Toggle member status
 async function toggleStatus(id, currentStatus) {
     try {
+        const member = members.find(m => m._id === id);
+        if (!member) throw new Error('Membro não encontrado');
+
+        // Se está ativando, verifica as faltas
+        if (currentStatus === 'inativo') {
+            // Busca o histórico de presença
+            const response = await fetch(`/api/members/${id}/attendance`, {
+                headers: window.getAuthHeaders()
+            });
+            
+            if (response.ok) {
+                const attendanceData = await response.json();
+                const absences = attendanceData?.absences || 0;
+                
+                if (absences >= 12) {
+                    if (!confirm(`Este membro tem ${absences} faltas. Deseja realmente ativá-lo?`)) {
+                        return currentStatus;
+                    }
+                }
+            }
+        }
+
         const newStatus = currentStatus === 'ativo' ? 'inativo' : 'ativo';
-        const response = await fetch(`/api/members/${id}/status`, {
+        const statusResponse = await fetch(`/api/members/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 ...window.getAuthHeaders()
             },
-            body: JSON.stringify({ status: newStatus })
+            body: JSON.stringify({
+                ...member,
+                status: newStatus
+            })
         });
-        if (!response.ok) throw new Error('Erro ao alterar status');
+        
+        if (!statusResponse.ok) {
+            const errorData = await statusResponse.json().catch(() => ({ message: 'Erro ao alterar status' }));
+            throw new Error(errorData.message || 'Erro ao alterar status');
+        }
+
+        // Atualizar o membro na lista local
+        const memberIndex = members.findIndex(m => m._id === id);
+        if (memberIndex !== -1) {
+            members[memberIndex].status = newStatus;
+        }
+
+        // Atualizar a interface
         await loadMembers();
         showToast(`Status alterado para ${newStatus}`);
+        return newStatus;
     } catch (error) {
         showDetailedError(error, 'toggleStatus');
+        throw error;
     }
 }
 
@@ -659,33 +857,143 @@ document.addEventListener('DOMContentLoaded', () => {
     loadMembers();
     
     // Event listeners
-    searchInput.addEventListener('input', filterAndRenderMembers);
-    statusFilter.addEventListener('change', filterAndRenderMembers);
-    memberForm.addEventListener('submit', handleFormSubmit);
-    document.getElementById('exportBtn').onclick = exportMembersToCSV;
-    attendanceFilter.addEventListener('change', filterAndRenderMembers);
+    searchInput?.addEventListener('input', filterAndRenderMembers);
+    statusFilter?.addEventListener('change', filterAndRenderMembers);
+document.getElementById('exportBtn')?.addEventListener('click', exportMembersToXLSX);
+    attendanceFilter?.addEventListener('change', filterAndRenderMembers);
 
     // Inicializa listeners para o card de detalhes
     initializeMemberDetailsListeners();
     
     // Modal controls
-    const closeModal = () => { modal.style.display = 'none'; };
-    document.querySelector('.close').onclick = closeModal;
-    document.querySelectorAll('.close-modal').forEach(btn => btn.onclick = closeModal);
-    window.onclick = (e) => {
-        if (e.target === modal) closeModal();
+    const closeModal = () => { 
+        modal.style.display = 'none';
+        memberForm.reset();
+        currentMemberId = null;
     };
     
-    // Garante que o form não duplique listeners
-    memberForm.onsubmit = null;
-    memberForm.addEventListener('submit', handleFormSubmit);
+    document.querySelector('.close')?.addEventListener('click', closeModal);
+    document.querySelectorAll('.close-modal').forEach(btn => btn.addEventListener('click', closeModal));
+    
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    
+    // Remove qualquer listener anterior do formulário
+    const oldForm = memberForm.cloneNode(true);
+    memberForm.parentNode.replaceChild(oldForm, memberForm);
+    
+    // Adiciona o novo listener do formulário
+    oldForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        console.log('Form submitted', currentMemberId ? 'edit' : 'new');
+        
+        // Validação dos campos obrigatórios
+        const name = document.getElementById('name').value.trim();
+        const phone = document.getElementById('phone').value.replace(/\D/g, '');
+        
+        if (!name) {
+            showToast('O nome é obrigatório', 'error');
+            return;
+        }
+        
+        if (!phone || phone.length < 10) {
+            showToast('Telefone inválido', 'error');
+            return;
+        }
 
-    document.getElementById('addMemberBtn').onclick = () => {
+        const formData = {
+            name: name.trim(),
+            phone: phone,
+            email: document.getElementById('email').value.trim() || null,
+            birthDate: document.getElementById('birthDate').value || null,
+            status: document.getElementById('status').value || 'ativo',
+            discipleBy: document.getElementById('discipleBy').value || null,
+            address: document.getElementById('address').value.trim() || null,
+            ministries: {
+                louvor: document.querySelector('input[name="ministry-louvor"]')?.checked || false,
+                danca: document.querySelector('input[name="ministry-danca"]')?.checked || false,
+                midia: document.querySelector('input[name="ministry-midia"]')?.checked || false,
+                intercessao: document.querySelector('input[name="ministry-intercessao"]')?.checked || false,
+                boaparte: document.querySelector('input[name="ministry-boaparte"]')?.checked || false
+            }
+        };
+
+        try {
+            const url = currentMemberId ? `/api/members/${currentMemberId}` : '/api/members';
+            console.log('Sending request to:', url, formData);
+
+            // Remover campos null ou undefined antes de enviar
+            const cleanData = Object.fromEntries(
+                Object.entries(formData).filter(([_, value]) => value != null)
+            );
+            
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Você precisa estar logado para realizar esta operação');
+            }
+
+            const response = await fetch(url, {
+                method: currentMemberId ? 'PUT' : 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(cleanData)
+            });
+
+            if (!response.ok) {
+                let errorMessage = 'Erro ao salvar membro';
+                
+                try {
+                    if (response.status === 401) {
+                        localStorage.removeItem('token');
+                        window.location.href = '/pages/login.html';
+                        return;
+                    }
+
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorMessage;
+                        if (errorData.errors) {
+                            // If there are validation errors, show them in detail
+                            errorMessage = Object.entries(errorData.errors)
+                                .map(([field, error]) => `${field}: ${error.message}`)
+                                .join('\n');
+                        }
+                    } else {
+                        const errorText = await response.text();
+                        console.error('Resposta do servidor:', errorText);
+                        errorMessage = errorText || errorMessage;
+                    }
+                } catch (e) {
+                    console.error('Erro ao processar resposta:', e);
+                }
+                
+                throw new Error(errorMessage);
+            }
+
+            const result = await response.json();
+            console.log('Resposta do servidor:', result);
+
+            await loadMembers();
+            closeModal();
+            showToast(currentMemberId ? 'Membro atualizado com sucesso' : 'Membro criado com sucesso');
+        } catch (error) {
+            console.error('Erro ao salvar membro:', error);
+            showToast(error.message || 'Erro ao salvar membro', 'error');
+        }
+    });
+
+    // Botão Novo Membro
+    document.getElementById('addMemberBtn')?.addEventListener('click', () => {
         currentMemberId = null;
         memberForm.reset();
         modalTitle.textContent = 'Novo Membro';
+        document.getElementById('status').value = 'ativo'; // Define status padrão
         modal.style.display = 'block';
-    };
+    });
 
     // Logout
     const logoutBtn = document.getElementById('logoutBtn');
