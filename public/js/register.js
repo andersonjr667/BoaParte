@@ -8,13 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(registerForm);
         const password = formData.get('password');
         const confirmPassword = formData.get('confirmPassword');
-        const registerCode = formData.get('registerCode');
-        const REQUIRED_CODE = 'IGREJA2025';
+        // const registerCode = formData.get('registerCode');
+        // const REQUIRED_CODE = 'IGREJA2025';
 
-        if (registerCode !== REQUIRED_CODE) {
-            showError('Código de registro inválido. Solicite o código à liderança.');
-            return;
-        }
+        // if (registerCode !== REQUIRED_CODE) {
+        //     showError('Código de registro inválido. Solicite o código à liderança.');
+        //     return;
+        // }
 
         if (password !== confirmPassword) {
             showError('As senhas não coincidem');

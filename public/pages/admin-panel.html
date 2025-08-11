@@ -7,12 +7,293 @@
     <link rel="stylesheet" href="/styles/admin-panel.css">
     <link rel="stylesheet" href="/styles/dashboard.css">
     <link rel="stylesheet" href="/styles/hamburger.css">
+    <link rel="stylesheet" href="/styles/member-stats.css">
     <link rel="icon" href="/images/logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        .member-stats-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .member-stats-content {
+            background-color: var(--color2);
+            margin: 5% auto;
+            padding: 1rem;
+            border: 1px solid var(--color1);
+            width: 90%;
+            max-width: 1200px;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 8px;
+            padding: 8px;
+        }
+
+        .stats-card {
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stats-card h3 {
+            margin: 0 0 4px 0;
+            color: var(--color3);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .stats-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--color4);
+            text-align: center;
+        }
+
+        .close-stats {
+            position: absolute;
+            right: 1.5rem;
+            top: 1.5rem;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--color3);
+            background: none;
+            border: none;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .close-stats:hover {
+            color: var(--color4);
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .stats-header h2 {
+            color: var(--color4);
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .member-stats-content {
+                margin: 10% auto;
+                width: 95%;
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-card {
+                padding: 1rem;
+            }
+
+            .stats-value {
+                font-size: 1.5rem;
+            }
+        }
+
+        .member-stats-modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .member-stats-content {
+            background-color: #feffd4;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stats-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stats-card h3 {
+            margin: 0 0 10px 0;
+            color: var(--color3);
+        }
+
+        .stats-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--color4);
+        }
+
+        .close-stats {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--color3);
+        }
+
+        .close-stats:hover {
+            color: var(--color4);
+        }
+
+        .admin-panel {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.panel-header {
+    margin-bottom: 20px;
+}
+
+.panel-content {
+    display: grid;
+    gap: 20px;
+}
+
+.panel-section {
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.product-card {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.product-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.admin-controls {
+    margin-top: 20px;
+}
+    </style>
 </head>
 <body>
     <!-- Sidebar Navigation -->
+    <!-- Member Stats Modal -->
+    <div id="memberStatsModal" class="member-stats-modal">
+        <div class="member-stats-content">
+            <span class="close-stats">&times;</span>
+            <h2>Informações Detalhadas dos Membros</h2>
+            <div class="stats-grid">
+                <div class="stats-card">
+                    <h3>Total Homens</h3>
+                    <div class="stats-value" id="totalMen">0</div>
+                </div>
+                <div class="stats-card">
+                    <h3>Total Homens Inativos</h3>
+                    <div class="stats-value" id="inactiveMen">0</div>
+                </div>
+                <div class="stats-card">
+                    <h3>Total Mulheres</h3>
+                    <div class="stats-value" id="totalWomen">0</div>
+                </div>
+                <div class="stats-card">
+                    <h3>Total Mulheres Inativas</h3>
+                    <div class="stats-value" id="inactiveWomen">0</div>
+                </div>
+                <div class="stats-card">
+                    <h3>Média de Idade</h3>
+                    <div class="stats-value" id="averageAge">0</div>
+                </div>
+                <div class="stats-card">
+                    <h3>Membros no Boa Parte</h3>
+                    <div class="stats-value" id="boaParteMembers">0</div>
+                </div>
+                <div class="stats-card">
+                    <h3>Membros no Louvor</h3>
+                    <div class="stats-value" id="louvorMembers">0</div>
+                </div>
+                <div class="stats-card">
+                    <h3>Membros no Min. de Dança</h3>
+                    <div class="stats-value" id="dancaMembers">0</div>
+                </div>
+                <div class="stats-card">
+                    <h3>Membros na Mídia</h3>
+                    <div class="stats-value" id="midiaMembers">0</div>
+                </div>
+                <div class="stats-card">
+                    <h3>Membros na Interseção</h3>
+                    <div class="stats-value" id="intersecaoMembers">0</div>
+                </div>
+                <div class="stats-card">
+                    <h3>Mais Inativos</h3>
+                    <div class="stats-value" id="mostInactive">-</div>
+                </div>
+                <div class="stats-card">
+                    <h3>Total de Faltas na Semana</h3>
+                    <div class="stats-value" id="weeklyAbsences">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <nav class="sidebar">
         <ul class="nav-menu">
             <li><a href="/pages/dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
@@ -272,6 +553,9 @@
                     </div>
                     
                     <div class="tool-content">
+                        <button class="btn btn-primary" onclick="openMemberStats()">
+                            <i class="fas fa-chart-pie"></i> Ver Informações Detalhadas
+                        </button>
                         <div id="birthdayTodayMsg" class="birthday-alert" style="display:none;">
                             <!-- Mensagem de aniversário será inserida via JS -->
                         </div>
@@ -1143,10 +1427,18 @@
         });
     </script>
 
+    <script>
+                try {
+                    const user = JSON.parse(localStorage.getItem('user'));
+                    if (!user || user.role !== 'admin') {
+                        window.location.href = '/pages/access-denied.html';
+                    }
+                } catch { window.location.href = '/pages/access-denied.html'; }
+    </script>
     <script src="/js/init.js"></script>
     <script src="/js/admin-panel.js"></script>
-    <script src="/js/absent-details-modal.js"></script>
     <script src="/js/maintenance.js"></script>
     <script src="/js/hamburger.js"></script>
+    <script src="/js/member-stats.js"></script>
 </body>
 </html>

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/styles/hamburger.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="icon" href="/images/logo.png">
-    <script src="/js/init.js"></script>
+    <!-- <script src="/js/init.js"></script> Removido para evitar execução prematura -->
     <style>
         .member-details-card {
             display: none;
@@ -388,10 +388,38 @@
     </main>
 
     <!-- Add these scripts before your other scripts -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/members.js"></script>
-    <script src="/js/maintenance.js"></script>
-    <script src="/js/hamburger.js"></script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Exibe foto de perfil para Anderson ou Luiz Felipe
+    try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        var pic = document.getElementById('profilePic');
+        if (user && pic) {
+            if (user.username === 'Anderson' || user.name === 'Anderson') {
+                pic.src = '../images/Fotos_Perfil/anderson.png';
+                pic.style.display = '';
+            } else if (user.username === 'Luiz Felipe' || user.name === 'Luiz Felipe') {
+                pic.src = '../images/Fotos_Perfil/luiz.jpg';
+                pic.style.display = '';
+            } else if (user.username === 'Paulo Emanuel N' || user.name === 'Paulo Emanuel N') {
+                pic.src = '../images/Fotos_Perfil/paulo.jpg';
+                pic.style.display = '';
+            }
+        }
+    } catch {}
+});
+        <script>
+                try {
+                    const user = JSON.parse(localStorage.getItem('user'));
+                    if (!user) {
+                        window.location.href = '/pages/access-denied.html';
+                    }
+                } catch { window.location.href = '/pages/access-denied.html'; }
+        </script>
+        <script src="/js/init.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/js/members.js"></script>
+        <script src="/js/maintenance.js"></script>
+        <script src="/js/hamburger.js"></script>
     <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Exibe foto de perfil para Anderson ou Luiz Felipe
@@ -412,6 +440,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     } catch {}
 });
-</script>
+    </script>
 </body>
 </html>

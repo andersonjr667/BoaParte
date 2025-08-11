@@ -1,0 +1,380 @@
+[
+  {
+    "date": "2025-08-02",
+    "time": "19:38",
+    "absents": [
+      {
+        "name": "André",
+        "phone": "5531987812303"
+      },
+      {
+        "name": "Arthur 🫒",
+        "phone": "5531986832164"
+      },
+      {
+        "name": "Davi",
+        "phone": "5531995611124"
+      },
+      {
+        "name": "Débora",
+        "phone": "5531992344897"
+      },
+      {
+        "name": "Dudah",
+        "phone": "5531995359296"
+      },
+      {
+        "name": "Ester Tigre",
+        "phone": "5531982670832"
+      },
+      {
+        "name": "Gabi J.",
+        "phone": "5531985252076"
+      },
+      {
+        "name": "Gabi Deps",
+        "phone": "5531971164949"
+      },
+      {
+        "name": "Ian",
+        "phone": "5531989346041"
+      },
+      {
+        "name": "Isaac Takahashi",
+        "phone": "5531971652421"
+      },
+      {
+        "name": "João Paulo",
+        "phone": "5531989383386"
+      },
+      {
+        "name": "João Pedro",
+        "phone": "5531991578504"
+      },
+      {
+        "name": "Julia",
+        "phone": "5531998388190"
+      },
+      {
+        "name": "Laura(Luan)",
+        "phone": "5531997621357"
+      },
+      {
+        "name": "Luan",
+        "phone": "5531999792892"
+      },
+      {
+        "name": "Manu Melo",
+        "phone": "5531989446562"
+      },
+      {
+        "name": "Maria Fernanda",
+        "phone": "5531972660695"
+      },
+      {
+        "name": "Mari",
+        "phone": "5531971747001"
+      },
+      {
+        "name": "Mari T",
+        "phone": "5531983951289"
+      },
+      {
+        "name": "Mariana Andrade",
+        "phone": "5531973166612"
+      },
+      {
+        "name": "Nicolas",
+        "phone": "5531985702117"
+      },
+      {
+        "name": "Pedro",
+        "phone": "5531992601919"
+      },
+      {
+        "name": "Rafique",
+        "phone": "5531982003128"
+      },
+      {
+        "name": "Richard",
+        "phone": "5531999954812"
+      },
+      {
+        "name": "Roberta",
+        "phone": "5531989580017"
+      },
+      {
+        "name": "Thais",
+        "phone": "5531997741862"
+      }
+    ]
+  },
+  {
+    "date": "2025-08-03",
+    "time": "10:27",
+    "absents": [
+      {
+        "name": "André",
+        "phone": "5531987812303"
+      },
+      {
+        "name": "Arthur 🫒",
+        "phone": "5531986832164"
+      },
+      {
+        "name": "Davi",
+        "phone": "5531995611124"
+      },
+      {
+        "name": "Débora",
+        "phone": "5531992344897"
+      },
+      {
+        "name": "Ester Tigre",
+        "phone": "5531982670832"
+      },
+      {
+        "name": "Gabi Deps",
+        "phone": "5531971164949"
+      },
+      {
+        "name": "Ian",
+        "phone": "5531989346041"
+      },
+      {
+        "name": "Isaac Takahashi",
+        "phone": "5531971652421"
+      },
+      {
+        "name": "João Pedro",
+        "phone": "5531991578504"
+      },
+      {
+        "name": "Julia",
+        "phone": "5531998388190"
+      },
+      {
+        "name": "Kaique",
+        "phone": "5531993935510"
+      },
+      {
+        "name": "Laura(Luan)",
+        "phone": "5531997621357"
+      },
+      {
+        "name": "Luiz Rodrigues",
+        "phone": "5531995297164"
+      },
+      {
+        "name": "Manu Melo",
+        "phone": "5531989446562"
+      },
+      {
+        "name": "Maria Fernanda",
+        "phone": "5531972660695"
+      },
+      {
+        "name": "Mari",
+        "phone": "5531971747001"
+      },
+      {
+        "name": "Mari T",
+        "phone": "5531983951289"
+      },
+      {
+        "name": "Mariana Andrade",
+        "phone": "5531973166612"
+      },
+      {
+        "name": "Mateus Bernades",
+        "phone": "5533988882030"
+      },
+      {
+        "name": "Mateuzinn",
+        "phone": "5531991299240"
+      },
+      {
+        "name": "Nicolas",
+        "phone": "5531985702117"
+      },
+      {
+        "name": "Paulo",
+        "phone": "5531971938925"
+      },
+      {
+        "name": "Pedro",
+        "phone": "5531992601919"
+      },
+      {
+        "name": "Rafique",
+        "phone": "5531982003128"
+      },
+      {
+        "name": "Richard",
+        "phone": "5531999954812"
+      },
+      {
+        "name": "Sabrina",
+        "phone": "5531995560774"
+      },
+      {
+        "name": "Thayná Bernades",
+        "phone": "5533999424001"
+      },
+      {
+        "name": "Wendel",
+        "phone": "5531983088043"
+      }
+    ]
+  },
+  {
+    "date": "2025-08-03",
+    "time": "19:59",
+    "absents": [
+      {
+        "name": "André",
+        "phone": "5531987812303"
+      },
+      {
+        "name": "Arthur 🫒",
+        "phone": "5531986832164"
+      },
+      {
+        "name": "Arthur 🤓",
+        "phone": "5531987748972"
+      },
+      {
+        "name": "Bianca Vargas",
+        "phone": "5531975953540"
+      },
+      {
+        "name": "Davi",
+        "phone": "5531995611124"
+      },
+      {
+        "name": "Débora",
+        "phone": "5531992344897"
+      },
+      {
+        "name": "Dudah",
+        "phone": "5531995359296"
+      },
+      {
+        "name": "Ester Tigre",
+        "phone": "5531982670832"
+      },
+      {
+        "name": "Gabi J.",
+        "phone": "5531985252076"
+      },
+      {
+        "name": "Gabi Deps",
+        "phone": "5531971164949"
+      },
+      {
+        "name": "Heitor",
+        "phone": "5531980230446"
+      },
+      {
+        "name": "Ian",
+        "phone": "5531989346041"
+      },
+      {
+        "name": "Isaac Takahashi",
+        "phone": "5531971652421"
+      },
+      {
+        "name": "João Paulo",
+        "phone": "5531989383386"
+      },
+      {
+        "name": "João Pedro",
+        "phone": "5531991578504"
+      },
+      {
+        "name": "Julia",
+        "phone": "5531998388190"
+      },
+      {
+        "name": "Kaique",
+        "phone": "5531993935510"
+      },
+      {
+        "name": "Larissa",
+        "phone": "5531995033990"
+      },
+      {
+        "name": "Laura(Luan)",
+        "phone": "5531997621357"
+      },
+      {
+        "name": "Luan",
+        "phone": "5531999792892"
+      },
+      {
+        "name": "Maria Fernanda",
+        "phone": "5531972660695"
+      },
+      {
+        "name": "Mari C",
+        "phone": "5531993014289"
+      },
+      {
+        "name": "Mari",
+        "phone": "5531971747001"
+      },
+      {
+        "name": "Mari T",
+        "phone": "5531983951289"
+      },
+      {
+        "name": "Mariana Andrade",
+        "phone": "5531973166612"
+      },
+      {
+        "name": "Mateuzinn",
+        "phone": "5531991299240"
+      },
+      {
+        "name": "Nicolas",
+        "phone": "5531985702117"
+      },
+      {
+        "name": "Pedro",
+        "phone": "5531992601919"
+      },
+      {
+        "name": "Richard",
+        "phone": "5531999954812"
+      },
+      {
+        "name": "Roberta",
+        "phone": "5531989580017"
+      },
+      {
+        "name": "Sabrina",
+        "phone": "5531995560774"
+      },
+      {
+        "name": "Talita",
+        "phone": "5531987063884"
+      },
+      {
+        "name": "Thiago Vieira",
+        "phone": "5531987245639"
+      },
+      {
+        "name": "Valquiria Fernandes",
+        "phone": "5531987397393"
+      },
+      {
+        "name": "Laura Millani",
+        "phone": "5531984258629"
+      },
+      {
+        "name": "Wendel",
+        "phone": "5531983088043"
+      }
+    ]
+  }
+]

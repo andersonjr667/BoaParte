@@ -1,0 +1,135 @@
+/* Member Stats Modal Styles */
+.member-stats-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.member-stats-content {
+    background-color: var(--color2);
+    margin: 5% auto;
+    padding: 2rem;
+    border: 1px solid var(--color1);
+    width: 90%;
+    max-width: 1200px;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.stats-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease-in-out;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+}
+
+.stats-card h3 {
+    margin: 0 0 1rem 0;
+    color: var(--color3);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.stats-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--color4);
+}
+
+.close-stats {
+    position: absolute;
+    right: 1.5rem;
+    top: 1.5rem;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: var(--color3);
+    background: none;
+    border: none;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease-in-out;
+}
+
+.close-stats:hover {
+    color: var(--color4);
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.stats-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.stats-header h2 {
+    color: var(--color4);
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+/* Botão de estatísticas */
+.btn-stats {
+    background-color: var(--color3);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
+    font-size: 1rem;
+}
+
+.btn-stats:hover {
+    background-color: var(--color4);
+}
+
+.btn-stats i {
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .member-stats-content {
+        margin: 10% auto;
+        width: 95%;
+        padding: 1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-card {
+        padding: 1rem;
+    }
+
+    .stats-value {
+        font-size: 1.5rem;
+    }
+}

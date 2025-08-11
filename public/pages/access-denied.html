@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acesso Negado</title>
+  <link rel="stylesheet" href="/styles/colors.css">
+  <link rel="stylesheet" href="/styles/styles.css">
+  <link rel="icon" href="/images/logo.png">
+  <style>
+    body {
+      background: var(--background-color, #feffd4);
+      color: var(--color4, #450b1e);
+      font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      margin: 0;
+    }
+    .access-denied-container {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 6px 32px rgba(158, 45, 74, 0.10), 0 1.5px 6px rgba(0,0,0,0.04);
+      padding: 48px 32px 32px 32px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      margin: 24px;
+    }
+    .access-denied-title {
+      font-size: 2.1rem;
+      font-weight: 700;
+      color: var(--color3, #9e2d4a);
+      margin-bottom: 18px;
+    }
+    .access-denied-msg {
+      font-size: 1.1rem;
+      margin-bottom: 32px;
+      color: var(--color4, #450b1e);
+    }
+    .access-denied-btn {
+      background: var(--color3, #9e2d4a);
+      color: var(--color2, #feffd4);
+      border: none;
+      border-radius: 8px;
+      padding: 12px 28px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+    .access-denied-btn:hover {
+      background: var(--color4, #450b1e);
+    }
+  </style>
+</head>
+<body>
+  <div class="access-denied-container" id="accessDeniedBox">
+    <img src="/images/logo.png" alt="Logo Boa Parte" style="width:72px;height:72px;object-fit:contain;box-shadow:0 2px 8px #9e2d4a22; margin-bottom:12px; display:block; margin-left:auto; margin-right:auto;" onerror="this.style.display='none'">
+    <div class="access-denied-title">Acesso Negado</div>
+    <div class="access-denied-msg" id="accessDeniedMsg">Você não tem permissão para acessar esta página.</div>
+    <button class="access-denied-btn" id="accessDeniedAction">Voltar</button>
+  </div>
+  <script>
+    // Detecta se o usuário está logado e se é admin
+    let user = null;
+    try {
+      user = JSON.parse(localStorage.getItem('user'));
+    } catch {}
+    const msg = document.getElementById('accessDeniedMsg');
+    const btn = document.getElementById('accessDeniedAction');
+    if (!user) {
+      msg.textContent = 'Acesso negado. Faça login para continuar.';
+      btn.textContent = 'Ir para Login';
+      btn.onclick = () => window.location.href = '/pages/login.html';
+    } else {
+      msg.textContent = 'Você não tem permissão para acessar esta página.';
+      btn.textContent = 'Voltar para Dashboard';
+      btn.onclick = () => window.location.href = '/pages/dashboard.html';
+    }
+  </script>
+</body>
+</html>

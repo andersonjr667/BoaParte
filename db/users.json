@@ -1,0 +1,176 @@
+[
+  {
+    "_id": "67b25735991707f4588cf3b2",
+    "username": "Anderson",
+    "birthday": "10/01",
+    "password": "$2a$10$/gZhDhk27FVrv7ZfcgMJnuv07Ny77Odw4fQKbLrXNhWnnWbxugf1S",
+    "__v": 0,
+    "createdAt": "2025-02-01T10:14:57.648Z",
+    "role": "admin"
+  },
+  {
+    "_id": "67b31b931b0feadd8dac3aa3",
+    "username": "thaynadias48@gmail.com",
+    "birthday": "30/12",
+    "password": "$2a$10$9YWHwqiKIuN3oG.74ilruuBEtv4gY4ew60iPruf.NrHfzU.tiByky",
+    "role": "user",
+    "__v": 0,
+    "createdAt": "2025-02-25T14:22:11.123Z"
+  },
+  {
+    "_id": "67b31cb21b0feadd8dac3ab0",
+    "username": "Luiza M",
+    "birthday": "22/07",
+    "password": "$2a$10$fyi.HF/HQA88IVaPcCuaX.elOcIZAHniaoKIJSSw5tvxRAenuT9hG",
+    "__v": 0,
+    "role": "user",
+    "createdAt": "2025-02-27T09:45:33.456Z"
+  },
+  {
+    "_id": "67b31f031b0feadd8dac3ab9",
+    "username": "Luan ",
+    "birthday": "27/03",
+    "password": "$2a$10$n8YZXJXSQf/CgnYAaEC1auMcfUgDgMIxfYzH1YSbEyim160a2AU1q",
+    "role": "user",
+    "__v": 0,
+    "createdAt": "2025-03-01T16:10:22.789Z"
+  },
+  {
+    "_id": "67b321362d384ca3330bf161",
+    "username": "Victoria Roberta ",
+    "password": "$2a$10$5AC4oC7q5kP2ayoEv37...I6PM04RGDoSF8s1KWMIB27JgSrvxA2u",
+    "role": "user",
+    "__v": 0,
+    "createdAt": "2025-03-03T11:55:44.321Z"
+  },
+  {
+    "_id": "67b3241d7d26f301f26fea18",
+    "username": "Ingryd Rocha",
+    "birthday": "31/07",
+    "password": "$2a$10$AL2PDI5.SforpFy8D9O9lu7qvO.5SIlAU5vR1vbSJsRBerIN/cwbO",
+    "role": "user",
+    "__v": 0,
+    "createdAt": "2025-03-05T08:30:12.654Z"
+  },
+  {
+    "_id": "67b34760f6d231f6b6752d5f",
+    "username": "VALQUIRIA VIEIRA",
+    "birthday": "03/09",
+    "password": "$2a$10$5A2Tv3j1l/8cdDk5rCrzRuA6Cr4zXgk.QVVyyVh3R9meO8LMtSTaa",
+    "role": "user",
+    "__v": 0,
+    "createdAt": "2025-03-07T13:18:55.987Z"
+  },
+  {
+    "_id": "67b35480fad2aa76149f9feb",
+    "username": "Emanuelly melo",
+    "birthday": "12/07",
+    "password": "$2a$10$k84DWhLU5owiwnUcmKx3iOL0F4/2uTr8SPHH3GIXwG6Cj/1Vap9w2",
+    "role": "user",
+    "__v": 0,
+    "createdAt": "2025-03-09T19:40:00.111Z"
+  },
+  {
+    "_id": "67b354cafad2aa76149f9ff1",
+    "username": "Emanuelly melo ",
+    "password": "$2a$10$uNgML.SvO2vn8h8N8h.48eQRM/CYiD7RJ9sJv0m9/acDiU3xzSbLy",
+    "role": "user",
+    "__v": 0,
+    "createdAt": "2025-03-10T10:15:27.222Z"
+  },
+  {
+    "_id": "67b372e7052a6ccd5640ac3b",
+    "username": "willgetter",
+    "password": "$2a$10$P5T/D0W7PD3O82PcpB5aXu3zRk4wW29y3Z0Oz0BMbJOARfrgeQmf6",
+    "role": "user",
+    "__v": 0,
+    "createdAt": "2025-02-28T17:05:39.888Z"
+  },
+  {
+    "_id": "67b3c154d994fc0e60dfb047",
+    "username": "Mariana T",
+    "birthday": "05/03",
+    "password": "$2a$10$3MsgdRQZBm6Z7PVl9j5Xw.umzSLSnMRi4cxsyvlqzDNrqGwdOd4Ge",
+    "role": "user",
+    "__v": 0,
+    "createdAt": "2025-03-06T21:12:03.333Z"
+  },
+  {
+    "_id": "67b51b99c9297f49e2204e66",
+    "username": "Pr. Thiago Vieira ",
+    "birthday": "06/11",
+    "password": "$2a$10$E3WqI52gUEzWJJbZ4UjsEepDf3FX4nwTShKsbzOj0kURy/VdQ8.bC",
+    "role": "user",
+    "__v": 0,
+    "createdAt": "2025-03-08T12:50:41.444Z"
+  },
+  {
+    "_id": "67b8eec16160336cc95eec04",
+    "username": "Paulo Emanuel N",
+    "password": "$2a$10$9hI6fGfZ03ay5aXl9vm6zu6Vip68hHLD0NVdclabXKcCP0SAWAMaq",
+    "role": "user",
+    "createdAt": "2025-02-21T21:23:13.462Z",
+    "__v": 0
+  },
+  {
+    "_id": "67bbaa4fc1f10356a42c32c6",
+    "username": "Ana Luiza",
+    "birthday": "23/05",
+    "password": "$2a$10$CeN1RQ6JKie5EgKGWsbgqOMQUx6j28XuDbeGAdjy7WmDh/3RSOzli",
+    "role": "user",
+    "createdAt": "2025-02-23T23:07:59.920Z",
+    "__v": 0
+  },
+  {
+    "_id": "67bbb2fe4b5ac4ebf8ad79a9",
+    "username": "Gabrielle Jácome",
+    "birthday": "08/08",
+    "password": "$2a$10$ONU3Zf71lr3W3zbmaxS8guT9Zeq3RdWKa1pB2kwQQNTjQdbo9WorG",
+    "role": "user",
+    "createdAt": "2025-02-23T23:45:02.816Z",
+    "__v": 0
+  },
+  {
+    "_id": "67bc32ec5f577975b171ac89",
+    "username": "Arthur",
+    "birthday": "22/05",
+    "password": "$2a$10$Qc4hwUnuYJU5VXtBTWssk.ijIofp5rxcEsJuJwPBNEpvsyqDwdYGe",
+    "role": "user",
+    "createdAt": "2025-02-24T08:50:52.684Z",
+    "__v": 0
+  },
+  {
+    "_id": "67ce04f4961c6e31919c80cc",
+    "username": "Thais Garcia",
+    "password": "$2a$10$..dvwWveAZaMnScEI/d3KugKAx.uE5p2Nc.eyoVUGul2CyCh4Rpka",
+    "role": "user",
+    "createdAt": "2025-03-09T21:15:32.586Z",
+    "__v": 0
+  },
+  {
+    "_id": "67d02ca930b544b1765539f4",
+    "username": "Alysson Carvalho",
+    "birthday": "29/03",
+    "password": "$2a$10$.6LuGjcHCmrh/S3UlNBiROPpjkAQuH8JOqT5LyMS98JKEDboCd7Gq",
+    "role": "user",
+    "createdAt": "2025-03-11T12:29:29.283Z",
+    "__v": 0
+  },
+  {
+    "_id": "67dc61469c396371f7876bda",
+    "username": "Mari Cordeiro",
+    "birthday": "19/10",
+    "password": "$2a$10$t0hXh8uBKIOhDSvpHiArouuCgBrjHbg.Z9xopLYDLOexBcfr8cZIW",
+    "role": "user",
+    "createdAt": "2025-03-20T18:41:10.995Z",
+    "__v": 0
+  },
+  {
+    "_id": "683a513d91c1082cbc932b8b",
+    "username": "Luiz Felipe",
+    "password": "$2a$10$PyeOhKWuRz7XPF7ufnpI0.3KGQGlwIgNg0uOwn2/gbmuTo2j2vb3W",
+    "role": "user",
+    "createdAt": "2025-05-31T00:45:49.508Z",
+    "__v": 0
+  }
+]

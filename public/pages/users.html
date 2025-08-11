@@ -132,6 +132,14 @@
     });
     </script>
 <!-- Removido script embutido duplicado para evitar conflito com users.js -->
+<script>
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (!user || user.role !== 'admin') {
+                    window.location.href = '/pages/access-denied.html';
+                }
+            } catch { window.location.href = '/pages/access-denied.html'; }
+</script>
 <script src="/js/init.js"></script>
 <script src="/js/users.js"></script>
 <script src="/js/maintenance.js"></script>

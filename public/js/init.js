@@ -105,13 +105,36 @@ document.addEventListener('DOMContentLoaded', function() {
         window.logAction('page_load', `Page ${pageName} loaded`);
     });
 
-    // Executa as verificações
-    const isLoginPage = window.location.pathname.endsWith('login.html');
-    const isRegisterPage = window.location.pathname.endsWith('register.html');
-    if (!isLoginPage && !isRegisterPage) {
-        window.checkAuth();
-    }
-    window.loadUserName();
+
+        // Executa as verificações apenas em páginas protegidas
+        const publicPages = [
+            'login.html',
+            'register.html',
+            'access-denied.html',
+            'index.html',
+            '', // root
+        ];
+        const currentPage = window.location.pathname.split('/').pop();
+        if (!publicPages.includes(currentPage)) {
+                window.checkAuth();
+        }
+        window.loadUserName();
+
+    // Esconde links de admin para usuários comuns
+    // IDs de admin válidos (adicione todos os _id de admin do users.json)
+    const ADMIN_IDS = [
+        '67b25735991707f4588cf3b2' // Anderson
+        // Adicione outros IDs de admin aqui se necessário
+    ];
+    document.addEventListener('DOMContentLoaded', function() {
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        const isAdmin = user && (user.role === 'admin' || ADMIN_IDS.includes(user._id));
+        if (!isAdmin) {
+            document.querySelectorAll('.admin-only').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+    });
 
 
 });

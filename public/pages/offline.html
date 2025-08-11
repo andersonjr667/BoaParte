@@ -1,12 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Página não encontrada | Boa Parte</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/styles/colors.css">
-  <link rel="icon" href="/images/logo.png">
-  <script src="/js/maintenance.js"></script>
+  <title>Você está offline</title>
   <style>
     :root {
       --color1: #c5b89f;
@@ -31,7 +28,7 @@
       justify-content: center;
       min-height: 100vh;
     }
-    .notfound-container {
+    .offline-container {
       background: #fff;
       border-radius: 18px;
       box-shadow: 0 6px 32px rgba(158, 45, 74, 0.10), 0 1.5px 6px rgba(0,0,0,0.04);
@@ -45,25 +42,25 @@
       align-items: center;
       gap: 18px;
     }
-    .notfound-emoji {
+    .offline-emoji {
       font-size: 3.5rem;
       margin-bottom: 8px;
       user-select: none;
     }
-    .notfound-title {
+    .offline-title {
       font-size: 2.2rem;
       font-weight: 700;
       color: var(--color3);
       margin-bottom: 8px;
       letter-spacing: -1px;
     }
-    .notfound-text {
+    .offline-text {
       font-size: 1.08rem;
       color: var(--color4);
       margin-bottom: 18px;
       line-height: 1.5;
     }
-    .notfound-btn {
+    .offline-btn {
       background: var(--color3);
       color: #fff;
       border: none;
@@ -76,30 +73,31 @@
       box-shadow: 0 2px 8px rgba(158, 45, 74, 0.08);
       margin-top: 8px;
     }
-    .notfound-btn:hover, .notfound-btn:focus {
+    .offline-btn:hover, .offline-btn:focus {
       background: var(--color4);
       outline: none;
     }
     @media (max-width: 500px) {
-      .notfound-container {
+      .offline-container {
         padding: 32px 8vw 24px 8vw;
         max-width: 98vw;
       }
-      .notfound-title {
+      .offline-title {
         font-size: 1.5rem;
       }
-      .notfound-emoji {
+      .offline-emoji {
         font-size: 2.2rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="notfound-container">
-  <img src="/images/logo.png" alt="Logo Boa Parte" class="notfound-emoji" style="width:72px;height:72px;object-fit:contain;box-shadow:0 2px 8px #9e2d4a22; margin-bottom:12px;" onerror="this.style.display='none'">
-    <div class="notfound-title">Página não encontrada</div>
-    <div class="notfound-text">A página que você procura não existe ou foi removida.<br>Verifique o endereço ou volte para a página inicial.</div>
-    <button class="notfound-btn" onclick="window.location.href='/pages/dashboard.html'">Voltar para o Dashboard</button>
+  <div class="offline-container">
+    <img src="/images/logo.png" alt="Logo Boa Parte" style="width:72px;height:72px;object-fit:contain;box-shadow:0 2px 8px #9e2d4a22; margin-bottom:12px; display:block; margin-left:auto; margin-right:auto;" onerror="this.style.display='none'">
+  <div class="offline-emoji" aria-label="Sem conexão">📡🚫</div>
+  <div class="offline-title">Você está offline</div>
+  <div class="offline-text">Por favor, verifique sua conexão com a internet e tente novamente.</div>
+  <button class="offline-btn" onclick="location.reload()">Tentar novamente</button>
   </div>
 </body>
 </html>

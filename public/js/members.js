@@ -1,7 +1,23 @@
+
 // Garante que window.getAuthHeaders existe
 if (typeof window.getAuthHeaders !== 'function') {
     window.getAuthHeaders = () => ({});
 }
+
+// Validação extra para ocultar links admin-only caso o init.js falhe ou seja removido
+(() => {
+    const ADMIN_IDS = [
+        '67b25735991707f4588cf3b2' // Anderson
+        // Adicione outros IDs de admin aqui se necessário
+    ];
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const isAdmin = user && (user.role === 'admin' || ADMIN_IDS.includes(user._id));
+    if (!isAdmin) {
+        document.querySelectorAll('.admin-only').forEach(el => {
+            el.style.display = 'none';
+        });
+    }
+})();
 
 let members = [];
 let currentMemberId = null;

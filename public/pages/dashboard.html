@@ -128,9 +128,17 @@
         </div>
     </main>
 
-    <!-- Scripts -->
-    <script src="/js/init.js"></script>
-    <script src="/js/dashboard.js"></script>
+        <script>
+            // Redireciona para access-denied se não for admin ou não estiver logado
+                try {
+                    const user = JSON.parse(localStorage.getItem('user'));
+                    if (!user) {
+                        window.location.href = '/pages/access-denied.html';
+                    }
+                } catch { window.location.href = '/pages/access-denied.html'; }
+        </script>
+        <script src="/js/init.js"></script>
+        <script src="/js/dashboard.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/maintenance.js"></script>
     <script src="/js/hamburger.js"></script>

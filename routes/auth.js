@@ -122,17 +122,36 @@ router.post('/register', async (req, res) => {
         if (!name || !email || !password) {
             return res.status(400).json({ success: false, message: 'Nome, email e senha são obrigatórios' });
         }
+        // Verifica se já existe no MongoDB
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ success: false, message: 'Email já cadastrado' });
         }
-        const user = new User({
-            username: name,
-            email,
-            password
-        });
+        // Verifica se já existe no JSON
+        const usersPath = path.join(__dirname, '../db/users.json');
+        let users = [];
+        if (fs.existsSync(usersPath)) {
+            users = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
+            if (users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase())) {
+                return res.status(400).json({ success: false, message: 'Email já cadastrado' });
+            }
+        }
+        // Cria no MongoDB
+        const user = new User({ username: name, email, password });
         await user.save();
-
+        // Cria no JSON
+        const bcrypt = require('bcryptjs');
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUserJson = {
+            _id: user._id.toString(),
+            username: name,
+            email: email,
+            password: hashedPassword,
+            role: user.role || 'user',
+            createdAt: new Date().toISOString()
+        };
+        users.push(newUserJson);
+        fs.writeFileSync(usersPath, JSON.stringify(users, null, 2));
         // Gera token JWT
         const sessionVersion = getSessionVersion(req);
         const token = jwt.sign(
@@ -145,7 +164,6 @@ router.post('/register', async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
-
         // Log user registration
         await Log.logAction({
             type: 'system',
@@ -154,7 +172,6 @@ router.post('/register', async (req, res) => {
             description: 'Novo usuário registrado',
             source: 'auth'
         });
-
         res.status(201).json({
             success: true,
             token,

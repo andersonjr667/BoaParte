@@ -91,6 +91,14 @@
         </div>
     </main>
 </div>    <script src="/socket.io/socket.io.js"></script>
+<script>
+                try {
+                    const user = JSON.parse(localStorage.getItem('user'));
+                    if (!user) {
+                        window.location.href = '/pages/access-denied.html';
+                    }
+                } catch { window.location.href = '/pages/access-denied.html'; }
+</script>
 <script src="/js/init.js"></script>
 <script src="/js/absent-members.js"></script>
 <script src="/js/maintenance.js"></script>
