@@ -244,7 +244,7 @@ body {
   box-shadow: var(--card-shadow);
   border: 1px solid var(--card-border);
   overflow: hidden;
-  height: 100%; /* Ocupa toda altura disponível */
+  max-height: 320px;
   display: flex;
   flex-direction: column;
 }

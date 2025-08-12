@@ -98,8 +98,9 @@ function renderAbsentMembers(members) {
                 const found = allMembers.find(m => m.phone === member.phone);
                 const status = found ? found.status : 'Desconhecido';
                 const statusClass = status === 'ativo' ? 'status-ativo' : (status === 'inativo' ? 'status-inativo' : 'status-desconhecido');
+                // Adiciona data-attributes para uso no clique
                 return `
-                    <tr>
+                    <tr class="absent-row" data-name="${member.name || ''}" data-phone="${member.phone || ''}">
                         <td>${member.name || '-'}</td>
                         <td>${dataFalta} ${horaFalta}</td>
                         <td>${member.phone || '-'}</td>
@@ -108,6 +109,14 @@ function renderAbsentMembers(members) {
                     </tr>
                 `;
             }).join('');
+            // Adiciona evento de clique para abrir modal de detalhes
+            Array.from(absentList.querySelectorAll('.absent-row')).forEach(row => {
+                row.addEventListener('click', function() {
+                    const name = this.getAttribute('data-name');
+                    const phone = this.getAttribute('data-phone');
+                    if (window.showAbsentDetails) window.showAbsentDetails(name, phone);
+                });
+            });
         });
 
 

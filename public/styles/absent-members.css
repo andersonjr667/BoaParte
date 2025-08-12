@@ -1,24 +1,89 @@
+/* MODAL DE DETALHES DE AUSENTE */
+.absent-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(33,0,15,0.35);
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.absent-modal-overlay.active {
+  display: flex;
+}
+.absent-modal {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 32px #0002;
+  padding: 32px 28px 24px 28px;
+  min-width: 320px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  color: #21000f;
+}
+.absent-modal .close-modal {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 2em;
+  color: #9e2d4a;
+  cursor: pointer;
+  z-index: 10;
+}
+.absent-modal h2 {
+  margin-top: 0;
+  color: #7c3a1e;
+  font-size: 1.35em;
+  margin-bottom: 12px;
+}
+.absent-modal .modal-row {
+  margin-bottom: 10px;
+  font-size: 1.08em;
+}
+.absent-modal .modal-label {
+  font-weight: 600;
+  color: #9e2d4a;
+  margin-right: 6px;
+}
+.absent-modal .modal-value {
+  color: #21000f;
+}
 /* Import common styles */
 @import url('dashboard.css');
 
 .filters {
     display: flex;
     gap: 20px;
-    margin-bottom: 20px;
-}
 
 .filters select,
 .filters input {
-    padding: 10px;
-    border: 1px solid var(--input-border);
-    border-radius: 4px;
-    font-size: 14px;
-    background: var(--card-background);
-    color: var(--text-color);
+  padding: 10px;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  font-size: 14px;
+  background: var(--card-background);
+  color: var(--text-color);
 }
 
 .filters select {
-    min-width: 150px;
+  min-width: 150px;
+  background: linear-gradient(90deg, #fffbe6 0%, #ffe0b2 100%);
+  border: 2px solid #9e2d4a;
+  color: #7c3a1e;
+  font-weight: 600;
+  font-size: 1.08em;
+  box-shadow: 0 2px 8px #9e2d4a22;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.filters select:focus {
+  outline: none;
+  border: 2px solid #7c3a1e;
+  box-shadow: 0 0 0 2px #ffe0b2;
+}
 }
 
 .filters input {
