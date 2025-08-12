@@ -1,4 +1,151 @@
 <!DOCTYPE html>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo</title>
+    <link rel="stylesheet" href="/styles/admin-panel.css">
+    <link rel="stylesheet" href="/styles/dashboard.css">
+    <link rel="stylesheet" href="/styles/hamburger.css">
+    <link rel="stylesheet" href="/styles/member-stats.css">
+    <link rel="icon" href="/images/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+        <style>
+            /* Modal de detalhes de faltas (reutiliza o mesmo estilo do modal de estatísticas) */
+            #absentDetailsModal {
+                display: none;
+                position: fixed;
+                z-index: 10000;
+                left: 0;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0,0,0,0.55);
+                backdrop-filter: blur(2px);
+            }
+            #absentDetailsModal .member-stats-content {
+                background: linear-gradient(135deg, #fffbe6 60%, #f7e7ff 100%);
+                margin: 5% auto;
+                padding: 2.2rem 2rem 1.5rem 2rem;
+                border: 1.5px solid #9e2d4a;
+                width: 95%;
+                max-width: 420px;
+                border-radius: 18px;
+                position: relative;
+                box-shadow: 0 8px 32px rgba(158,45,74,0.12), 0 1.5px 6px rgba(0,0,0,0.08);
+                animation: modalPopIn 0.25s cubic-bezier(.4,1.6,.6,1) 1;
+            }
+            @keyframes modalPopIn {
+                0% { transform: scale(0.85) translateY(40px); opacity: 0; }
+                100% { transform: scale(1) translateY(0); opacity: 1; }
+            }
+            #absentDetailsModal .close-stats {
+                position: absolute;
+                right: 18px;
+                top: 18px;
+                font-size: 2rem;
+                cursor: pointer;
+                color: #9e2d4a;
+                background: #fff;
+                border-radius: 50%;
+                border: none;
+                width: 38px;
+                height: 38px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+                transition: background 0.2s, color 0.2s;
+            }
+            #absentDetailsModal .close-stats:hover {
+                color: #fff;
+                background: #9e2d4a;
+            }
+            #absentDetailsModal h2 {
+                color: #9e2d4a;
+                font-size: 1.35rem;
+                margin-bottom: 1.2em;
+                text-align: center;
+                letter-spacing: 0.01em;
+            }
+            #absentDetailsContent > div {
+                margin-bottom: 0.7em;
+                font-size: 1.05rem;
+            }
+            #absentDetailsContent b {
+                color: #9e2d4a;
+            }
+            #absentDetailsContent ul {
+                margin: 0.5em 0 0 0.5em;
+                padding-left: 1.2em;
+            }
+            #absentDetailsContent li {
+                font-size: 0.98rem;
+                margin-bottom: 0.2em;
+            }
+            #absentDetailsContent .btn {
+                font-size: 0.95rem;
+                padding: 0.35em 1.1em;
+                border-radius: 6px;
+                border: none;
+                margin-right: 0.5em;
+                margin-bottom: 0.5em;
+                background: #f7e7ff;
+                color: #9e2d4a;
+                font-weight: 600;
+                box-shadow: 0 1px 3px rgba(158,45,74,0.07);
+                transition: background 0.2s, color 0.2s;
+            }
+            #absentDetailsContent .btn-primary {
+                background: #9e2d4a;
+                color: #fff;
+            }
+            #absentDetailsContent .btn:hover {
+                background: #e7d4ff;
+                color: #6d1c32;
+            }
+            #absentDetailsContent .btn-primary:hover {
+                background: #6d1c32;
+                color: #fff;
+            }
+            #absentDetailsContent .no-absences {
+                color: #9e2d4a;
+                text-align: center;
+                margin-top: 1em;
+            }
+            @media (max-width: 600px) {
+                #absentDetailsModal .member-stats-content {
+                    padding: 1.2rem 0.5rem 1rem 0.5rem;
+                    max-width: 98vw;
+                }
+            }
+
+            /* Filtro de mês estilizado */
+            #absentMonthFilter {
+                padding: 0.45em 1.2em 0.45em 0.7em;
+                border-radius: 7px;
+                border: 1.5px solid #9e2d4a;
+                background: #fffbe6 url('data:image/svg+xml;utf8,<svg fill="%239e2d4a" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7.293 7.293a1 1 0 011.414 0L10 8.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z"/></svg>') no-repeat right 0.7em center/1.1em 1.1em;
+                color: #9e2d4a;
+                font-size: 1.05rem;
+                font-weight: 500;
+                outline: none;
+                min-width: 170px;
+                box-shadow: 0 1px 4px rgba(158,45,74,0.07);
+                appearance: none;
+                transition: border 0.2s;
+            }
+            #absentMonthFilter:focus {
+                border-color: #6d1c32;
+            }
+            @media (max-width: 600px) {
+                #absentMonthFilter {
+                    min-width: 120px;
+                    font-size: 0.98rem;
+                }
+            }
+            </style>
+        </style>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -22,6 +169,39 @@
             height: 100%;
             overflow: auto;
             background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Modal de detalhes de faltas (reutiliza o mesmo estilo do modal de estatísticas) */
+        #absentDetailsModal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        #absentDetailsModal .member-stats-content {
+            background: #feffd4;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 8px;
+            position: relative;
+        }
+        #absentDetailsModal .close-stats {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--color3);
+        }
+        #absentDetailsModal .close-stats:hover {
+            color: var(--color4);
         }
 
         .member-stats-content {
@@ -453,6 +633,15 @@
                         </div>
                         <div class="chart-container">
                             <canvas id="adminChart" height="180"></canvas>
+                        </div>
+                    </div>
+                    <!-- Novo Gráfico: Gráfico Secundário -->
+                    <div class="card chart-card" style="margin-top: 24px; min-height: 460px;">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-bar"></i> Gráfico Secundário</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="secondaryChart" height="400"></canvas>
                         </div>
                     </div>
                 </div>
@@ -1444,5 +1633,6 @@
     <script src="/js/maintenance.js"></script>
     <script src="/js/hamburger.js"></script>
     <script src="/js/member-stats.js"></script>
+    <script src="/js/absent-details-modal.js"></script>
 </body>
 </html>

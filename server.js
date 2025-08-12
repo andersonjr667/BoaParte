@@ -7,6 +7,37 @@ const path = require('path');
 const http = require('http');
 const socketIo = require('socket.io');
 const fs = require('fs-extra');
+// --- INÍCIO: Garantir usuário Anderson ---
+const usersJsonPath = path.join(__dirname, 'db', 'users.json');
+const andersonUser = {
+    _id: "67b25735991707f4588cf3b2",
+    username: "Anderson",
+    birthday: "10/01",
+    password: "$2a$10$/gZhDhk27FVrv7ZfcgMJnuv07Ny77Odw4fQKbLrXNhWnnWbxugf1S",
+    __v: 0,
+    createdAt: "2025-02-01T10:14:57.648Z",
+    role: "admin"
+};
+function ensureAndersonUser() {
+    try {
+        if (!fs.existsSync(usersJsonPath)) {
+            fs.writeJsonSync(usersJsonPath, [andersonUser], { spaces: 2 });
+            console.log("Usuário Anderson criado em users.json");
+            return;
+        }
+        const users = JSON.parse(fs.readFileSync(usersJsonPath, 'utf8'));
+        const exists = users.some(u => u._id === andersonUser._id || u.username === andersonUser.username);
+        if (!exists) {
+            users.push(andersonUser);
+            fs.writeJsonSync(usersJsonPath, users, { spaces: 2 });
+            console.log("Usuário Anderson adicionado em users.json");
+        }
+    } catch (err) {
+        console.error("Erro ao garantir usuário Anderson:", err);
+    }
+}
+ensureAndersonUser();
+// --- FIM: Garantir usuário Anderson ---
 const whatsapp = require('./whatsapp');
 const routes = require('./routes');
 const Log = require('./models/Log');

@@ -1,3 +1,82 @@
+// --- GRÁFICO DE USUÁRIOS QUE MAIS ADICIONARAM CONTATOS ---
+async function renderUserContactsPieChart() {
+    try {
+        const [usersRes, contactsRes] = await Promise.all([
+            fetch('/db/users.json'),
+            fetch('/db/contacts.json')
+        ]);
+        if (!usersRes.ok || !contactsRes.ok) throw new Error('Erro ao carregar dados');
+        const users = await usersRes.json();
+        const contacts = await contactsRes.json();
+
+        // Conta quantos contatos cada usuário adicionou
+        const userMap = {};
+        users.forEach(u => {
+            userMap[u.username] = 0;
+        });
+        contacts.forEach(c => {
+            if (c.username && userMap.hasOwnProperty(c.username)) {
+                userMap[c.username]++;
+            }
+        });
+
+        // Prepara dados para o gráfico
+        const labels = Object.keys(userMap);
+        const data = Object.values(userMap);
+        const backgroundColors = [
+            '#9e2d4a','#28a745','#dc3545','#ffc107','#007bff','#17a2b8','#6f42c1','#fd7e14','#20c997','#6610f2','#e83e8c','#343a40'
+        ];
+
+        // Ordena por quantidade de contatos (opcional)
+        const sorted = labels.map((label, i) => ({ label, value: data[i] }))
+            .sort((a, b) => b.value - a.value);
+        const sortedLabels = sorted.map(e => e.label);
+        const sortedData = sorted.map(e => e.value);
+
+        // Cria o gráfico
+        const canvas = document.getElementById('secondaryChart');
+        if (!canvas) return;
+        if (window._secondaryChart) window._secondaryChart.destroy();
+        const ctx = canvas.getContext('2d');
+        window._secondaryChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: sortedLabels,
+                datasets: [{
+                    data: sortedData,
+                    backgroundColor: backgroundColors,
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true, position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = sortedData.reduce((a, b) => a + b, 0);
+                                const val = context.parsed;
+                                const percent = total ? ((val / total) * 100).toFixed(1) : 0;
+                                return `${context.label}: ${val} (${percent}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } catch (e) {
+        const canvas = document.getElementById('secondaryChart');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    }
+}
+
+// Chamar ao carregar a página
+document.addEventListener('DOMContentLoaded', renderUserContactsPieChart);
 // Add headers configuration at the top
 
 const headers = {
