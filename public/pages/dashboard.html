@@ -85,7 +85,24 @@
                 </div>
                 <div class="form-group">
                     <label for="quickPhone">Telefone</label>
-                    <input type="tel" id="quickPhone" required maxlength="16" pattern="\(\d{2}\) 9\d{4}-\d{4}" placeholder="(99) 9XXXX-XXXX">
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <select id="ddi" name="ddi" required>
+                            <option value="+55" selected>+55 (Brasil)</option>
+                            <option value="+1">+1 (EUA)</option>
+                            <option value="+44">+44 (Reino Unido)</option>
+                            <option value="+351">+351 (Portugal)</option>
+                            <option value="+81">+81 (Japão)</option>
+                        </select>
+                        <input 
+                            type="tel" 
+                            id="quickPhone" 
+                            name="phone" 
+                            required 
+                            maxlength="16" 
+                            pattern="\(\d{2}\) 9\d{4}-\d{4}" 
+                            placeholder="(99) 9XXXX-XXXX"
+                        >
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="quickBirthday">Data de Aniversário <small>(Opcional)</small></label>
@@ -139,25 +156,24 @@
         </div>
     </main>
 
-        <script>
-            // Redireciona para access-denied se não for admin ou não estiver logado
-                try {
-                    const user = JSON.parse(localStorage.getItem('user'));
-                    if (!user) {
-                        window.location.href = '/pages/access-denied.html';
-                    }
-                } catch { window.location.href = '/pages/access-denied.html'; }
-        </script>
-        <script src="/js/init.js"></script>
-        <script src="/js/dashboard.js"></script>
+    <script>
+        // Redireciona para access-denied se não for admin ou não estiver logado
+        try {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) {
+                window.location.href = '/pages/access-denied.html';
+            }
+        } catch { window.location.href = '/pages/access-denied.html'; }
+    </script>
+    <script src="/js/init.js"></script>
+    <script src="/js/dashboard.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/maintenance.js"></script>
     <script src="/js/hamburger.js"></script>
 
     <script>
-        // Exibe foto de perfil para Anderson, Luiz Felipe ou Paulo Emanuel N
+    // Exibe foto de perfil para Anderson, Luiz Felipe ou Paulo Emanuel N
     document.addEventListener('DOMContentLoaded', function() {
-        // Exibe foto de perfil para Anderson, Luiz Felipe ou Paulo Emanuel N
         try {
             const user = JSON.parse(localStorage.getItem('user'));
             var pic = document.getElementById('profilePic');
@@ -175,10 +191,27 @@
             }
         } catch {}
     });
+
+    // Ajusta o pattern do telefone de acordo com o DDI
+    document.getElementById('ddi').addEventListener('change', function() {
+        const phoneInput = document.getElementById('quickPhone');
+        if (this.value === '+55') {
+            phoneInput.pattern = "\\(\\d{2}\\) 9\\d{4}-\\d{4}";
+            phoneInput.placeholder = "(99) 9XXXX-XXXX";
+            phoneInput.maxLength = 16;
+        } else if (this.value === '+1') {
+            phoneInput.pattern = "\\d{3}-\\d{3}-\\d{4}";
+            phoneInput.placeholder = "999-999-9999";
+            phoneInput.maxLength = 12;
+        } else {
+            phoneInput.pattern = "\\d{6,15}";
+            phoneInput.placeholder = "Digite o número";
+            phoneInput.maxLength = 15;
+        }
+    });
     </script>
 
-</script>
-    <!-- Toast container deve estar dentro do body, antes do fechamento -->
+    <!-- Toast container deve estar dentro do body -->
     <div class="toast-container" id="toastContainer" style="position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:2147483647;min-width:260px;max-width:90vw;pointer-events:none;"></div>
     <script>
     // Mensagem de feliz aniversário para o usuário logado
@@ -188,7 +221,6 @@
             if (user && user.birthday) {
                 const today = new Date();
                 const todayStr = today.getDate().toString().padStart(2, '0') + '/' + (today.getMonth() + 1).toString().padStart(2, '0');
-                // Remove espaços, normaliza e compara datas
                 const userBirthday = String(user.birthday).replace(/\s/g, '').replace(/-/g, '/');
                 console.log('DEBUG ANIVERSARIO:', {userBirthday, todayStr, user});
                 if (userBirthday === todayStr) {
