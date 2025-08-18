@@ -120,6 +120,11 @@
                     pic.src = '/images/Fotos_Perfil/paulo.jpg';
                     pic.style.display = '';
                 }
+                        else if (user.photoFileName) {
+                            pic.src = '/images/Fotos_Perfil/' + user.photoFileName;
+                        } else {
+                            pic.src = '/images/Fotos_Perfil/default.jpeg';
+                        }
             }
         } catch {}
     });

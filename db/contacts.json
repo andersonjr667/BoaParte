@@ -1331,5 +1331,101 @@
     "createdAt": "2025-08-03T23:08:17.085Z",
     "status": "novo",
     "__v": 0
+  },
+  {
+    "_id": "1754990587930",
+    "name": "Carlos ",
+    "phone": "21998739102",
+    "owner": "Anderson",
+    "username": "Anderson",
+    "birthday": null,
+    "receivedMessage": true,
+    "createdAt": "2025-08-12T09:23:07.930Z",
+    "status": "novo",
+    "__v": 0
+  },
+  {
+    "_id": "1754990612771",
+    "name": "Gabrielle",
+    "phone": "31994988648",
+    "owner": "Anderson",
+    "username": "Anderson",
+    "birthday": null,
+    "receivedMessage": true,
+    "createdAt": "2025-08-12T09:23:32.771Z",
+    "status": "novo",
+    "__v": 0
+  },
+  {
+    "_id": "1754990629717",
+    "name": "Leônidas ",
+    "phone": "31987060124",
+    "owner": "Anderson",
+    "username": "Anderson",
+    "birthday": null,
+    "receivedMessage": true,
+    "createdAt": "2025-08-12T09:23:49.717Z",
+    "status": "novo",
+    "__v": 0
+  },
+  {
+    "_id": "1755470869535",
+    "name": "Francisco",
+    "phone": "31973540819",
+    "owner": "Anderson",
+    "username": "Anderson",
+    "birthday": null,
+    "receivedMessage": false,
+    "createdAt": "2025-08-17T22:47:49.535Z",
+    "status": "novo",
+    "__v": 0
+  },
+  {
+    "_id": "1755470898773",
+    "name": "Geraldo",
+    "phone": "31991404070",
+    "owner": "Anderson",
+    "username": "Anderson",
+    "birthday": null,
+    "receivedMessage": false,
+    "createdAt": "2025-08-17T22:48:18.773Z",
+    "status": "novo",
+    "__v": 0
+  },
+  {
+    "_id": "1755470961634",
+    "name": "Maria Aparecida",
+    "phone": "31991034056",
+    "owner": "Anderson",
+    "username": "Anderson",
+    "birthday": null,
+    "receivedMessage": false,
+    "createdAt": "2025-08-17T22:49:21.634Z",
+    "status": "novo",
+    "__v": 0
+  },
+  {
+    "_id": "1755537058273",
+    "name": "Gabriel",
+    "phone": "4698883500",
+    "owner": "Anderson",
+    "username": "Anderson",
+    "birthday": null,
+    "receivedMessage": false,
+    "createdAt": "2025-08-17T17:10:58.273Z",
+    "status": "novo",
+    "__v": 0
+  },
+  {
+    "_id": "1755537096438",
+    "name": "Mary",
+    "phone": "4698313317",
+    "owner": "Anderson",
+    "username": "Anderson",
+    "birthday": null,
+    "receivedMessage": false,
+    "createdAt": "2025-08-17T17:11:36.438Z",
+    "status": "novo",
+    "__v": 0
   }
 ]

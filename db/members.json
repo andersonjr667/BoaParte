@@ -5,7 +5,7 @@
     "phone": "5531993259908",
     "isDisciple": false,
     "createdAt": "2025-05-29T10:15:30.000Z",
-    "updatedAt": "2025-08-07T17:08:18.755Z",
+    "updatedAt": "2025-08-18T19:03:44.961Z",
     "__v": 0,
     "discipleBy": "",
     "gender": "feminino",
@@ -28,7 +28,7 @@
     "phone": "5531984353383",
     "isDisciple": false,
     "createdAt": "2025-05-29T10:16:45.000Z",
-    "updatedAt": "2025-08-07T18:26:57.490Z",
+    "updatedAt": "2025-08-18T19:16:57.015Z",
     "__v": 0,
     "discipleBy": "",
     "gender": "masculino",
@@ -69,27 +69,47 @@
     }
   },
   {
-    "_id": "87c7d8e9f0a1b2c3d4e5f6a7",
-    "name": "Anderson Jr(Juninho)",
-    "phone": "5531971533882",
-    "isDisciple": false,
-    "createdAt": "2025-05-29T10:35:20.000Z",
-    "updatedAt": "2025-08-07T18:31:54.184Z",
-    "__v": 0,
-    "discipleBy": "",
-    "gender": "masculino",
-    "status": "ativo",
-    "role": "membro",
-    "email": "",
-    "birthDate": "01/10/2009",
-    "address": "",
+    "_id": "7febe5cf-e164-4849-b0fc-d1adc0f82042",
+    "name": "Anderson (Dé)",
+    "phone": "31999044944",
+    "birthDate": "2003-06-27",
+    "status": "inativo",
     "ministries": {
       "louvor": false,
       "danca": false,
       "midia": false,
       "intercessao": false,
-      "recepcao": false,
-      "kids": false
+      "boaparte": false
+    },
+    "createdBy": "67b25735991707f4588cf3b2",
+    "createdAt": "2025-08-17T23:50:51.556Z",
+    "updatedAt": "2025-08-17T23:58:43.967Z",
+    "attendance": {
+      "history": [],
+      "consecutiveAbsences": 0
+    }
+  },
+  {
+    "_id": "87c7d8e9f0a1b2c3d4e5f6a7",
+    "name": "Anderson Jr (Juninho)",
+    "phone": "31971533882",
+    "isDisciple": false,
+    "createdAt": "2025-05-29T10:35:20.000Z",
+    "updatedAt": "2025-08-18T19:20:01.111Z",
+    "__v": 0,
+    "discipleBy": "",
+    "gender": "masculino",
+    "status": "ativo",
+    "role": "membro",
+    "email": "alsj1520@gmail.com",
+    "birthDate": "2009-01-10",
+    "address": "Rua Helio Costa Bairro São Marcos",
+    "ministries": {
+      "louvor": false,
+      "danca": false,
+      "midia": true,
+      "intercessao": false,
+      "boaparte": true
     }
   },
   {
@@ -114,6 +134,26 @@
       "intercessao": false,
       "recepcao": false,
       "kids": false
+    }
+  },
+  {
+    "_id": "ff8bfcdc-09ec-4f39-aa75-396fccc55859",
+    "name": "Andreza",
+    "phone": "31971632899",
+    "status": "ativo",
+    "ministries": {
+      "louvor": false,
+      "danca": false,
+      "midia": false,
+      "intercessao": false,
+      "boaparte": false
+    },
+    "createdBy": "67b25735991707f4588cf3b2",
+    "createdAt": "2025-08-18T00:07:04.368Z",
+    "updatedAt": "2025-08-18T00:07:04.368Z",
+    "attendance": {
+      "history": [],
+      "consecutiveAbsences": 0
     }
   },
   {
@@ -362,22 +402,21 @@
     "phone": "5531980230446",
     "isDisciple": false,
     "createdAt": "2025-05-29T10:29:11.000Z",
-    "updatedAt": "2025-08-06T19:09:38.788Z",
+    "updatedAt": "2025-08-17T14:26:48.439Z",
     "__v": 0,
     "discipleBy": "",
     "gender": "masculino",
     "status": "ativo",
     "role": "membro",
-    "email": "",
-    "birthDate": "",
+    "email": "heitoroliveira112500@gmail.com",
+    "birthDate": "2009-09-01",
     "address": "",
     "ministries": {
       "louvor": false,
       "danca": false,
       "midia": true,
       "intercessao": false,
-      "recepcao": false,
-      "kids": false
+      "boaparte": false
     }
   },
   {

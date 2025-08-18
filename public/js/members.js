@@ -336,6 +336,7 @@ async function handleFormSubmit(e) {
         };
 
         let response;
+        let isEdit = false;
         if (currentMemberId) {
             // Edição - usa PUT request
             response = await fetch(`/api/members/${currentMemberId}`, {
@@ -346,6 +347,7 @@ async function handleFormSubmit(e) {
                 },
                 body: JSON.stringify(sanitizedData)
             });
+            isEdit = true;
         } else {
             // Criação - usa POST request
             response = await fetch('/api/members', {
@@ -368,10 +370,42 @@ async function handleFormSubmit(e) {
         }
         
         await loadMembers();
-        modal.style.display = 'none';
-        showToast(currentMemberId ? 'Membro atualizado com sucesso' : 'Membro criado com sucesso');
+        const msg = isEdit ? 'Membro editado com sucesso' : 'Membro criado com sucesso';
+        showToast(msg);
+        const memberMsg = document.getElementById('memberMessage');
+        if (memberMsg) {
+            memberMsg.textContent = msg;
+            memberMsg.className = 'alert alert-success';
+            memberMsg.style.display = 'block';
+            memberMsg.style.background = '#d4edda';
+            memberMsg.style.color = '#155724';
+            memberMsg.style.border = '1px solid #c3e6cb';
+            memberMsg.style.padding = '8px';
+            memberMsg.style.borderRadius = '4px';
+            memberMsg.style.textAlign = 'center';
+        }
+        setTimeout(() => {
+            if (memberMsg) memberMsg.style.display = 'none';
+            modal.style.display = 'none';
+        }, 1800);
     } catch (error) {
         showToast('Erro ao salvar membro', 'error');
+        const memberMsg = document.getElementById('memberMessage');
+        if (memberMsg) {
+            memberMsg.textContent = 'Erro ao salvar membro';
+            memberMsg.className = 'alert alert-danger';
+            memberMsg.style.display = 'block';
+            memberMsg.style.background = '#f8d7da';
+            memberMsg.style.color = '#721c24';
+            memberMsg.style.border = '1px solid #f5c6cb';
+            memberMsg.style.padding = '8px';
+            memberMsg.style.borderRadius = '4px';
+            memberMsg.style.textAlign = 'center';
+        }
+        setTimeout(() => {
+            if (memberMsg) memberMsg.style.display = 'none';
+            modal.style.display = 'none';
+        }, 1800);
     }
 }
 
@@ -522,7 +556,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (memberForm) {
         memberForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+            const memberMsg = document.getElementById('memberMessage');
+            if (memberMsg) {
+                memberMsg.textContent = '';
+                memberMsg.style.display = 'none';
+            }
             const formData = {
                 name: document.getElementById('name').value,
                 phone: document.getElementById('phone').value,
@@ -995,7 +1033,8 @@ document.getElementById('exportBtn')?.addEventListener('click', exportMembersToX
 
             await loadMembers();
             closeModal();
-            showToast(currentMemberId ? 'Membro atualizado com sucesso' : 'Membro criado com sucesso');
+            const msg = currentMemberId ? 'Membro editado com sucesso' : 'Membro criado com sucesso';
+            showToast(msg);
         } catch (error) {
             console.error('Erro ao salvar membro:', error);
             showToast(error.message || 'Erro ao salvar membro', 'error');

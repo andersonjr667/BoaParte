@@ -330,6 +330,7 @@ app.set('sessionVersion', sessionVersion);
 // Mount the members router with /api prefix for all member operations
 app.use('/api/members', require('./routes/members'));
 app.use('/api/members/stats', require('./routes/member-stats'));
+app.use('/api/messages', require('./routes/messages'));
 
 // --- INÍCIO: Rotas REST CRUD de contatos (JSON) ---
 const contactsPath = path.join(__dirname, 'db', 'contacts.json');

@@ -19,6 +19,8 @@ router.use('/api/members/stats', memberStatsRoutes);
 router.use('/members', membersRoutes);
 router.use('/api/export', exportRoutes);
 router.use('/contacts', contactsRoutes);
+const messagesRoutes = require('./messages');
+router.use('/api/messages', messagesRoutes);
 // router.use('/admin', adminRoutes);
 // router.use('/stats', statsRoutes);
 // if (whatsapp && typeof whatsapp.router === 'function') {

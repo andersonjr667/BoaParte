@@ -27,30 +27,12 @@
     "createdAt": "2025-02-27T09:45:33.456Z"
   },
   {
-    "_id": "67b31f031b0feadd8dac3ab9",
-    "username": "Luan ",
-    "birthday": "27/03",
-    "password": "$2a$10$n8YZXJXSQf/CgnYAaEC1auMcfUgDgMIxfYzH1YSbEyim160a2AU1q",
-    "role": "user",
-    "__v": 0,
-    "createdAt": "2025-03-01T16:10:22.789Z"
-  },
-  {
     "_id": "67b321362d384ca3330bf161",
     "username": "Victoria Roberta ",
     "password": "$2a$10$5AC4oC7q5kP2ayoEv37...I6PM04RGDoSF8s1KWMIB27JgSrvxA2u",
     "role": "user",
     "__v": 0,
     "createdAt": "2025-03-03T11:55:44.321Z"
-  },
-  {
-    "_id": "67b3241d7d26f301f26fea18",
-    "username": "Ingryd Rocha",
-    "birthday": "31/07",
-    "password": "$2a$10$AL2PDI5.SforpFy8D9O9lu7qvO.5SIlAU5vR1vbSJsRBerIN/cwbO",
-    "role": "user",
-    "__v": 0,
-    "createdAt": "2025-03-05T08:30:12.654Z"
   },
   {
     "_id": "67b34760f6d231f6b6752d5f",
@@ -148,15 +130,6 @@
     "__v": 0
   },
   {
-    "_id": "67d02ca930b544b1765539f4",
-    "username": "Alysson Carvalho",
-    "birthday": "29/03",
-    "password": "$2a$10$.6LuGjcHCmrh/S3UlNBiROPpjkAQuH8JOqT5LyMS98JKEDboCd7Gq",
-    "role": "user",
-    "createdAt": "2025-03-11T12:29:29.283Z",
-    "__v": 0
-  },
-  {
     "_id": "67dc61469c396371f7876bda",
     "username": "Mari Cordeiro",
     "birthday": "19/10",
@@ -172,5 +145,21 @@
     "role": "user",
     "createdAt": "2025-05-31T00:45:49.508Z",
     "__v": 0
+  },
+  {
+    "_id": "689a796b6902aeabd66aff1c",
+    "username": "Bianca",
+    "email": "biancavargas.contas@gmail.com",
+    "password": "$2a$10$lumHxJ5nmGoh5SsDhupiIODFjvzWgq7HiEnK1ReanDq9Q9F5U19DO",
+    "role": "user",
+    "createdAt": "2025-08-11T23:14:52.845Z"
+  },
+  {
+    "_id": "68a100f036adc6c077db834c",
+    "username": "Talita ",
+    "email": "talitarodri3@gmail.com",
+    "password": "$2a$10$ySx5Ku4aWLFze/OF2HIe9ekJxdi/Ap1hodjz2npTbIFvv10bF4..G",
+    "role": "user",
+    "createdAt": "2025-08-16T22:06:41.864Z"
   }
 ]

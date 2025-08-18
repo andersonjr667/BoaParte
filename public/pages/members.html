@@ -269,6 +269,7 @@
                 <span class="close">&times;</span>
                 <h2 id="modalTitle">Novo Membro</h2>
                 <form id="memberForm">
+                    <div id="memberMessage" style="display:none; margin-bottom:10px;" class="alert"></div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="name">Nome</label>
@@ -391,34 +392,40 @@
             </div>
         </div>
     </main>
-
+<script>
     <!-- Add these scripts before your other scripts -->
 document.addEventListener('DOMContentLoaded', function() {
-    // Exibe foto de perfil para Anderson ou Luiz Felipe
     try {
         const user = JSON.parse(localStorage.getItem('user'));
         var pic = document.getElementById('profilePic');
         if (user && pic) {
             if (user.username === 'Anderson' || user.name === 'Anderson') {
-                pic.src = '../images/Fotos_Perfil/anderson.png';
-                pic.style.display = '';
+                pic.src = '/images/Fotos_Perfil/anderson.png';
             } else if (user.username === 'Luiz Felipe' || user.name === 'Luiz Felipe') {
-                pic.src = '../images/Fotos_Perfil/luiz.jpg';
-                pic.style.display = '';
+                pic.src = '/images/Fotos_Perfil/luiz.jpg';
             } else if (user.username === 'Paulo Emanuel N' || user.name === 'Paulo Emanuel N') {
-                pic.src = '../images/Fotos_Perfil/paulo.jpg';
-                pic.style.display = '';
+                pic.src = '/images/Fotos_Perfil/paulo.jpg';
+            } else if (user.photoFileName) {
+                pic.src = '/images/Fotos_Perfil/' + user.photoFileName;
+            } else {
+                pic.src = '/images/Fotos_Perfil/default.jpeg';
             }
+            pic.style.display = '';
         }
-    } catch {}
+    } catch (error) {
+        // Trate o erro se necessário
+    }
 });
+</script>
         <script>
-                try {
-                    const user = JSON.parse(localStorage.getItem('user'));
-                    if (!user) {
-                        window.location.href = '/pages/access-denied.html';
-                    }
-                } catch { window.location.href = '/pages/access-denied.html'; }
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (!user) {
+                    window.location.href = '/pages/access-denied.html';
+                }
+            } catch (error) {
+                window.location.href = '/pages/access-denied.html';
+            }
         </script>
         <script src="/js/init.js"></script>
         <script src="/socket.io/socket.io.js"></script>

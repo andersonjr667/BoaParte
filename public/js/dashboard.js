@@ -87,9 +87,15 @@ function initializeEventListeners() {
       const name = document.getElementById("quickName").value
       const phone = document.getElementById("quickPhone").value
       const birthday = document.getElementById("quickBirthday").value
+      const ddi = document.getElementById("ddi").value
       const phoneDigits = phone.replace(/\D/g, "")
-      if (!name || !phone || phoneDigits.length !== 11) {
-        showError("Nome e telefone válidos são obrigatórios. Telefone deve ter 11 dígitos.")
+      let valid = false
+      if (ddi === "+55" && phoneDigits.length === 11) valid = true
+      if (ddi === "+1" && phoneDigits.length === 10) valid = true
+      if (!name || !phone || !valid) {
+        showError(ddi === "+1"
+          ? "Nome e telefone válidos são obrigatórios. Telefone dos EUA deve ter 10 dígitos."
+          : "Nome e telefone válidos são obrigatórios. Telefone deve ter 11 dígitos.")
         if (submitBtn) submitBtn.disabled = false
         return
       }
@@ -129,6 +135,49 @@ document.addEventListener("DOMContentLoaded", () => {
     initializeEventListeners()
     initializeDashboard()
     setInterval(initializeDashboard, 30000)
+
+    // Adiciona listener ao botão de enviar para pendentes
+    const sendPendingBtn = document.getElementById("sendPendingBtn")
+    if (sendPendingBtn) {
+      sendPendingBtn.addEventListener("click", async () => {
+        sendPendingBtn.disabled = true
+        sendPendingBtn.textContent = "Enviando..."
+        try {
+          // Busca contatos novamente para garantir lista atualizada
+          const response = await fetch("/api/contacts", { headers: window.getAuthHeaders() })
+          if (!response.ok) throw new Error("Erro ao buscar contatos")
+          const contacts = await response.json()
+          // Filtra pendentes
+          const pendentes = contacts.filter(c => !c.receivedMessage)
+          if (pendentes.length === 0) {
+            showToast("Nenhum contato pendente encontrado.", "info")
+            return
+          }
+          let enviados = 0, falhas = 0
+          for (const contato of pendentes) {
+            try {
+              // Envia mensagem (ajuste a rota conforme necessário)
+              const res = await fetch(`/api/messages/send`, {
+                method: "POST",
+                headers: window.getAuthHeaders(),
+                body: JSON.stringify({ contactId: contato._id })
+              })
+              if (res.ok) enviados++
+              else falhas++
+            } catch {
+              falhas++
+            }
+          }
+          showToast(`Mensagens enviadas: ${enviados}, falhas: ${falhas}`, falhas ? "warning" : "success")
+          await initializeDashboard()
+        } catch (err) {
+          showError("Erro ao enviar para pendentes")
+        } finally {
+          sendPendingBtn.disabled = false
+          sendPendingBtn.textContent = "Enviar para Pendentes"
+        }
+      })
+    }
   }, 100)
 })
 
