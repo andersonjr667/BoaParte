@@ -32,7 +32,10 @@ Esperamos que você se sinta em casa e volte sempre!
 📍 Endereço: R. Aiuruoca, 125 – São Paulo, Belo Horizonte – MG, 31910-820
 
 📖 "*Alegrei-me quando me disseram: Vamos à casa do Senhor.*"  
-*Salmos 122:1*`;
+*Salmos 122:1*
+
+Com carinho,
+*Igreja Batista Solidária* e *JIBS*`;
 }
 
 // Mensagem padrão de lembrete para envio em massa

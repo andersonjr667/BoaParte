@@ -8,7 +8,25 @@ const contactsPath = path.join(__dirname, '../db/contacts.json');
 // Função simulada para envio de mensagem (substitua pelo Baileys ou integração real)
 const whatsapp = require('../whatsapp');
 // Mensagem padrão (pode ser personalizada)
-const defaultMessage = (name) => `Olá ${name}, esta é uma mensagem automática do sistema Boa Parte.`;
+const defaultMessage = (name) => `Oi, *${name}*! 🙌
+
+Que alegria ter você com a gente na *Igreja Batista Solidária*! 💛  
+Esperamos que você se sinta em casa e volte sempre!
+
+✨ *Nossos cultos:*
+• *Domingo – 10h e 19h*  
+• Terça – 20h *(Culto de Oração)*  
+• Quinta – 20h *(Culto do Clamor)*  
+• Sábado – 19h *(Culto dos Jovens)*
+
+📍 Endereço: R. Aiuruoca, 125 – São Paulo, Belo Horizonte – MG, 31910-820
+
+📖 "*Alegrei-me quando me disseram: Vamos à casa do Senhor.*"  
+*Salmos 122:1*
+
+Com carinho,
+*Igreja Batista Solidária* e *JIBS*`;
+
 async function sendMessageToContact(contact) {
   if (!contact.phone) throw new Error('Contato sem telefone');
   // Usa função do whatsapp.js

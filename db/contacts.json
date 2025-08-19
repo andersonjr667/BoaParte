@@ -1427,5 +1427,17 @@
     "createdAt": "2025-08-17T17:11:36.438Z",
     "status": "novo",
     "__v": 0
+  },
+  {
+    "_id": "1755622925891",
+    "name": "Daniel Schuvarz",
+    "phone": "31987699329",
+    "owner": "Anderson",
+    "username": "Anderson",
+    "birthday": null,
+    "receivedMessage": false,
+    "createdAt": "2025-08-19T17:02:05.891Z",
+    "status": "novo",
+    "__v": 0
   }
 ]
